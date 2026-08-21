@@ -63,7 +63,7 @@ export function saveAddress(address: Address): Address[] {
     updated = [...current, address];
   }
 
-  if (address.isDefault) {
+  if (address.isDefault || updated.length === 1) {
     updated = updated.map((a) => ({ ...a, isDefault: a.id === address.id }));
   }
 
@@ -72,6 +72,35 @@ export function saveAddress(address: Address): Address[] {
       localStorage.setItem(ADDRESSES_STORAGE_KEY, JSON.stringify(updated));
     } catch (e) {
       console.error("Failed to save address to localStorage", e);
+    }
+  }
+  return updated;
+}
+
+export function deleteAddress(addressId: string): Address[] {
+  const current = getSavedAddresses();
+  const updated = current.filter((a) => a.id !== addressId);
+  if (updated.length > 0 && !updated.some((a) => a.isDefault)) {
+    updated[0].isDefault = true;
+  }
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(ADDRESSES_STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.error("Failed to delete address from localStorage", e);
+    }
+  }
+  return updated;
+}
+
+export function setDefaultAddress(addressId: string): Address[] {
+  const current = getSavedAddresses();
+  const updated = current.map((a) => ({ ...a, isDefault: a.id === addressId }));
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(ADDRESSES_STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.error("Failed to update default address in localStorage", e);
     }
   }
   return updated;

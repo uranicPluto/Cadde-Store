@@ -43,6 +43,23 @@ export interface OrderCalculationResult {
   grandTotal: number;
 }
 
+export type OrderStatusType =
+  | "confirmed"
+  | "processing"
+  | "shipped"
+  | "out_for_delivery"
+  | "delivered"
+  | "cancelled";
+
+export interface StatusHistoryStep {
+  status: OrderStatusType;
+  title: { tr: string; en: string };
+  description: { tr: string; en: string };
+  date?: string;
+  completed: boolean;
+  active?: boolean;
+}
+
 export interface OrderRecord {
   orderId: string;
   orderNumber: string;
@@ -60,5 +77,8 @@ export interface OrderRecord {
   paymentMethod: "credit_card" | "cash_on_delivery";
   cardMaskedNumber?: string;
   calculation: OrderCalculationResult;
-  status: "confirmed" | "processing" | "shipped" | "delivered";
+  status: OrderStatusType;
+  trackingNumber?: string;
+  estimatedDelivery?: string;
+  statusHistory?: StatusHistoryStep[];
 }
