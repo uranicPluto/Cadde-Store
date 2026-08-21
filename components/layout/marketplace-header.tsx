@@ -1,0 +1,66 @@
+import React, { useState, useEffect } from "react";
+import { TopUtilityBar } from "@/components/layout/top-utility-bar";
+import { MainHeader } from "@/components/layout/main-header";
+import { CategoryNavigation } from "@/components/layout/category-navigation";
+import { MobileHeader } from "@/components/layout/mobile-header";
+import { cn } from "@/lib/utils";
+
+export interface MarketplaceHeaderProps {
+  isLoggedInMock?: boolean;
+  onLoginToggleMock?: () => void;
+  favoriteCount?: number;
+  cartCount?: number;
+  className?: string;
+}
+
+export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
+  isLoggedInMock = false,
+  onLoginToggleMock,
+  favoriteCount = 3,
+  cartCount = 2,
+  className,
+}) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 40) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header className={cn("w-full z-40 flex flex-col font-sans select-none", className)}>
+      {/* Desktop Header Layers */}
+      <div className="hidden lg:flex flex-col w-full">
+        {/* Layer 1: Top Utility Bar (hides on compact scroll) */}
+        {!isScrolled && <TopUtilityBar />}
+
+        {/* Layer 2 & 3 Sticky Container */}
+        <div className={cn("sticky top-0 z-40 bg-white transition-all shadow-xs", isScrolled && "shadow-md")}>
+          <MainHeader
+            isLoggedInMock={isLoggedInMock}
+            onLoginToggleMock={onLoginToggleMock}
+            favoriteCount={favoriteCount}
+            cartCount={cartCount}
+            className={isScrolled ? "py-2" : "py-3.5"}
+          />
+          <CategoryNavigation />
+        </div>
+      </div>
+
+      {/* Mobile Header (Dedicated Responsive View) */}
+      <MobileHeader
+        isLoggedInMock={isLoggedInMock}
+        onLoginToggleMock={onLoginToggleMock}
+        favoriteCount={favoriteCount}
+        cartCount={cartCount}
+      />
+    </header>
+  );
+};
