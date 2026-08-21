@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { getMockNavigationCategories, CategoryData } from "@/lib/navigation-data";
 import { MegaMenu } from "@/components/layout/mega-menu";
 import { Flame, ChevronDown } from "lucide-react";
@@ -39,12 +40,10 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
               <div
                 key={cat.id}
                 onMouseEnter={() => setActiveCategory(cat)}
-                className="relative shrink-0"
+                className="relative shrink-0 flex items-center"
               >
-                <button
-                  type="button"
-                  onClick={() => setActiveCategory(isActive ? null : cat)}
-                  aria-expanded={isActive}
+                <Link
+                  href={`/category/${cat.slug}`}
                   className={cn(
                     "py-2.5 px-3 text-xs font-bold text-text-main hover:text-primary transition-all border-b-2 border-transparent flex items-center gap-1 outline-none select-none",
                     isActive && "text-primary border-primary bg-primary-light/50 rounded-t",
@@ -54,7 +53,7 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
                   {cat.isHot && <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500 shrink-0" />}
                   <span>{categoryName}</span>
                   <ChevronDown className={cn("w-3 h-3 text-text-subtle transition-transform", isActive && "rotate-180")} />
-                </button>
+                </Link>
               </div>
             );
           })}

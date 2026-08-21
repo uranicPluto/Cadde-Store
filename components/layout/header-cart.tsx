@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ShoppingCart, ArrowRight, Trash2, ShoppingBag } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
-import { MOCK_PRODUCTS } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { useCart } from "@/lib/cart/cart-context";
+import Link from "next/link";
 
 export interface HeaderCartProps {
   cartCount?: number;
@@ -12,16 +13,16 @@ export interface HeaderCartProps {
 }
 
 export const HeaderCart: React.FC<HeaderCartProps> = ({
-  cartCount = 2,
+  cartCount,
   onClick,
   className,
 }) => {
   const { t, currency } = useLanguage();
+  const { items, removeFromCart, totalCount: liveCount, subtotal } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const mockCartItems = MOCK_PRODUCTS.slice(0, 2);
-  const totalPrice = mockCartItems.reduce((acc, curr) => acc + curr.price, 0);
+  const activeCount = cartCount !== undefined ? cartCount : liveCount;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -48,15 +49,15 @@ export const HeaderCart: React.FC<HeaderCartProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}
         aria-expanded={isOpen}
-        aria-label={`${t("common.cart")} (${cartCount})`}
+        aria-label={`${t("common.cart")} (${activeCount})`}
         className="flex items-center gap-2 p-2 rounded-lg text-text-main hover:text-primary hover:bg-slate-50 transition-all outline-none focus:ring-2 focus:ring-primary/20 group"
       >
         <div className="relative w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center group-hover:border-primary/40 group-hover:bg-primary-light transition-colors">
           <ShoppingCart className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" />
 
-          {cartCount > 0 && (
+          {activeCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[18px] text-center shadow-xs border border-white">
-              {cartCount}
+              {activeCount}
             </span>
           )}
         </div>
@@ -64,7 +65,7 @@ export const HeaderCart: React.FC<HeaderCartProps> = ({
         <div className="hidden xl:flex flex-col text-left leading-tight">
           <span className="text-[10px] text-text-subtle font-semibold uppercase">{t("common.cart")}</span>
           <span className="text-xs font-bold text-text-main group-hover:text-primary">
-            {formatCurrency(totalPrice, currency, false)}
+            {formatCurrency(subtotal, currency, false)}
           </span>
         </div>
       </button>
@@ -78,40 +79,41 @@ export const HeaderCart: React.FC<HeaderCartProps> = ({
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <span className="font-bold text-text-main flex items-center gap-1.5">
               <ShoppingBag className="w-4 h-4 text-primary" />
-              {t("header.cartSummary", { count: cartCount })}
+              {t("header.cartSummary", { count: activeCount })}
             </span>
             <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">
               {t("header.freeShippingBadge")}
             </span>
           </div>
 
-          {cartCount === 0 ? (
+          {items.length === 0 ? (
             <div className="py-6 text-center text-text-muted flex flex-col items-center gap-2">
               <ShoppingBag className="w-8 h-8 text-slate-300" />
               <span>{t("header.emptyCartMessage")}</span>
             </div>
           ) : (
             <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-              {mockCartItems.map((item) => (
+              {items.map((item) => (
                 <div
                   key={item.id}
                   className="flex items-center gap-3 p-2 bg-slate-50/80 rounded border border-slate-100 hover:border-slate-200"
                 >
                   <img
-                    src={item.imageUrl}
-                    alt={item.name}
+                    src={item.product.imageUrl}
+                    alt={item.product.name}
                     className="w-11 h-11 object-cover rounded border border-slate-200 shrink-0"
                   />
                   <div className="flex flex-col flex-1 min-w-0">
-                    <span className="font-bold text-text-main truncate">{item.brand}</span>
-                    <span className="text-[11px] text-text-muted truncate">{item.name}</span>
+                    <span className="font-bold text-text-main truncate">{item.product.brand}</span>
+                    <span className="text-[11px] text-text-muted truncate">{item.product.name}</span>
                     <span className="font-bold text-primary text-xs mt-0.5">
-                      {formatCurrency(item.price, currency)}
+                      {item.quantity} x {formatCurrency(item.product.price, currency)}
                     </span>
                   </div>
                   <button
                     type="button"
-                    className="text-slate-400 hover:text-rose-500 p-1"
+                    onClick={() => removeFromCart(item.id)}
+                    className="text-slate-400 hover:text-rose-500 p-1 transition-colors"
                     title={t("common.close")}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -121,12 +123,12 @@ export const HeaderCart: React.FC<HeaderCartProps> = ({
             </div>
           )}
 
-          {cartCount > 0 && (
+          {items.length > 0 && (
             <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-text-muted">{t("header.cartTotal")}:</span>
                 <span className="text-sm font-extrabold text-primary">
-                  {formatCurrency(totalPrice, currency)}
+                  {formatCurrency(subtotal, currency)}
                 </span>
               </div>
               <Button

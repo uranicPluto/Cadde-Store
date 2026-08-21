@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, X, Loader2, Clock, TrendingUp, Tag, Store, ArrowRight } from "lucide-react";
 import { getMockProducts, getMockBrands, getMockCategories } from "@/lib/mock-data";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -15,6 +16,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
   className,
   onSearchSubmit,
 }) => {
+  const router = useRouter();
   const { language, currency, t } = useLanguage();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -61,12 +63,17 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
     setIsLoading(false);
   };
 
+  const executeSearch = (searchTerm: string) => {
+    if (searchTerm.trim()) {
+      onSearchSubmit?.(searchTerm);
+      setIsOpen(false);
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      onSearchSubmit?.(query);
-      setIsOpen(false);
-    }
+    executeSearch(query);
   };
 
   const filteredProducts = query.trim()
@@ -139,8 +146,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                       key={i}
                       onClick={() => {
                         setQuery(term);
-                        onSearchSubmit?.(term);
-                        setIsOpen(false);
+                        executeSearch(term);
                       }}
                       className="px-2.5 py-1 bg-slate-100 hover:bg-primary-light hover:text-primary text-text-main text-xs rounded-full font-medium transition-colors"
                     >
@@ -162,8 +168,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                       key={i}
                       onClick={() => {
                         setQuery(term);
-                        onSearchSubmit?.(term);
-                        setIsOpen(false);
+                        executeSearch(term);
                       }}
                       className="flex items-center justify-between p-2 rounded hover:bg-slate-50 text-left text-xs text-text-main group"
                     >
@@ -183,10 +188,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                   {filteredCategories.map((c) => (
                     <div
                       key={c.id}
-                      onClick={() => {
-                        onSearchSubmit?.(c.name);
-                        setIsOpen(false);
-                      }}
+                      onClick={() => executeSearch(c.name)}
                       className="flex items-center gap-2 p-1.5 rounded hover:bg-white cursor-pointer text-xs font-semibold text-primary"
                     >
                       <Tag className="w-3.5 h-3.5 text-primary" />
@@ -196,10 +198,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                   {filteredBrands.map((b) => (
                     <div
                       key={b.id}
-                      onClick={() => {
-                        onSearchSubmit?.(b.name);
-                        setIsOpen(false);
-                      }}
+                      onClick={() => executeSearch(b.name)}
                       className="flex items-center gap-2 p-1.5 rounded hover:bg-white cursor-pointer text-xs font-semibold text-amber-700"
                     >
                       <Store className="w-3.5 h-3.5 text-amber-600" />
@@ -223,10 +222,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                     {filteredProducts.slice(0, 4).map((p) => (
                       <div
                         key={p.id}
-                        onClick={() => {
-                          onSearchSubmit?.(p.name);
-                          setIsOpen(false);
-                        }}
+                        onClick={() => executeSearch(p.name)}
                         className="flex items-center gap-3 p-2 rounded hover:bg-slate-50 cursor-pointer transition-colors"
                       >
                         <img

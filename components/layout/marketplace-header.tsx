@@ -4,6 +4,8 @@ import { MainHeader } from "@/components/layout/main-header";
 import { CategoryNavigation } from "@/components/layout/category-navigation";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/cart/cart-context";
+import { useFavorites } from "@/lib/favorites/favorites-context";
 
 export interface MarketplaceHeaderProps {
   isLoggedInMock?: boolean;
@@ -16,11 +18,16 @@ export interface MarketplaceHeaderProps {
 export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   isLoggedInMock = false,
   onLoginToggleMock,
-  favoriteCount = 3,
-  cartCount = 2,
+  favoriteCount,
+  cartCount,
   className,
 }) => {
+  const { totalCount: liveCartCount } = useCart();
+  const { favoriteCount: liveFavCount } = useFavorites();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const activeCartCount = cartCount !== undefined ? cartCount : liveCartCount;
+  const activeFavCount = favoriteCount !== undefined ? favoriteCount : liveFavCount;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,8 +53,8 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
           <MainHeader
             isLoggedInMock={isLoggedInMock}
             onLoginToggleMock={onLoginToggleMock}
-            favoriteCount={favoriteCount}
-            cartCount={cartCount}
+            favoriteCount={activeFavCount}
+            cartCount={activeCartCount}
             className={isScrolled ? "py-2" : "py-3.5"}
           />
           <CategoryNavigation />
@@ -58,8 +65,8 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
       <MobileHeader
         isLoggedInMock={isLoggedInMock}
         onLoginToggleMock={onLoginToggleMock}
-        favoriteCount={favoriteCount}
-        cartCount={cartCount}
+        favoriteCount={activeFavCount}
+        cartCount={activeCartCount}
       />
     </header>
   );

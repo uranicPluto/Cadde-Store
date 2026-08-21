@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import Link from "next/link";
 import { ProductMock } from "@/lib/mock-data";
+import { createSlug } from "@/lib/catalog/slug-utils";
 import { Price } from "@/components/ui/price";
 import { Rating } from "@/components/ui/rating";
 import { Badge } from "@/components/ui/badge";
@@ -7,12 +9,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Eye } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { useFavorites } from "@/lib/favorites/favorites-context";
+import { useCart } from "@/lib/cart/cart-context";
+import { DetailedProductMock, getFullCatalog } from "@/lib/catalog/product-repository";
 
 export interface ProductCardProps {
-  product: ProductMock;
-  onAddToCart?: (product: ProductMock) => void;
+  product: ProductMock | DetailedProductMock;
+  onAddToCart?: (product: any) => void;
   onFavoriteToggle?: (productId: string, isFav: boolean) => void;
-  onQuickView?: (product: ProductMock) => void;
+  onQuickView?: (product: any) => void;
   className?: string;
 }
 
@@ -23,21 +28,49 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onQuickView,
   className,
 }) => {
-  const { t } = useLanguage();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { language, t } = useLanguage();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
+
+  const productSlug = (product as DetailedProductMock).slug || createSlug(product.name);
+  const favActive = isFavorite(product.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    const nextState = !isFavorite;
-    setIsFavorite(nextState);
-    onFavoriteToggle?.(product.id, nextState);
+    toggleFavorite(product.id);
+    onFavoriteToggle?.(product.id, !favActive);
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    
+    // Find detailed product or build minimal mock for cart
+    const fullCatalog = getFullCatalog(language);
+    const fullItem = fullCatalog.find((p) => p.id === product.id) || {
+      id: product.id,
+      slug: productSlug,
+      name: product.name,
+      brand: product.brand,
+      categorySlug: "general",
+      categoryName: "General",
+      storeName: product.storeName,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      rating: product.rating,
+      reviewCount: product.reviewCount,
+      imageUrl: product.imageUrl,
+      galleryImages: [product.imageUrl],
+      badges: product.badges,
+      description: "",
+      specifications: {},
+      stock: 20,
+      reviews: [],
+    };
+
+    addToCart(fullItem);
     onAddToCart?.(product);
   };
 
@@ -57,28 +90,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         className
       )}
     >
-      {/* Top Badges & Favorite Button */}
+      {/* Top Badges & Image Overlay */}
       <div className="relative w-full aspect-3/4 bg-slate-100 overflow-hidden">
-        {/* Product Image */}
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-        />
+        {/* Product Image Link */}
+        <Link href={`/product/${productSlug}`} className="block w-full h-full">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+          />
+        </Link>
 
         {/* Favorite Icon Button */}
         <div className="absolute top-2 right-2 z-10">
           <Button
             variant="favorite"
             size="sm"
-            isFavoriteActive={isFavorite}
+            isFavoriteActive={favActive}
             onClick={handleFavoriteClick}
-            aria-label={isFavorite ? t("productCard.removeFavorite") : t("productCard.addFavorite")}
+            aria-label={favActive ? t("productCard.removeFavorite") : t("productCard.addFavorite")}
           />
         </div>
 
         {/* Badges Overlay */}
-        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start max-w-[80%]">
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start max-w-[80%] pointer-events-none">
           {product.badges?.bestseller && (
             <Badge variant="bestseller" size="sm">{t("badges.bestseller")}</Badge>
           )}
@@ -124,9 +159,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           {/* Product Name Title */}
-          <h3 className="text-xs text-text-main font-normal leading-snug line-clamp-2 min-h-[32px] group-hover:text-primary transition-colors">
-            {product.name}
-          </h3>
+          <Link href={`/product/${productSlug}`}>
+            <h3 className="text-xs text-text-main font-normal leading-snug line-clamp-2 min-h-[32px] group-hover:text-primary transition-colors">
+              {product.name}
+            </h3>
+          </Link>
 
           {/* Rating */}
           <div className="mt-0.5">
