@@ -40,6 +40,38 @@ export const tr = {
     followStore: "Mağazayı Takip Et",
     followingStore: "Takip Ediliyor",
   },
+  cart: {
+    title: "Sepetim",
+    checkoutCta: "Ödemeye Geç",
+    emptyTitle: "Sepetiniz Boş",
+    emptyDesc: "Alışverişe devam ederek favori ürünlerinizi sepetinize ekleyin.",
+    continueShopping: "Alışverişe Devam Et",
+    itemSavedToFavorites: "Ürün favorilere eklendi",
+  },
+  checkout: {
+    title: "Güvenli Ödeme",
+    progressCart: "Sepet",
+    progressDelivery: "Teslimat",
+    progressPayment: "Ödeme",
+    progressConfirmation: "Onay",
+    customerInfo: "Müşteri Bilgileri",
+    placeOrderCta: "Siparişi Tamamla",
+  },
+  shipping: {
+    title: "Kargo Teslimat Seçeneği",
+    standard: "Standart Teslimat",
+    express: "Hızlı Express Kargo",
+  },
+  payment: {
+    title: "Ödeme Yöntemi",
+    creditCard: "Kredi / Banka Kartı",
+    cashOnDelivery: "Kapıda Ödeme",
+  },
+  order: {
+    confirmedTitle: "Siparişiniz Alındı",
+    orderNumber: "Sipariş No",
+    continueShopping: "Alışverişe Devam Et",
+  },
   account: {
     signIn: "GİRİŞ YAP",
     signUp: "Kayıt Ol",

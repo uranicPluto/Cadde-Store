@@ -40,6 +40,38 @@ export const en = {
     followStore: "Follow Store",
     followingStore: "Following",
   },
+  cart: {
+    title: "My Cart",
+    checkoutCta: "Proceed to Checkout",
+    emptyTitle: "Your Cart Is Empty",
+    emptyDesc: "Continue shopping and add your favorite products to your cart.",
+    continueShopping: "Continue Shopping",
+    itemSavedToFavorites: "Product saved to favorites",
+  },
+  checkout: {
+    title: "Secure Checkout",
+    progressCart: "Cart",
+    progressDelivery: "Delivery",
+    progressPayment: "Payment",
+    progressConfirmation: "Confirmation",
+    customerInfo: "Customer Information",
+    placeOrderCta: "Place Order",
+  },
+  shipping: {
+    title: "Shipping Method",
+    standard: "Standard Delivery",
+    express: "Express Fast Shipping",
+  },
+  payment: {
+    title: "Payment Method",
+    creditCard: "Credit / Debit Card",
+    cashOnDelivery: "Cash on Delivery",
+  },
+  order: {
+    confirmedTitle: "Order Confirmed",
+    orderNumber: "Order No",
+    continueShopping: "Continue Shopping",
+  },
   account: {
     signIn: "SIGN IN",
     signUp: "Sign Up",
