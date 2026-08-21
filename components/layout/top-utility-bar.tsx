@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { Store, HelpCircle, PhoneCall } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useLanguage } from "@/lib/i18n/language-context";
@@ -21,10 +22,13 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ className }) => {
       <div className="max-w-wide mx-auto flex items-center justify-between gap-4">
         {/* Left Announcement / Merchant Callout */}
         <div className="flex items-center gap-2 truncate">
-          <span className="inline-flex items-center gap-1 font-semibold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded text-[11px]">
+          <Link
+            href="/seller"
+            className="inline-flex items-center gap-1 font-semibold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded text-[11px] hover:bg-amber-400/20 transition-colors"
+          >
             <Store className="w-3 h-3" />
             {t("common.becomeSeller")}
-          </span>
+          </Link>
           <span className="hidden md:inline text-slate-400">|</span>
           <span className="hidden md:inline text-slate-300 text-[11px] truncate">
             {t("header.sellerCallout")}
@@ -49,12 +53,12 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ className }) => {
             <span>{t("common.customerService")}</span>
           </a>
 
-          <a
-            href="#"
+          <Link
+            href="/seller/dashboard"
             className="flex items-center gap-1 text-amber-400 font-semibold hover:underline"
           >
             <span>{t("common.sellerPortal")}</span>
-          </a>
+          </Link>
 
           {/* Interactive Language & Currency Switcher */}
           <div className="pl-2 border-l border-slate-700">
