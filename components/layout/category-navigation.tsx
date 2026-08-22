@@ -33,7 +33,7 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
     <div className={cn("relative w-full bg-white border-b border-slate-200 shadow-2xs z-30", className)} ref={containerRef}>
       <div className="max-w-wide mx-auto px-4 sm:px-6">
         <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
-          {/* Competitor Screenshot Feature: ☰ Categories NEW Pill Badge */}
+          {/* Competitor Screenshot Feature: ☰ Categories NEW Pill Button */}
           <div
             onMouseEnter={() => setActiveCategory(activeCategories[0])}
             className="relative shrink-0 flex items-center pr-2 border-r border-slate-200"
@@ -66,14 +66,14 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
                   className={cn(
                     "py-2.5 px-2.5 sm:px-3 text-xs font-bold text-slate-800 hover:text-primary transition-all border-b-2 border-transparent flex items-center gap-1.5 outline-none select-none",
                     isActive && "text-primary border-primary font-black",
-                    cat.slug === "women" && "border-primary text-primary font-black",
+                    cat.slug === "kadin" && "border-primary text-primary font-black",
                     cat.isHot && "text-slate-900 font-bold"
                   )}
                 >
                   {cat.isHot && <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500 shrink-0" />}
                   <span>{categoryName}</span>
 
-                  {/* Red New Pill Badge for Flash & Bestsellers (Competitor Screenshot) */}
+                  {/* Red New Pill Badge for Flash & Bestsellers */}
                   {(cat.slug === "deals" || cat.isHot) && (
                     <span className="bg-rose-600 text-white text-[8px] font-black px-1.5 py-0.2 rounded-full uppercase">
                       NEW
@@ -88,10 +88,11 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
         </nav>
       </div>
 
-      {/* Mega Menu Dropdown */}
+      {/* 2-Panel Master Mega Menu Dropdown */}
       {activeCategory && (
         <MegaMenu
           category={activeCategory}
+          allCategories={activeCategories}
           isOpen={!!activeCategory}
           onClose={() => setActiveCategory(null)}
         />
