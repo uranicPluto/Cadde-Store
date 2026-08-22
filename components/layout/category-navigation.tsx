@@ -18,12 +18,14 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
   const { language, t } = useLanguage();
   const isEn = language === "en";
   const activeCategories = categories || getMockNavigationCategories(language);
-  const [activeCategory, setActiveCategory] = useState<CategoryData | null>(null);
+
+  // MegaMenu is open ONLY when hovering on the main "☰ Categories NEW ∨" button
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActiveCategory(null);
+      if (e.key === "Escape") setIsMenuOpen(false);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -33,13 +35,14 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
     <div className={cn("relative w-full bg-white border-b border-slate-200 shadow-2xs z-30", className)} ref={containerRef}>
       <div className="max-w-wide mx-auto px-4 sm:px-6">
         <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
-          {/* Competitor Screenshot Feature: ☰ Categories NEW Button with Dropdown Indicator */}
+          {/* ONLY THIS BUTTON OPENS THE MEGAMENU (Matches User Request & Image 2) */}
           <div
-            onMouseEnter={() => setActiveCategory(activeCategories[0])}
+            onMouseEnter={() => setIsMenuOpen(true)}
             className="relative shrink-0 flex items-center pr-2 border-r border-slate-200"
           >
             <button
               type="button"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
               className="py-2.5 px-3 text-xs font-black text-slate-900 hover:text-primary transition-colors flex items-center gap-1.5 outline-none select-none"
             >
               <Menu className="w-4 h-4 text-slate-700" />
@@ -47,26 +50,23 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
               <span className="bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">
                 NEW
               </span>
-              <ChevronDown className={cn("w-3.5 h-3.5 text-slate-500 transition-transform ml-0.5", activeCategory && "rotate-180")} />
+              <ChevronDown className={cn("w-3.5 h-3.5 text-slate-500 transition-transform ml-0.5", isMenuOpen && "rotate-180")} />
             </button>
           </div>
 
-          {/* Clean Individual Category Tabs Without Dropdown Arrows (Matches User Request) */}
+          {/* Clean Direct Category Links - NO HOVER DROPDOWN (Matches Image 1) */}
           {activeCategories.map((cat) => {
-            const isActive = activeCategory?.id === cat.id;
             const categoryName = t(`categories.${cat.slug}`) || cat.name;
 
             return (
               <div
                 key={cat.id}
-                onMouseEnter={() => setActiveCategory(cat)}
                 className="relative shrink-0 flex items-center"
               >
                 <Link
                   href={`/category/${cat.slug}`}
                   className={cn(
                     "py-2.5 px-2.5 sm:px-3 text-xs font-bold text-slate-800 hover:text-primary transition-all border-b-2 border-transparent flex items-center gap-1.5 outline-none select-none",
-                    isActive && "text-primary border-primary font-black",
                     cat.slug === "kadin" && "border-primary text-primary font-black",
                     cat.isHot && "text-slate-900 font-bold"
                   )}
@@ -87,13 +87,13 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
         </nav>
       </div>
 
-      {/* 2-Panel Master Mega Menu Dropdown */}
-      {activeCategory && (
+      {/* Master 2-Panel MegaMenu Dropdown (Opens ONLY on Categories Button Hover) */}
+      {isMenuOpen && (
         <MegaMenu
-          category={activeCategory}
+          category={activeCategories[0]}
           allCategories={activeCategories}
-          isOpen={!!activeCategory}
-          onClose={() => setActiveCategory(null)}
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
         />
       )}
     </div>
