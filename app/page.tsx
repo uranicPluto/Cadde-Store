@@ -5,6 +5,7 @@ import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { HeroSection } from "@/components/homepage/hero-section";
 import { FlashSalesSection } from "@/components/homepage/flash-sales-section";
 import { CategoryGridStrips } from "@/components/homepage/category-grid-strips";
+import { BrandQuickStrip } from "@/components/homepage/brand-quick-strip";
 import { CampaignBannerStrips } from "@/components/homepage/campaign-banner-strips";
 import { FeaturedBrandsSection } from "@/components/homepage/featured-brands-section";
 import { StoreHighlightsSection } from "@/components/homepage/store-highlights-section";
@@ -31,6 +32,9 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col">
         {/* Campaign Hero Slider */}
         <HeroSection />
+
+        {/* Brand Logos & 3D Quick Action Strip */}
+        <BrandQuickStrip />
 
         {/* Category Circle Strips */}
         <CategoryGridStrips />
