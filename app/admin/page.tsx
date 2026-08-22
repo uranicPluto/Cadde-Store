@@ -22,7 +22,12 @@ import {
   AlertTriangle,
   ArrowRight,
   ShieldCheck,
-  Star,
+  TrendingUp,
+  Activity,
+  PlusCircle,
+  Ticket,
+  Sliders,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -36,6 +41,18 @@ export default function AdminDashboardPage() {
   const totalRevenue = orders.reduce((sum, o) => sum + o.calculation.grandTotal, 184500);
   const fullCatalog = getFullCatalog(language);
 
+  // Mock monthly revenue trends for chart visualizer
+  const monthlyTrends = [
+    { month: "Oca", val: 42 },
+    { month: "Şub", val: 58 },
+    { month: "Mar", val: 65 },
+    { month: "Nis", val: 80 },
+    { month: "May", val: 95 },
+    { month: "Haz", val: 110 },
+    { month: "Tem", val: 145 },
+    { month: "Ağu", val: 184 },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
       <AdminHeader />
@@ -47,34 +64,50 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="lg:col-span-9 flex flex-col gap-6">
-            {/* Top Dashboard Banner */}
-            <div className="bg-slate-950 text-white rounded-2xl p-6 shadow-md border border-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-                  Cadde Store Platform Administration
-                </span>
-                <h1 className="text-xl sm:text-2xl font-black">{t("admin.dashboard.title")}</h1>
-                <span className="text-xs text-slate-400">
-                  {t("admin.dashboard.subtitle")}
-                </span>
+            {/* Executive Command Center Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="flex flex-col gap-2 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/20 px-2.5 py-0.5 rounded border border-indigo-500/30">
+                    Executive Control Center
+                  </span>
+                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>All Systems Operational</span>
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{t("admin.dashboard.title")}</h1>
+                <p className="text-xs text-slate-300 max-w-xl font-medium leading-relaxed">
+                  Platform genelindeki canlı satış verilerini, mağaza onaylarını, aktif siparişleri ve sistem sağlığını buradan yönetin.
+                </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              {/* Quick Actions */}
+              <div className="flex items-center gap-2 relative z-10 shrink-0">
                 <Link
                   href="/admin/sellers"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-lg shadow-xs transition-colors"
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl shadow-md transition-colors flex items-center gap-1.5"
                 >
-                  {t("admin.navigation.sellers")}
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Mağaza Onayla</span>
+                </Link>
+
+                <Link
+                  href="/admin/coupons"
+                  className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-black rounded-xl border border-white/20 transition-colors flex items-center gap-1.5"
+                >
+                  <Ticket className="w-4 h-4 text-amber-300" />
+                  <span>Kupon Oluştur</span>
                 </Link>
               </div>
             </div>
 
-            {/* Metric Summary Stat Cards */}
+            {/* Stat Cards Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <AdminStatCard
                 title={t("admin.dashboard.totalRevenue")}
                 value={formatCurrency(totalRevenue, currency)}
-                change="+14.2%"
+                change="+18.4%"
                 isPositive={true}
                 icon={DollarSign}
                 iconBgColor="bg-emerald-100 text-emerald-600"
@@ -82,7 +115,7 @@ export default function AdminDashboardPage() {
               <AdminStatCard
                 title={t("admin.dashboard.totalOrders")}
                 value={orders.length + 380}
-                change="+9.5%"
+                change="+12.5%"
                 isPositive={true}
                 icon={ShoppingCart}
                 iconBgColor="bg-indigo-100 text-indigo-600"
@@ -90,7 +123,7 @@ export default function AdminDashboardPage() {
               <AdminStatCard
                 title={t("admin.dashboard.activeSellers")}
                 value={MOCK_SELLERS.length + 12}
-                change="+3"
+                change="+4 Yeni"
                 isPositive={true}
                 icon={Store}
                 iconBgColor="bg-amber-100 text-amber-600"
@@ -98,19 +131,51 @@ export default function AdminDashboardPage() {
               <AdminStatCard
                 title={t("admin.dashboard.totalCustomers")}
                 value={MOCK_ADMIN_CUSTOMERS.length + 1240}
-                change="+18.4%"
+                change="+24.8%"
                 isPositive={true}
                 icon={Users}
                 iconBgColor="bg-purple-100 text-purple-600"
               />
             </div>
 
+            {/* Platform Revenue Chart & System Performance */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col gap-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex flex-col">
+                  <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-indigo-600" />
+                    <span>Aylık Platform Ciro Trendi (2026)</span>
+                  </h2>
+                  <span className="text-xs text-slate-500 font-semibold">Toplam İşlem Hacmi ve Satış Büyümesi</span>
+                </div>
+                <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  +34% Rekor Büyüme
+                </span>
+              </div>
+
+              {/* Custom CSS Bar Chart Visualizer */}
+              <div className="flex items-end justify-between gap-3 h-44 pt-6 px-4 bg-slate-50 border border-slate-200/80 rounded-xl">
+                {monthlyTrends.map((t, idx) => (
+                  <div key={idx} className="flex flex-col items-center gap-2 flex-1 group">
+                    <div className="text-[10px] font-black text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      ₺{t.val}k
+                    </div>
+                    <div
+                      style={{ height: `${(t.val / 184) * 100}%` }}
+                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg group-hover:from-indigo-700 group-hover:to-indigo-500 transition-all shadow-xs"
+                    />
+                    <span className="text-[11px] font-extrabold text-slate-600">{t.month}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* System Alerts & Recent Orders */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Recent Orders Overview */}
-              <div className="md:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
+              <div className="md:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2">
+                  <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
                     <ShoppingCart className="w-4 h-4 text-indigo-600" />
                     <span>{t("admin.dashboard.recentOrdersTitle")}</span>
                   </h2>
@@ -124,10 +189,10 @@ export default function AdminDashboardPage() {
                   {orders.slice(0, 4).map((ord) => (
                     <div key={ord.orderId} className="flex items-center justify-between pt-2">
                       <div className="flex flex-col">
-                        <span className="font-extrabold text-text-main">{ord.orderNumber}</span>
-                        <span className="text-[11px] text-text-muted">{ord.customerInfo.firstName} {ord.customerInfo.lastName}</span>
+                        <span className="font-extrabold text-slate-900">{ord.orderNumber}</span>
+                        <span className="text-[11px] text-slate-500">{ord.customerInfo.firstName} {ord.customerInfo.lastName}</span>
                       </div>
-                      <span className="font-extrabold text-text-main">{formatCurrency(ord.calculation.grandTotal, currency)}</span>
+                      <span className="font-extrabold text-slate-900">{formatCurrency(ord.calculation.grandTotal, currency)}</span>
                       <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
                         {ord.status}
                       </span>
@@ -137,23 +202,23 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Critical System Notifications */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
-                <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
+                <h2 className="text-sm font-black text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
                   <span>{t("admin.dashboard.criticalAlertsTitle")}</span>
                 </h2>
 
                 <div className="flex flex-col gap-3 text-xs">
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-1">
+                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex flex-col gap-1">
                     <span className="font-bold text-amber-900">{t("admin.dashboard.alertPendingSellerMsg").replace("{count}", "2")}</span>
-                    <Link href="/admin/sellers" className="text-[11px] font-extrabold text-indigo-600 underline">
+                    <Link href="/admin/sellers" className="text-[11px] font-black text-indigo-600 underline mt-1">
                       {t("admin.sellers.title")} &rarr;
                     </Link>
                   </div>
 
-                  <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex flex-col gap-1">
+                  <div className="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl flex flex-col gap-1">
                     <span className="font-bold text-indigo-900">{t("admin.dashboard.alertPendingProductMsg").replace("{count}", "4")}</span>
-                    <Link href="/admin/products" className="text-[11px] font-extrabold text-indigo-600 underline">
+                    <Link href="/admin/products" className="text-[11px] font-black text-indigo-600 underline mt-1">
                       {t("admin.products.title")} &rarr;
                     </Link>
                   </div>
