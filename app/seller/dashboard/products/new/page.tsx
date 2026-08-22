@@ -6,6 +6,7 @@ import { SellerHeader } from "@/components/seller/seller-header";
 import { SellerSidebar } from "@/components/seller/seller-sidebar";
 import { ProductForm } from "@/components/seller/product-form";
 import { DetailedProductMock } from "@/lib/catalog/product-repository";
+import { useLanguage } from "@/lib/i18n/language-context";
 import { Footer } from "@/components/layout/footer";
 import { PlusCircle } from "lucide-react";
 
@@ -13,6 +14,7 @@ const SELLER_PRODUCTS_KEY = "cadde-store-seller-products";
 
 export default function AddSellerProductPage() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleCreateProduct = (newProduct: DetailedProductMock) => {
     try {
@@ -43,9 +45,9 @@ export default function AddSellerProductPage() {
                   <PlusCircle className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-black text-text-main">Yeni Ürün Ekle</h1>
+                  <h1 className="text-xl font-black text-text-main">{t("seller.productForm.addTitle")}</h1>
                   <span className="text-xs text-text-muted">
-                    Mağazanıza yeni bir ürün eklemek için aşağıdaki formu doldurunuz.
+                    {t("seller.productForm.addSubtitle")}
                   </span>
                 </div>
               </div>

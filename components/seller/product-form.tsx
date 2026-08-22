@@ -4,7 +4,7 @@ import { DetailedProductMock } from "@/lib/catalog/product-repository";
 import { createSlug } from "@/lib/catalog/slug-utils";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { Image as ImageIcon, Save, CheckCircle2, ArrowLeft, Tag, Truck, Box } from "lucide-react";
+import { Image as ImageIcon, Save, ArrowLeft, Tag, Truck, Box } from "lucide-react";
 
 export interface ProductFormProps {
   initialProduct?: DetailedProductMock;
@@ -16,7 +16,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   onSubmit,
 }) => {
   const router = useRouter();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   const [name, setName] = useState(initialProduct?.name || "");
   const [brand, setBrand] = useState(initialProduct?.brand || "Trend Fashion");
@@ -82,16 +82,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Vazgeç</span>
+          <span>{t("seller.productForm.cancel")}</span>
         </button>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" type="button" onClick={() => router.back()} className="font-bold text-xs">
-            Taslak Kaydet
+            {t("seller.productForm.saveDraft")}
           </Button>
           <Button variant="primary" size="sm" type="submit" className="font-extrabold text-xs bg-emerald-600 hover:bg-emerald-700">
             <Save className="w-4 h-4 mr-1.5" />
-            <span>Ürünü Yayınla</span>
+            <span>{t("seller.productForm.publishProduct")}</span>
           </Button>
         </div>
       </div>
@@ -100,24 +100,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col gap-4">
         <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
           <Box className="w-4 h-4 text-primary" />
-          <span>Temel Ürün Bilgileri</span>
+          <span>{t("seller.productForm.basicInfo")}</span>
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="flex flex-col gap-1 sm:col-span-2">
-            <label className="font-bold text-text-muted">Ürün Adı / Title <span className="text-rose-500">*</span></label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.productName")}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Örn: Siyah Oversize Fit Bisiklet Yaka Pamuklu Erkek Tişört"
+              placeholder={t("seller.productForm.productNamePlaceholder")}
               className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary focus:bg-white font-bold"
               required
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-text-muted">Marka / Brand:</label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.brand")}</label>
             <input
               type="text"
               value={brand}
@@ -127,7 +127,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-text-muted">Kategori / Category:</label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.category")}</label>
             <select
               value={categorySlug}
               onChange={(e) => setCategorySlug(e.target.value)}
@@ -143,11 +143,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1 sm:col-span-2">
-            <label className="font-bold text-text-muted">Açıklama / Description:</label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.description")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ürün malzemesi, kalıbı ve detaylı bilgileri giriniz."
+              placeholder={t("seller.productForm.descriptionPlaceholder")}
               className="p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary focus:bg-white min-h-[90px]"
             />
           </div>
@@ -158,7 +158,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col gap-4">
         <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
           <ImageIcon className="w-4 h-4 text-primary" />
-          <span>Görsel URL / Media</span>
+          <span>{t("seller.productForm.media")}</span>
         </h2>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center text-xs">
@@ -167,14 +167,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5 flex-1 w-full">
-            <label className="font-bold text-text-muted">Ana Görsel Görsel Bağlantısı (Image URL):</label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.imageUrl")}</label>
             <input
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary font-bold text-xs"
             />
-            <span className="text-[11px] text-text-subtle">Unsplash veya direct HTTPS resim adresi giriniz.</span>
+            <span className="text-[11px] text-text-subtle">{t("seller.productForm.imageUrlHelp")}</span>
           </div>
         </div>
       </div>
@@ -183,12 +183,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col gap-4">
         <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
           <Tag className="w-4 h-4 text-primary" />
-          <span>Fiyatlandırma & Stok</span>
+          <span>{t("seller.productForm.pricingAndStock")}</span>
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-text-muted">Satış Fiyatı (TRY ₺) <span className="text-rose-500">*</span></label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.sellingPrice")}</label>
             <input
               type="number"
               step="0.01"
@@ -200,7 +200,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-text-muted">Üstü Çizili Fiyat (TRY ₺):</label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.originalPrice")}</label>
             <input
               type="number"
               step="0.01"
@@ -211,7 +211,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-text-muted">Stok Adedi / Quantity <span className="text-rose-500">*</span></label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.stockQuantity")}</label>
             <input
               type="number"
               value={stock}
@@ -225,7 +225,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         {/* Variants */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-3 border-t border-slate-100">
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-text-muted">Renk Varyantları (virgülle ayırın):</label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.colorVariants")}</label>
             <input
               type="text"
               value={colorsText}
@@ -236,7 +236,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-text-muted">Beden Varyantları (virgülle ayırın):</label>
+            <label className="font-bold text-text-muted">{t("seller.productForm.sizeVariants")}</label>
             <input
               type="text"
               value={sizesText}
@@ -252,7 +252,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col gap-4">
         <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
           <Truck className="w-4 h-4 text-primary" />
-          <span>Kargo & Rozetler</span>
+          <span>{t("seller.productForm.shippingAndBadges")}</span>
         </h2>
 
         <div className="flex flex-wrap gap-6 text-xs font-bold">
@@ -263,7 +263,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               onChange={(e) => setFreeShipping(e.target.checked)}
               className="w-4 h-4 text-primary rounded"
             />
-            <span>Kargo Bedava Etiketi Göster</span>
+            <span>{t("seller.productForm.showFreeShipping")}</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -273,7 +273,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               onChange={(e) => setFastDelivery(e.target.checked)}
               className="w-4 h-4 text-primary rounded"
             />
-            <span>Hızlı Teslimat Etiketi Göster</span>
+            <span>{t("seller.productForm.showFastDelivery")}</span>
           </label>
         </div>
       </div>

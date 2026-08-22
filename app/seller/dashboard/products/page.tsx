@@ -12,7 +12,7 @@ import { Footer } from "@/components/layout/footer";
 const SELLER_PRODUCTS_KEY = "cadde-store-seller-products";
 
 export default function SellerProductsPage() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [products, setProducts] = useState<DetailedProductMock[]>([]);
 
   useEffect(() => {
@@ -35,6 +35,8 @@ export default function SellerProductsPage() {
     } catch (e) {}
   };
 
+  const countBadgeText = t("seller.products.countBadge").replace("{count}", String(products.length));
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
       <SellerHeader />
@@ -53,13 +55,13 @@ export default function SellerProductsPage() {
                 </div>
                 <div className="flex flex-col">
                   <h1 className="text-xl font-black text-text-main flex items-center gap-2">
-                    <span>Ürün Yönetimi</span>
+                    <span>{t("seller.products.title")}</span>
                     <span className="text-xs bg-amber-600 text-white font-extrabold px-2 py-0.5 rounded-full">
-                      {products.length} Ürün
+                      {countBadgeText}
                     </span>
                   </h1>
                   <span className="text-xs text-text-muted">
-                    Mağazanıza ait tüm ürünleri listeleyin, güncelleyin veya yeni ürün ekleyin.
+                    {t("seller.products.subtitle")}
                   </span>
                 </div>
               </div>

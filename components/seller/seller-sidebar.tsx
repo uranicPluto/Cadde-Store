@@ -5,17 +5,17 @@ import { LayoutDashboard, Package, ShoppingCart, Star, Settings, Store, PlusCirc
 import { useLanguage } from "@/lib/i18n/language-context";
 import { cn } from "@/lib/utils";
 
-export const SELLER_NAV_ITEMS = [
-  { href: "/seller/dashboard", icon: LayoutDashboard, labelTr: "Genel Bakış", labelEn: "Overview" },
-  { href: "/seller/dashboard/products", icon: Package, labelTr: "Ürün Yönetimi", labelEn: "Products" },
-  { href: "/seller/dashboard/orders", icon: ShoppingCart, labelTr: "Sipariş Yönetimi", labelEn: "Orders" },
-  { href: "/seller/dashboard/reviews", icon: Star, labelTr: "Değerlendirmeler", labelEn: "Reviews" },
-  { href: "/seller/dashboard/settings", icon: Settings, labelTr: "Mağaza Ayarları", labelEn: "Store Settings" },
-];
-
 export const SellerSidebar: React.FC<{ className?: string }> = ({ className }) => {
   const pathname = usePathname();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { href: "/seller/dashboard", icon: LayoutDashboard, label: t("seller.navigation.overview") },
+    { href: "/seller/dashboard/products", icon: Package, label: t("seller.navigation.products") },
+    { href: "/seller/dashboard/orders", icon: ShoppingCart, label: t("seller.navigation.orders") },
+    { href: "/seller/dashboard/reviews", icon: Star, label: t("seller.navigation.reviews") },
+    { href: "/seller/dashboard/settings", icon: Settings, label: t("seller.navigation.settings") },
+  ];
 
   return (
     <aside className={cn("bg-slate-900 text-white rounded-xl p-4 shadow-md flex flex-col gap-5", className)}>
@@ -26,7 +26,7 @@ export const SellerSidebar: React.FC<{ className?: string }> = ({ className }) =
         </div>
         <div className="flex flex-col min-w-0 flex-1">
           <span className="font-extrabold text-xs text-white truncate">Trend Fashion Mağazası</span>
-          <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Onaylı Satıcı ★ 4.9</span>
+          <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">{t("seller.sidebar.verifiedBadge")}</span>
         </div>
       </div>
 
@@ -36,15 +36,14 @@ export const SellerSidebar: React.FC<{ className?: string }> = ({ className }) =
         className="w-full py-2.5 px-3 bg-primary hover:bg-primary-hover text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 shadow-xs transition-colors"
       >
         <PlusCircle className="w-4 h-4" />
-        <span>Yeni Ürün Ekle</span>
+        <span>{t("seller.sidebar.addProduct")}</span>
       </Link>
 
       {/* Navigation List */}
       <nav className="flex flex-col gap-1">
-        {SELLER_NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || (item.href !== "/seller/dashboard" && pathname.startsWith(item.href));
-          const label = language === "en" ? item.labelEn : item.labelTr;
 
           return (
             <Link
@@ -58,7 +57,7 @@ export const SellerSidebar: React.FC<{ className?: string }> = ({ className }) =
               )}
             >
               <Icon className={cn("w-4 h-4", isActive ? "text-primary" : "text-slate-400")} />
-              <span>{label}</span>
+              <span>{item.label}</span>
             </Link>
           );
         })}
@@ -70,14 +69,14 @@ export const SellerSidebar: React.FC<{ className?: string }> = ({ className }) =
             className="flex items-center gap-2.5 p-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-amber-400 transition-colors"
           >
             <Store className="w-4 h-4 text-amber-400" />
-            <span>Mağaza Vitrinini Gör</span>
+            <span>{t("seller.navigation.viewStorefront")}</span>
           </Link>
           <Link
             href="/"
             className="flex items-center gap-2.5 p-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Pazaryerine Dön</span>
+            <span>{t("seller.navigation.backToMarketplace")}</span>
           </Link>
         </div>
       </nav>

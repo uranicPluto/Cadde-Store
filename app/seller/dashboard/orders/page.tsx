@@ -8,13 +8,13 @@ import { getSavedOrders } from "@/lib/orders/order-utils";
 import { OrderRecord, OrderStatusType } from "@/lib/orders/order-types";
 import { formatCurrency } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { ShoppingCart, Eye, CheckCircle2, ArrowRight } from "lucide-react";
+import { ShoppingCart, ArrowRight } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
 const ORDERS_STORAGE_KEY = "cadde-store-orders";
 
 export default function SellerOrdersPage() {
-  const { language, currency } = useLanguage();
+  const { currency, t } = useLanguage();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -35,6 +35,8 @@ export default function SellerOrdersPage() {
     return o.status === statusFilter;
   });
 
+  const countBadgeText = t("seller.orders.countBadge").replace("{count}", String(filteredOrders.length));
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
       <SellerHeader />
@@ -53,13 +55,13 @@ export default function SellerOrdersPage() {
                 </div>
                 <div className="flex flex-col">
                   <h1 className="text-xl font-black text-text-main flex items-center gap-2">
-                    <span>Sipariş Yönetimi</span>
+                    <span>{t("seller.orders.title")}</span>
                     <span className="text-xs bg-indigo-600 text-white font-extrabold px-2 py-0.5 rounded-full">
-                      {filteredOrders.length} Sipariş
+                      {countBadgeText}
                     </span>
                   </h1>
                   <span className="text-xs text-text-muted">
-                    Mağazanıza gelen müşteri siparişlerini kargolayın ve durumlarını güncelleyin.
+                    {t("seller.orders.subtitle")}
                   </span>
                 </div>
               </div>
@@ -73,7 +75,7 @@ export default function SellerOrdersPage() {
                     statusFilter === "all" ? "bg-slate-900 text-white border-slate-900" : "bg-white text-text-main border-slate-200"
                   }`}
                 >
-                  Tümü
+                  {t("seller.orders.filterAll")}
                 </button>
                 <button
                   type="button"
@@ -82,7 +84,7 @@ export default function SellerOrdersPage() {
                     statusFilter === "processing" ? "bg-slate-900 text-white border-slate-900" : "bg-white text-text-main border-slate-200"
                   }`}
                 >
-                  Hazırlanıyor
+                  {t("seller.orders.filterProcessing")}
                 </button>
                 <button
                   type="button"
@@ -91,7 +93,7 @@ export default function SellerOrdersPage() {
                     statusFilter === "shipped" ? "bg-slate-900 text-white border-slate-900" : "bg-white text-text-main border-slate-200"
                   }`}
                 >
-                  Kargoda
+                  {t("seller.orders.filterShipped")}
                 </button>
               </div>
             </div>
@@ -102,19 +104,19 @@ export default function SellerOrdersPage() {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-text-muted font-extrabold uppercase tracking-wider">
-                      <th className="p-3">Sipariş No</th>
-                      <th className="p-3">Müşteri</th>
-                      <th className="p-3">Tarih</th>
-                      <th className="p-3">Tutar</th>
-                      <th className="p-3">Durum</th>
-                      <th className="p-3 text-right">İşlem / Güncelle</th>
+                      <th className="p-3">{t("seller.orders.thOrderNo")}</th>
+                      <th className="p-3">{t("seller.orders.thCustomer")}</th>
+                      <th className="p-3">{t("seller.orders.thDate")}</th>
+                      <th className="p-3">{t("seller.orders.thAmount")}</th>
+                      <th className="p-3">{t("seller.orders.thStatus")}</th>
+                      <th className="p-3 text-right">{t("seller.orders.thAction")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
                     {filteredOrders.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="p-8 text-center text-text-muted">
-                          Herhangi bir sipariş kaydı bulunmuyor.
+                          {t("seller.orders.noOrdersFound")}
                         </td>
                       </tr>
                     ) : (
@@ -136,11 +138,11 @@ export default function SellerOrdersPage() {
                               onChange={(e) => handleUpdateStatus(ord.orderId, e.target.value as OrderStatusType)}
                               className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-bold outline-none text-slate-800"
                             >
-                              <option value="confirmed">Sipariş Alındı</option>
-                              <option value="processing">Hazırlanıyor</option>
-                              <option value="shipped">Kargoya Verildi</option>
-                              <option value="delivered">Teslim Edildi</option>
-                              <option value="cancelled">İptal Edildi</option>
+                              <option value="confirmed">{t("seller.orders.statusConfirmed")}</option>
+                              <option value="processing">{t("seller.orders.statusProcessing")}</option>
+                              <option value="shipped">{t("seller.orders.statusShipped")}</option>
+                              <option value="delivered">{t("seller.orders.statusDelivered")}</option>
+                              <option value="cancelled">{t("seller.orders.statusCancelled")}</option>
                             </select>
                           </td>
                           <td className="p-3 text-right">
@@ -148,7 +150,7 @@ export default function SellerOrdersPage() {
                               href={`/seller/dashboard/orders/${ord.orderNumber}`}
                               className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-text-main font-bold text-xs inline-flex items-center gap-1 transition-colors"
                             >
-                              <span>Detay</span>
+                              <span>{t("seller.orders.details")}</span>
                               <ArrowRight className="w-3 h-3" />
                             </Link>
                           </td>

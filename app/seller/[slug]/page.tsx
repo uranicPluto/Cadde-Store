@@ -13,7 +13,7 @@ import { ProductCard } from "@/components/marketplace/product-card";
 import { Rating } from "@/components/ui/rating";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
-import { Store, ShieldCheck, MapPin, MessageSquare, Users, Search, ArrowUpDown } from "lucide-react";
+import { ShieldCheck, MapPin, Users, Search, ArrowUpDown } from "lucide-react";
 
 export default function SellerStorefrontPage() {
   const params = useParams();
@@ -38,6 +38,10 @@ export default function SellerStorefrontPage() {
 
   if (!seller) return null;
 
+  const tabProductsLabel = t("seller.storefront.tabProducts").replace("{count}", String(displayProducts.length));
+  const tabReviewsLabel = t("seller.storefront.tabReviews").replace("{count}", String(seller.reviews.length));
+  const tabAboutLabel = t("seller.storefront.tabAbout");
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
       <MarketplaceHeader />
@@ -47,7 +51,7 @@ export default function SellerStorefrontPage() {
         <Breadcrumb
           items={[
             { label: t("common.allProducts"), href: "/" },
-            { label: "Satıcı Mağazası" },
+            { label: t("seller.header.sellerPortal") },
             { label: seller.name },
           ]}
         />
@@ -71,7 +75,7 @@ export default function SellerStorefrontPage() {
                   {seller.verified && (
                     <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      Onaylı Satıcı
+                      {t("seller.storefront.verifiedSeller")}
                     </span>
                   )}
                 </div>
@@ -81,7 +85,7 @@ export default function SellerStorefrontPage() {
                   <span>•</span>
                   <span className="flex items-center gap-1">
                     <Users className="w-3.5 h-3.5 text-primary" />
-                    <strong>{seller.followers.toLocaleString()}</strong> Takipçi
+                    <strong>{seller.followers.toLocaleString()}</strong> {t("seller.storefront.followers")}
                   </span>
                   <span>•</span>
                   <span className="flex items-center gap-1">
@@ -94,10 +98,10 @@ export default function SellerStorefrontPage() {
 
             <div className="flex items-center gap-3">
               <Button variant="primary" size="md" className="font-extrabold px-6 shadow-xs">
-                Mağazayı Takip Et
+                {t("seller.storefront.followStore")}
               </Button>
               <Button variant="outline" size="md" className="font-bold">
-                Satıcıya Soru Sor
+                {t("seller.storefront.askSeller")}
               </Button>
             </div>
           </div>
@@ -107,9 +111,9 @@ export default function SellerStorefrontPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
           <Tabs
             items={[
-              { id: "products", label: `Mağaza Ürünleri (${displayProducts.length})` },
-              { id: "reviews", label: `Satıcı Değerlendirmeleri (${seller.reviews.length})` },
-              { id: "about", label: "Mağaza Hakkında" },
+              { id: "products", label: tabProductsLabel },
+              { id: "reviews", label: tabReviewsLabel },
+              { id: "about", label: tabAboutLabel },
             ]}
             activeId={activeTab}
             onChange={setActiveTab}
@@ -126,7 +130,7 @@ export default function SellerStorefrontPage() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Mağaza içinde ara..."
+                  placeholder={t("seller.storefront.searchPlaceholder")}
                   className="w-full h-9 pl-9 pr-3 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary font-medium"
                 />
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -139,10 +143,10 @@ export default function SellerStorefrontPage() {
                   onChange={(e) => setSortOption(e.target.value as SortOption)}
                   className="bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-text-main font-bold outline-none"
                 >
-                  <option value="recommended">Önerilen Sıralama</option>
-                  <option value="bestselling">En Çok Satanlar</option>
-                  <option value="price_asc">Fiyat: Düşükten Yüksek</option>
-                  <option value="price_desc">Fiyat: Yüksekten Düşük</option>
+                  <option value="recommended">{t("seller.storefront.sortRecommended")}</option>
+                  <option value="bestselling">{t("seller.storefront.sortBestselling")}</option>
+                  <option value="price_asc">{t("seller.storefront.sortPriceAsc")}</option>
+                  <option value="price_desc">{t("seller.storefront.sortPriceDesc")}</option>
                 </select>
               </div>
             </div>
@@ -159,9 +163,9 @@ export default function SellerStorefrontPage() {
         {/* Reviews Tab Content */}
         {activeTab === "reviews" && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs flex flex-col gap-4 max-w-3xl">
-            <h2 className="text-base font-extrabold text-text-main">Müşteri Yorumları</h2>
+            <h2 className="text-base font-extrabold text-text-main">{t("seller.storefront.reviewsTitle")}</h2>
             {seller.reviews.length === 0 ? (
-              <p className="text-xs text-text-muted">Henüz değerlendirme yapılmamış.</p>
+              <p className="text-xs text-text-muted">{t("seller.storefront.noReviewsYet")}</p>
             ) : (
               seller.reviews.map((rev) => (
                 <div key={rev.id} className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-2">
@@ -175,7 +179,9 @@ export default function SellerStorefrontPage() {
 
                   {rev.reply && (
                     <div className="mt-2 p-3 bg-primary-light/40 border border-primary/20 rounded-lg text-xs flex flex-col gap-1">
-                      <span className="font-extrabold text-primary">Satıcı Yanıtı ({rev.replyDate}):</span>
+                      <span className="font-extrabold text-primary">
+                        {t("seller.storefront.sellerReply").replace("{date}", rev.replyDate || "")}
+                      </span>
                       <p className="text-slate-800">{rev.reply}</p>
                     </div>
                   )}
@@ -189,18 +195,18 @@ export default function SellerStorefrontPage() {
         {activeTab === "about" && (
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs flex flex-col gap-6 max-w-3xl">
             <div className="flex flex-col gap-2">
-              <h2 className="text-base font-extrabold text-text-main">Hakkımızda</h2>
+              <h2 className="text-base font-extrabold text-text-main">{t("seller.storefront.aboutTitle")}</h2>
               <p className="text-xs text-slate-700 leading-relaxed">{seller.description[language]}</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 text-xs">
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-1">
-                <span className="font-bold text-text-muted">Kargo Politikası:</span>
+                <span className="font-bold text-text-muted">{t("seller.storefront.shippingPolicyTitle")}</span>
                 <p className="text-slate-700">{seller.shippingPolicy[language]}</p>
               </div>
 
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col gap-1">
-                <span className="font-bold text-text-muted">İade Koşulları:</span>
+                <span className="font-bold text-text-muted">{t("seller.storefront.returnPolicyTitle")}</span>
                 <p className="text-slate-700">{seller.returnPolicy[language]}</p>
               </div>
             </div>

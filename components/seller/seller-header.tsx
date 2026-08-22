@@ -1,11 +1,11 @@
 import React from "react";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
-import { Store, Bell, Search, ShieldCheck } from "lucide-react";
+import { Store } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 
 export const SellerHeader: React.FC = () => {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <header className="bg-white border-b border-slate-200 py-3 px-6 shadow-2xs flex items-center justify-between gap-4 sticky top-0 z-30">
@@ -15,7 +15,7 @@ export const SellerHeader: React.FC = () => {
             CS
           </div>
           <span className="font-extrabold text-base text-text-main hidden sm:inline">
-            Cadde Store <span className="text-xs text-primary font-bold uppercase tracking-wider">Satıcı Portalı</span>
+            Cadde Store <span className="text-xs text-primary font-bold uppercase tracking-wider">{t("seller.header.sellerPortal")}</span>
           </span>
         </Link>
       </div>
@@ -30,7 +30,7 @@ export const SellerHeader: React.FC = () => {
           className="text-xs font-bold text-slate-700 hover:text-primary flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200"
         >
           <Store className="w-3.5 h-3.5 text-primary" />
-          <span className="hidden sm:inline">Canlı Vitrin</span>
+          <span className="hidden sm:inline">{t("seller.header.liveStorefront")}</span>
         </Link>
       </div>
     </header>

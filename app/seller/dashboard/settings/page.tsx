@@ -5,10 +5,12 @@ import { SellerHeader } from "@/components/seller/seller-header";
 import { SellerSidebar } from "@/components/seller/seller-sidebar";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
-import { Settings, Store, Truck, ShieldCheck, Save } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/language-context";
+import { Settings, Store, Truck, Save } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
 export default function SellerSettingsPage() {
+  const { t } = useLanguage();
   const [storeName, setStoreName] = useState("Trend Fashion Mağazası");
   const [phone, setPhone] = useState("0850 123 45 67");
   const [email, setEmail] = useState("destek@trendfashion.com");
@@ -18,7 +20,7 @@ export default function SellerSettingsPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setToastMsg("Mağaza ayarları başarıyla güncellendi.");
+    setToastMsg(t("seller.settings.successToastMessage"));
     setTimeout(() => setToastMsg(null), 3000);
   };
 
@@ -28,7 +30,7 @@ export default function SellerSettingsPage() {
 
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200">
-          <Toast type="success" title="Mağaza Ayarları" message={toastMsg} onClose={() => setToastMsg(null)} />
+          <Toast type="success" title={t("seller.settings.successToastTitle")} message={toastMsg} onClose={() => setToastMsg(null)} />
         </div>
       )}
 
@@ -45,9 +47,9 @@ export default function SellerSettingsPage() {
                   <Settings className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-black text-text-main">Mağaza Ayarları</h1>
+                  <h1 className="text-xl font-black text-text-main">{t("seller.settings.title")}</h1>
                   <span className="text-xs text-text-muted">
-                    İletişim bilgileri, kargo kuralları ve iade politikalarınızı güncelleyin.
+                    {t("seller.settings.subtitle")}
                   </span>
                 </div>
               </div>
@@ -58,12 +60,12 @@ export default function SellerSettingsPage() {
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
                 <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
                   <Store className="w-4 h-4 text-primary" />
-                  <span>Mağaza Kimliği & İletişim</span>
+                  <span>{t("seller.settings.sectionIdentity")}</span>
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="flex flex-col gap-1 sm:col-span-2">
-                    <label className="font-bold text-text-muted">Mağaza Adı:</label>
+                    <label className="font-bold text-text-muted">{t("seller.settings.storeName")}</label>
                     <input
                       type="text"
                       value={storeName}
@@ -73,7 +75,7 @@ export default function SellerSettingsPage() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">İletişim Telefonu:</label>
+                    <label className="font-bold text-text-muted">{t("seller.settings.phone")}</label>
                     <input
                       type="tel"
                       value={phone}
@@ -83,7 +85,7 @@ export default function SellerSettingsPage() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">E-posta Adresi:</label>
+                    <label className="font-bold text-text-muted">{t("seller.settings.email")}</label>
                     <input
                       type="email"
                       value={email}
@@ -98,12 +100,12 @@ export default function SellerSettingsPage() {
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
                 <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
                   <Truck className="w-4 h-4 text-primary" />
-                  <span>Kargo Kuralları</span>
+                  <span>{t("seller.settings.sectionShipping")}</span>
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">Ücretsiz Kargo Limiti (TRY ₺):</label>
+                    <label className="font-bold text-text-muted">{t("seller.settings.freeShippingThreshold")}</label>
                     <input
                       type="number"
                       value={freeShipThreshold}
@@ -113,7 +115,7 @@ export default function SellerSettingsPage() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">Kargoya Veriliş Süresi (Gün):</label>
+                    <label className="font-bold text-text-muted">{t("seller.settings.handlingDays")}</label>
                     <input
                       type="number"
                       value={handlingDays}
@@ -127,7 +129,7 @@ export default function SellerSettingsPage() {
               <div className="flex justify-end">
                 <Button variant="primary" size="md" type="submit" className="font-bold px-8 bg-emerald-600 hover:bg-emerald-700 shadow-md">
                   <Save className="w-4 h-4 mr-1.5" />
-                  <span>Ayarları Kaydet</span>
+                  <span>{t("seller.settings.saveSettings")}</span>
                 </Button>
               </div>
             </form>

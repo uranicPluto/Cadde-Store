@@ -10,10 +10,10 @@ import { getSavedOrders } from "@/lib/orders/order-utils";
 import { OrderRecord } from "@/lib/orders/order-types";
 import { formatCurrency } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { ShoppingCart, DollarSign, Package, Users, TrendingUp, AlertTriangle, ArrowRight, Star } from "lucide-react";
+import { ShoppingCart, DollarSign, Package, AlertTriangle, ArrowRight, Star } from "lucide-react";
 
 export default function SellerDashboardOverviewPage() {
-  const { language, currency } = useLanguage();
+  const { currency, t } = useLanguage();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
 
   useEffect(() => {
@@ -37,11 +37,11 @@ export default function SellerDashboardOverviewPage() {
             <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
-                  Satıcı Yönetim Paneli
+                  {t("seller.dashboard.bannerTag")}
                 </span>
                 <h1 className="text-xl sm:text-2xl font-black">Trend Fashion Mağazası</h1>
                 <span className="text-xs text-slate-300">
-                  Bugünün sipariş ve performans özetini buradan takip edin.
+                  {t("seller.dashboard.bannerSubtitle")}
                 </span>
               </div>
 
@@ -50,7 +50,7 @@ export default function SellerDashboardOverviewPage() {
                   href="/seller/dashboard/products/new"
                   className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-extrabold rounded-lg shadow-xs transition-colors"
                 >
-                  + Yeni Ürün Ekle
+                  {t("seller.dashboard.addProductCta")}
                 </Link>
               </div>
             </div>
@@ -58,7 +58,7 @@ export default function SellerDashboardOverviewPage() {
             {/* Metric Summary Stat Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <SellerStatCard
-                title="Toplam Ciro"
+                title={t("seller.dashboard.statTotalSales")}
                 value={formatCurrency(totalSales, currency)}
                 change="+18.4%"
                 isPositive={true}
@@ -66,7 +66,7 @@ export default function SellerDashboardOverviewPage() {
                 iconBgColor="bg-emerald-100 text-emerald-600"
               />
               <SellerStatCard
-                title="Siparişler"
+                title={t("seller.dashboard.statOrders")}
                 value={orders.length + 140}
                 change="+12.2%"
                 isPositive={true}
@@ -74,17 +74,17 @@ export default function SellerDashboardOverviewPage() {
                 iconBgColor="bg-indigo-100 text-indigo-600"
               />
               <SellerStatCard
-                title="Aktif Ürünler"
+                title={t("seller.dashboard.statActiveProducts")}
                 value={32}
-                change="+4 Yeni"
+                change="+4"
                 isPositive={true}
                 icon={Package}
                 iconBgColor="bg-amber-100 text-amber-600"
               />
               <SellerStatCard
-                title="Mağaza Puanı"
+                title={t("seller.dashboard.statStoreRating")}
                 value="4.9 ★"
-                change="99% Memnuniyet"
+                change={t("seller.dashboard.satisfactionRate")}
                 isPositive={true}
                 icon={Star}
                 iconBgColor="bg-purple-100 text-purple-600"
@@ -97,10 +97,10 @@ export default function SellerDashboardOverviewPage() {
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2">
                     <ShoppingCart className="w-4 h-4 text-primary" />
-                    <span>Son Mağaza Siparişleri</span>
+                    <span>{t("seller.dashboard.recentOrdersTitle")}</span>
                   </h2>
                   <Link href="/seller/dashboard/orders" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                    <span>Tümünü Gör</span>
+                    <span>{t("seller.dashboard.seeAll")}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -113,8 +113,8 @@ export default function SellerDashboardOverviewPage() {
                         <span className="text-[11px] text-text-muted">{ord.customerInfo.firstName} {ord.customerInfo.lastName}</span>
                       </div>
                       <span className="font-extrabold text-primary">{formatCurrency(ord.calculation.grandTotal, currency)}</span>
-                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-extrabold">
-                        {ord.status.toUpperCase()}
+                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
+                        {ord.status}
                       </span>
                     </div>
                   ))}
@@ -125,16 +125,18 @@ export default function SellerDashboardOverviewPage() {
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
                 <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  <span>Kritik Stok Uyarısı</span>
+                  <span>{t("seller.dashboard.criticalStockTitle")}</span>
                 </h2>
 
                 <div className="flex flex-col gap-3 text-xs">
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="font-bold text-amber-900">Siyah Oversize Tişört</span>
-                      <span className="text-[10px] text-amber-700">Son 5 adet kaldı</span>
+                      <span className="text-[10px] text-amber-700">{t("seller.dashboard.lastItemsLeft")}</span>
                     </div>
-                    <Link href="/seller/dashboard/products" className="text-[11px] font-extrabold text-primary underline">Stok Ekle</Link>
+                    <Link href="/seller/dashboard/products" className="text-[11px] font-extrabold text-primary underline">
+                      {t("seller.dashboard.addStock")}
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -17,7 +17,7 @@ export default function EditSellerProductPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [product, setProduct] = useState<DetailedProductMock | null>(null);
 
   useEffect(() => {
@@ -53,6 +53,8 @@ export default function EditSellerProductPage() {
 
   if (!product) return null;
 
+  const titleText = t("seller.productForm.editTitle").replace("{name}", product.name);
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
       <SellerHeader />
@@ -70,9 +72,9 @@ export default function EditSellerProductPage() {
                   <Edit2 className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-black text-text-main">Ürün Düzenle: {product.name}</h1>
+                  <h1 className="text-xl font-black text-text-main">{titleText}</h1>
                   <span className="text-xs text-text-muted">
-                    Fiyat, stok, görsel veya varyant bilgilerini güncelleyin.
+                    {t("seller.productForm.editSubtitle")}
                   </span>
                 </div>
               </div>

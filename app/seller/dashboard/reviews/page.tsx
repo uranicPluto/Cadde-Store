@@ -7,12 +7,14 @@ import { getSellerBySlug } from "@/lib/sellers/seller-repository";
 import { SellerReview } from "@/lib/sellers/seller-types";
 import { Rating } from "@/components/ui/rating";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/i18n/language-context";
 import { Star, MessageSquare, Send } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
 const SELLER_REVIEWS_KEY = "cadde-store-seller-reviews";
 
 export default function SellerReviewsPage() {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState<SellerReview[]>([]);
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -44,6 +46,8 @@ export default function SellerReviewsPage() {
     } catch (e) {}
   };
 
+  const countBadgeText = t("seller.reviews.countBadge").replace("{count}", String(reviews.length));
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
       <SellerHeader />
@@ -62,13 +66,13 @@ export default function SellerReviewsPage() {
                 </div>
                 <div className="flex flex-col">
                   <h1 className="text-xl font-black text-text-main flex items-center gap-2">
-                    <span>Müşteri Değerlendirmeleri</span>
+                    <span>{t("seller.reviews.title")}</span>
                     <span className="text-xs bg-purple-600 text-white font-extrabold px-2 py-0.5 rounded-full">
-                      {reviews.length} Yorum
+                      {countBadgeText}
                     </span>
                   </h1>
                   <span className="text-xs text-text-muted">
-                    Müşterilerinizin ürünlerinize yazdığı yorumları yanıtlayın.
+                    {t("seller.reviews.subtitle")}
                   </span>
                 </div>
               </div>
@@ -93,7 +97,9 @@ export default function SellerReviewsPage() {
                   {/* Existing Reply or Reply Box */}
                   {rev.reply ? (
                     <div className="mt-2 p-3 bg-primary-light/30 border border-primary/20 rounded-xl text-xs flex flex-col gap-1">
-                      <span className="font-extrabold text-primary">Yanıtınız ({rev.replyDate}):</span>
+                      <span className="font-extrabold text-primary">
+                        {t("seller.reviews.yourReply").replace("{date}", rev.replyDate || "")}
+                      </span>
                       <p className="text-slate-800 font-medium">{rev.reply}</p>
                     </div>
                   ) : (
@@ -103,16 +109,16 @@ export default function SellerReviewsPage() {
                           <textarea
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
-                            placeholder="Müşterinize vereceğiniz nazik yanıtı buraya yazınız..."
+                            placeholder={t("seller.reviews.placeholderReply")}
                             className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-primary focus:bg-white min-h-[70px]"
                           />
                           <div className="flex items-center justify-end gap-2">
                             <Button variant="outline" size="sm" onClick={() => setReplyingId(null)}>
-                              İptal
+                              {t("seller.reviews.cancel")}
                             </Button>
                             <Button variant="primary" size="sm" onClick={() => handleSendReply(rev.id)} className="font-bold">
                               <Send className="w-3.5 h-3.5 mr-1" />
-                              <span>Yanıtı Gönder</span>
+                              <span>{t("seller.reviews.sendReply")}</span>
                             </Button>
                           </div>
                         </div>
@@ -123,7 +129,7 @@ export default function SellerReviewsPage() {
                           className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
-                          <span>Bu Yorumu Yanıtla</span>
+                          <span>{t("seller.reviews.replyToThis")}</span>
                         </button>
                       )}
                     </div>
