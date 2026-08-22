@@ -10,10 +10,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
       if (saved) {
@@ -34,6 +33,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
   };
+
+  const openCartDrawer = () => setIsOpen(true);
+  const closeCartDrawer = () => setIsOpen(false);
 
   const addToCart = (
     product: DetailedProductMock,
@@ -62,6 +64,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ];
     }
     saveCart(updated);
+    // Auto-open right slide-out cart drawer on product add (Matches User Request)
+    setIsOpen(true);
   };
 
   const removeFromCart = (id: string) => {
@@ -98,6 +102,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeFromCart,
         updateQuantity,
         clearCart,
+        isOpen,
+        openCartDrawer,
+        closeCartDrawer,
         totalCount,
         subtotal,
         discount,

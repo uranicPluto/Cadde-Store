@@ -14,6 +14,9 @@ export interface CartContextType {
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  isOpen: boolean;
+  openCartDrawer: () => void;
+  closeCartDrawer: () => void;
   totalCount: number;
   subtotal: number;
   discount: number;

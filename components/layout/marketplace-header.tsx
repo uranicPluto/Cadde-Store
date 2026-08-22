@@ -3,6 +3,7 @@ import { TopUtilityBar } from "@/components/layout/top-utility-bar";
 import { MainHeader } from "@/components/layout/main-header";
 import { CategoryNavigation } from "@/components/layout/category-navigation";
 import { MobileHeader } from "@/components/layout/mobile-header";
+import { RightCartDrawer } from "@/components/layout/right-cart-drawer";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart/cart-context";
 import { useFavorites } from "@/lib/favorites/favorites-context";
@@ -68,6 +69,9 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
         favoriteCount={activeFavCount}
         cartCount={activeCartCount}
       />
+
+      {/* Slide-out Right Cart Drawer (Matches Screenshot 3) */}
+      <RightCartDrawer />
     </header>
   );
 };
