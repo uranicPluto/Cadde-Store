@@ -37,6 +37,7 @@ export default function CategoryPage() {
   const handleFilterChange = (f: FilterState) => {
     setFilterCriteria({
       categories: f.categories,
+      subcategories: f.subcategories,
       brands: f.brands,
       minPrice: f.minPrice ? parseFloat(f.minPrice) : undefined,
       maxPrice: f.maxPrice ? parseFloat(f.maxPrice) : undefined,
@@ -45,6 +46,7 @@ export default function CategoryPage() {
       freeShippingOnly: f.freeShippingOnly,
       selectedSizes: f.selectedSizes,
       selectedColors: f.selectedColors,
+      selectedMaterials: f.selectedMaterials,
     });
   };
 
@@ -96,9 +98,9 @@ export default function CategoryPage() {
 
         {/* Controls & Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Desktop Filter Sidebar (3 Cols) */}
+          {/* Desktop Filter Sidebar (3 Cols) with Category-Specific Configuration */}
           <div className="hidden lg:block lg:col-span-3 sticky top-24">
-            <FilterSidebar onFilterChange={handleFilterChange} />
+            <FilterSidebar categorySlug={slug} onFilterChange={handleFilterChange} />
           </div>
 
           {/* Main Product Listing Area (9 Cols) */}
@@ -158,7 +160,7 @@ export default function CategoryPage() {
         position="bottom"
         title={t("filters.mobileFilterTitle")}
       >
-        <FilterSidebar onFilterChange={handleFilterChange} />
+        <FilterSidebar categorySlug={slug} onFilterChange={handleFilterChange} />
       </Drawer>
 
       <Footer />
