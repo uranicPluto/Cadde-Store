@@ -33,7 +33,7 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
     <div className={cn("relative w-full bg-white border-b border-slate-200 shadow-2xs z-30", className)} ref={containerRef}>
       <div className="max-w-wide mx-auto px-4 sm:px-6">
         <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
-          {/* Competitor Screenshot Feature: ☰ Categories NEW Pill Button */}
+          {/* Competitor Screenshot Feature: ☰ Categories NEW Button with Dropdown Indicator */}
           <div
             onMouseEnter={() => setActiveCategory(activeCategories[0])}
             className="relative shrink-0 flex items-center pr-2 border-r border-slate-200"
@@ -47,10 +47,11 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
               <span className="bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">
                 NEW
               </span>
+              <ChevronDown className={cn("w-3.5 h-3.5 text-slate-500 transition-transform ml-0.5", activeCategory && "rotate-180")} />
             </button>
           </div>
 
-          {/* Individual Category Tabs (Matches User Screenshot Layout) */}
+          {/* Clean Individual Category Tabs Without Dropdown Arrows (Matches User Request) */}
           {activeCategories.map((cat) => {
             const isActive = activeCategory?.id === cat.id;
             const categoryName = t(`categories.${cat.slug}`) || cat.name;
@@ -79,8 +80,6 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
                       NEW
                     </span>
                   )}
-
-                  <ChevronDown className={cn("w-3 h-3 text-slate-400 transition-transform", isActive && "rotate-180")} />
                 </Link>
               </div>
             );
