@@ -4,6 +4,16 @@ import { getSession } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
+export interface ValidatedOrderItem {
+  productId: string;
+  name: string;
+  sellerId: string;
+  price: number;
+  quantity: number;
+  selectedColor?: string;
+  selectedSize?: string;
+}
+
 export async function GET() {
   try {
     const session = await getSession();
@@ -35,7 +45,7 @@ export async function GET() {
     return NextResponse.json({ orders });
   } catch (error) {
     console.error("GET Orders API Error:", error);
-    return NextResponse.json({ error: "Siparişler getirilemedi." }, { status: 500 });
+    return NextResponse.json({ error: "Siparişler getirilemedi.", code: "ORDERS_FETCH_ERROR" }, { status: 500 });
   }
 }
 
@@ -46,10 +56,27 @@ export async function POST(request: Request) {
     const { items, couponCode, shippingAddress, customerInfo } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0 || !shippingAddress) {
-      return NextResponse.json({ error: "Geçersiz sipariş verileri." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Geçersiz sipariş verileri.", code: "ORDER_VALIDATION_ERROR" },
+        { status: 400 }
+      );
     }
 
-    // 1. Resolve Customer ID (Guest support preserved)
+    // 1. Quantity Validation (Fix 1)
+    for (const item of items) {
+      const qty = Number(item.quantity);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 99) {
+        return NextResponse.json(
+          {
+            error: `"${item.product?.name || item.name || 'Ürün'}" için geçersiz adet (${item.quantity}). Adet 1 ile 99 arasında tam sayı olmalıdır.`,
+            code: "INVALID_QUANTITY",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 2. Resolve Customer ID (Guest support preserved)
     let customerId = session?.id;
     if (!customerId) {
       const guestEmail = customerInfo?.email || `guest-${Date.now()}@cadde.store`;
@@ -67,19 +94,14 @@ export async function POST(request: Request) {
       customerId = guestUser.id;
     }
 
-    // 2. Database-Authoritative Product Resolution & Server-Side Price / Stock Recalculation
+    // 3. Initial Product & Price Resolution from DB (Fix 5 & Fix 10)
     let serverSubtotal = 0;
-    const validatedItems: {
-      dbProd: any;
-      quantity: number;
-      price: number;
-      selectedColor?: string;
-      selectedSize?: string;
-    }[] = [];
+    const validatedItems: ValidatedOrderItem[] = [];
 
     for (const item of items) {
       const productId = typeof item.product === "object" ? item.product?.id : item.productId || item.id;
       const productSlug = typeof item.product === "object" ? item.product?.slug : undefined;
+      const requestedQty = Number(item.quantity);
 
       const dbProd = await prisma.product.findFirst({
         where: {
@@ -91,64 +113,146 @@ export async function POST(request: Request) {
         include: { seller: true },
       });
 
-      // Strict Validation: Product MUST exist in DB with ACTIVE status. No fallback product/seller/category creation!
       if (!dbProd || dbProd.status !== "ACTIVE" || !dbProd.seller) {
         return NextResponse.json(
-          { error: `"${item.product?.name || item.name || 'Seçilen ürün'}" mevcut değildir veya artık satışta bulunmamaktadır.` },
+          {
+            error: `"${item.product?.name || item.name || 'Seçilen ürün'}" mevcut değildir veya artık satışta bulunmamaktadır.`,
+            code: "PRODUCT_UNAVAILABLE",
+          },
           { status: 400 }
         );
       }
 
-      if (dbProd.stock < item.quantity) {
+      if (dbProd.stock < requestedQty) {
         return NextResponse.json(
-          { error: `"${dbProd.name}" için yetersiz stok! Mevcut stok: ${dbProd.stock} adet.` },
+          {
+            error: `"${dbProd.name}" için yetersiz stok! Mevcut stok: ${dbProd.stock} adet.`,
+            code: "INSUFFICIENT_STOCK",
+          },
           { status: 400 }
         );
       }
 
-      // Authoritative DB Price
       const price = dbProd.price;
-      serverSubtotal += price * item.quantity;
+      serverSubtotal += price * requestedQty;
 
       validatedItems.push({
-        dbProd,
-        quantity: item.quantity,
+        productId: dbProd.id,
+        name: dbProd.name,
+        sellerId: dbProd.sellerId,
         price,
+        quantity: requestedQty,
         selectedColor: item.selectedColor,
         selectedSize: item.selectedSize,
       });
     }
 
-    // 3. Server-side Coupon Validation
+    // 4. Server-Side Coupon Verification (Fix 3 & Fix 4)
     let couponDiscount = 0;
     let validCouponId: string | null = null;
+    let validCouponCode: string | null = null;
 
     if (couponCode) {
+      const formattedCode = String(couponCode).toUpperCase().trim();
       const coupon = await prisma.coupon.findUnique({
-        where: { code: String(couponCode).toUpperCase().trim() },
+        where: { code: formattedCode },
       });
 
-      if (coupon && coupon.active && (!coupon.expiresAt || new Date(coupon.expiresAt) > new Date())) {
-        if (!coupon.minimumOrder || serverSubtotal >= coupon.minimumOrder) {
-          validCouponId = coupon.id;
-          if (coupon.type === "PERCENTAGE") {
-            couponDiscount = (serverSubtotal * coupon.value) / 100;
-            if (coupon.maximumDiscount && couponDiscount > coupon.maximumDiscount) {
-              couponDiscount = coupon.maximumDiscount;
-            }
-          } else if (coupon.type === "FIXED" || coupon.type === "FREE_SHIPPING") {
-            couponDiscount = coupon.value;
-          }
+      if (!coupon || !coupon.active) {
+        return NextResponse.json(
+          { error: "Geçersiz veya pasif kupon kodu.", code: "COUPON_INVALID" },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+        return NextResponse.json(
+          { error: "Bu kupon kodunun kullanım süresi dolmuştur.", code: "COUPON_EXPIRED" },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.minimumOrder && serverSubtotal < coupon.minimumOrder) {
+        return NextResponse.json(
+          {
+            error: `Bu kupon en az ${coupon.minimumOrder} ₺ tutarındaki sepetlerde geçerlidir.`,
+            code: "COUPON_MINIMUM_ORDER_NOT_MET",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
+        return NextResponse.json(
+          { error: "Bu kuponun toplam kullanım limiti dolmuştur.", code: "COUPON_USAGE_LIMIT" },
+          { status: 400 }
+        );
+      }
+
+      // Pre-check customer redemption uniqueness
+      const existingRedemption = await prisma.couponRedemption.findFirst({
+        where: { couponId: coupon.id, userId: customerId },
+      });
+      if (existingRedemption) {
+        return NextResponse.json(
+          { error: "Bu kuponu daha önce kullandınız.", code: "COUPON_ALREADY_REDEEMED" },
+          { status: 400 }
+        );
+      }
+
+      validCouponId = coupon.id;
+      validCouponCode = coupon.code;
+
+      if (coupon.type === "PERCENTAGE") {
+        couponDiscount = (serverSubtotal * coupon.value) / 100;
+        if (coupon.maximumDiscount && couponDiscount > coupon.maximumDiscount) {
+          couponDiscount = coupon.maximumDiscount;
         }
+      } else if (coupon.type === "FIXED" || coupon.type === "FREE_SHIPPING") {
+        couponDiscount = coupon.value;
       }
     }
 
-    const shippingFee = serverSubtotal >= 200 ? 0 : 34.9;
+    // 5. Database Platform Settings Shipping Calculation (Fix 6)
+    let settings = await prisma.platformSettings.findUnique({ where: { id: "default" } });
+    if (!settings) {
+      settings = {
+        id: "default",
+        marketplaceName: "Cadde Store Türkiye",
+        supportEmail: "destek@cadde.store",
+        defaultCommissionRate: 10.0,
+        orderCancellationWindowDays: 2,
+        returnWindowDays: 14,
+        defaultShippingFee: 34.9,
+        freeShippingThreshold: 200.0,
+        updatedAt: new Date(),
+      };
+    }
+
+    const shippingFee = serverSubtotal >= settings.freeShippingThreshold ? 0 : settings.defaultShippingFee;
     const grandTotal = Math.max(0, serverSubtotal - couponDiscount + shippingFee);
     const orderNumber = `CS-${Date.now().toString().slice(-6)}`;
 
-    // 4. Atomic Prisma Transaction: Create Order, OrderGroups, OrderItems, Redemptions & Decrement Stock
+    // 6. Atomic Prisma Transaction (Fix 2 & Fix 8)
     const result = await prisma.$transaction(async (tx) => {
+      // Re-verify Atomic Stock & Perform Conditional Atomic Decrement
+      for (const item of validatedItems) {
+        const updated = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            status: "ACTIVE",
+            stock: { gte: item.quantity },
+          },
+          data: {
+            stock: { decrement: item.quantity },
+          },
+        });
+
+        if (updated.count === 0) {
+          throw new Error(`INSUFFICIENT_STOCK:${item.name}`);
+        }
+      }
+
       // Create root Order
       const order = await tx.order.create({
         data: {
@@ -165,21 +269,20 @@ export async function POST(request: Request) {
           statusHistory: {
             create: {
               status: "CONFIRMED",
-              note: "Sipariş veritabanı ürünleri ile doğrulandı ve onaylandı.",
+              note: "Sipariş veritabanı stok ve güvenlik kontrolleri ile onaylandı.",
             },
           },
         },
       });
 
-      // Group items by Seller ID derived directly from database Product relation
-      const itemsBySeller: Record<string, typeof validatedItems> = {};
+      // Group items by Seller ID
+      const itemsBySeller: Record<string, ValidatedOrderItem[]> = {};
       for (const item of validatedItems) {
-        const sellerId = item.dbProd.sellerId;
-        if (!itemsBySeller[sellerId]) itemsBySeller[sellerId] = [];
-        itemsBySeller[sellerId].push(item);
+        if (!itemsBySeller[item.sellerId]) itemsBySeller[item.sellerId] = [];
+        itemsBySeller[item.sellerId].push(item);
       }
 
-      // Create OrderGroups, OrderItems, and Decrement Stock for valid merchants
+      // Create OrderGroups & OrderItems
       for (const sellerId of Object.keys(itemsBySeller)) {
         const groupItems = itemsBySeller[sellerId];
         const groupSubtotal = groupItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -198,24 +301,26 @@ export async function POST(request: Request) {
             data: {
               orderId: order.id,
               orderGroupId: orderGroup.id,
-              productId: item.dbProd.id,
+              productId: item.productId,
               quantity: item.quantity,
               price: item.price,
               selectedColor: item.selectedColor || null,
               selectedSize: item.selectedSize || null,
             },
           });
-
-          // Decrement Stock
-          await tx.product.update({
-            where: { id: item.dbProd.id },
-            data: { stock: { decrement: item.quantity } },
-          });
         }
       }
 
-      // Record Coupon Redemption if applicable
+      // Record Coupon Redemption & Increment Usage Count
       if (validCouponId) {
+        const duplicateInTx = await tx.couponRedemption.findFirst({
+          where: { couponId: validCouponId, userId: customerId! },
+        });
+
+        if (duplicateInTx) {
+          throw new Error(`COUPON_ALREADY_REDEEMED:${validCouponCode}`);
+        }
+
         await tx.couponRedemption.create({
           data: {
             couponId: validCouponId,
@@ -223,6 +328,7 @@ export async function POST(request: Request) {
             orderId: order.id,
           },
         });
+
         await tx.coupon.update({
           where: { id: validCouponId },
           data: { usageCount: { increment: 1 } },
@@ -242,8 +348,34 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, order: completeOrder });
-  } catch (error) {
+  } catch (error: any) {
     console.error("POST Order API Error:", error);
-    return NextResponse.json({ error: "Sipariş işlenirken bir sunucu hatası oluştu." }, { status: 500 });
+
+    const errorMsg = error?.message || "";
+    if (errorMsg.startsWith("INSUFFICIENT_STOCK:")) {
+      const prodName = errorMsg.split("INSUFFICIENT_STOCK:")[1] || "Ürün";
+      return NextResponse.json(
+        {
+          error: `"${prodName}" için anlık yetersiz stok! Siparişiniz iptal edildi.`,
+          code: "INSUFFICIENT_STOCK",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (errorMsg.startsWith("COUPON_ALREADY_REDEEMED:")) {
+      return NextResponse.json(
+        {
+          error: "Bu kuponu daha önce kullandınız.",
+          code: "COUPON_ALREADY_REDEEMED",
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Sipariş işlenirken bir sunucu hatası oluştu.", code: "TRANSACTION_FAILED" },
+      { status: 500 }
+    );
   }
 }

@@ -213,6 +213,8 @@ model CouponRedemption {
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@unique([couponId, userId])
 }
 
 model Review {
