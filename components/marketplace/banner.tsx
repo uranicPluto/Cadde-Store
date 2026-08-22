@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { BannerMock } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,12 +19,15 @@ export const Banner: React.FC<BannerProps> = ({
   onCtaClick,
   className,
 }) => {
+  const targetLink = (banner as any).targetUrl || "/category/women";
+
   if (variant === "small") {
     return (
-      <div
+      <Link
+        href={targetLink}
         onClick={onCtaClick}
         className={cn(
-          "relative rounded-lg overflow-hidden p-4 bg-gradient-to-r text-white flex items-center justify-between cursor-pointer hover:opacity-95 transition-opacity shadow-sm",
+          "relative rounded-lg overflow-hidden p-4 bg-gradient-to-r text-white flex items-center justify-between cursor-pointer hover:opacity-95 transition-opacity shadow-sm block",
           banner.bgGradient,
           className
         )}
@@ -38,7 +42,7 @@ export const Banner: React.FC<BannerProps> = ({
           <p className="text-xs text-white/90">{banner.subtitle}</p>
         </div>
         <ArrowRight className="w-5 h-5 text-white shrink-0 z-10" />
-      </div>
+      </Link>
     );
   }
 
@@ -70,15 +74,17 @@ export const Banner: React.FC<BannerProps> = ({
         <p className="text-sm md:text-base text-white/90 leading-relaxed">
           {banner.subtitle}
         </p>
-        <Button
-          variant="primary"
-          size="md"
-          onClick={onCtaClick}
-          className="bg-white text-text-main hover:bg-slate-100 border-0 font-bold shadow-md mt-2"
-        >
-          <span>{banner.ctaText}</span>
-          <ArrowRight className="w-4 h-4 text-primary" />
-        </Button>
+        <Link href={targetLink}>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={onCtaClick}
+            className="bg-white text-text-main hover:bg-slate-100 border-0 font-bold shadow-md mt-2"
+          >
+            <span>{banner.ctaText}</span>
+            <ArrowRight className="w-4 h-4 text-primary" />
+          </Button>
+        </Link>
       </div>
 
       {/* Right Side Visual Highlight */}

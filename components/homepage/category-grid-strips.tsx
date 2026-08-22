@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { getMockCategories } from "@/lib/mock-data";
 import { Shirt, User, Footprints, Smartphone, Home, Sparkles, Activity, ShoppingBag, ArrowRight } from "lucide-react";
@@ -18,6 +19,17 @@ export const CategoryGridStrips: React.FC = () => {
     ShoppingBag: <ShoppingBag className="w-5 h-5 text-orange-500" />,
   };
 
+  const categorySlugs: Record<string, string> = {
+    c1: "women",
+    c2: "men",
+    c3: "shoes",
+    c4: "electronics",
+    c5: "home",
+    c6: "cosmetics",
+    c7: "sports",
+    c8: "supermarket",
+  };
+
   return (
     <section className="w-full bg-white py-8 border-b border-slate-200">
       <div className="max-w-wide mx-auto px-4 sm:px-6 flex flex-col gap-6">
@@ -25,17 +37,17 @@ export const CategoryGridStrips: React.FC = () => {
           <h2 className="text-xl font-bold text-text-main tracking-tight">
             {t("homepage.categoryStripsTitle")}
           </h2>
-          <a href="#" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+          <Link href="/category/women" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
             <span>{t("homepage.viewAll")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
           {categories.map((c) => (
-            <a
+            <Link
               key={c.id}
-              href="#"
+              href={`/category/${categorySlugs[c.id] || "women"}`}
               className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200/80 rounded-xl hover:border-primary hover:bg-primary-light/30 transition-all text-center gap-2 group shadow-2xs"
             >
               <div className="w-12 h-12 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -44,7 +56,7 @@ export const CategoryGridStrips: React.FC = () => {
               <span className="text-xs font-bold text-text-main group-hover:text-primary transition-colors line-clamp-1">
                 {c.name}
               </span>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

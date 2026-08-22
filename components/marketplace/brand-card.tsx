@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { BrandMock } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +11,8 @@ export interface BrandCardProps {
 
 export const BrandCard: React.FC<BrandCardProps> = ({ brand, onClick, className }) => {
   return (
-    <div
+    <Link
+      href={`/search?q=${encodeURIComponent(brand.name)}`}
       onClick={() => onClick?.(brand)}
       className={cn(
         "group relative bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-center justify-between text-center gap-2 cursor-pointer transition-all duration-200 hover:border-primary hover:shadow-md select-none",
@@ -35,6 +37,6 @@ export const BrandCard: React.FC<BrandCardProps> = ({ brand, onClick, className 
           </span>
         )}
       </div>
-    </div>
+    </Link>
   );
 };

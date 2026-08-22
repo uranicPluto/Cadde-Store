@@ -1,7 +1,8 @@
 import React from "react";
+import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { cn } from "@/lib/utils";
-import { ShieldCheck, Truck, Lock, Headset, Smartphone, Store, Globe } from "lucide-react";
+import { ShieldCheck, Truck, Lock, Headset, Store } from "lucide-react";
 
 export interface FooterProps {
   className?: string;
@@ -71,9 +72,9 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
             {t("footer.aboutCompany")}
           </p>
           <div className="flex items-center gap-3 pt-2">
-            <a href="#" className="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-400 hover:bg-amber-400/20 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">
+            <Link href="/seller" className="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-400 hover:bg-amber-400/20 px-3 py-1.5 rounded-md font-bold text-xs transition-colors">
               <Store className="w-4 h-4" /> {t("footer.becomeSeller")}
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -81,10 +82,10 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
         <div className="flex flex-col gap-3">
           <h4 className="font-bold text-white uppercase text-xs tracking-wider">{t("footer.caddeStoreGroup")}</h4>
           <ul className="flex flex-col gap-2 text-slate-400">
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.aboutUs")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.careers")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.corporate")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.press")}</a></li>
+            <li><Link href="/about" className="hover:text-white transition-colors">{t("footer.aboutUs")}</Link></li>
+            <li><Link href="/about" className="hover:text-white transition-colors">{t("footer.careers")}</Link></li>
+            <li><Link href="/about" className="hover:text-white transition-colors">{t("footer.corporate")}</Link></li>
+            <li><Link href="/about" className="hover:text-white transition-colors">{t("footer.press")}</Link></li>
           </ul>
         </div>
 
@@ -92,22 +93,22 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
         <div className="flex flex-col gap-3">
           <h4 className="font-bold text-white uppercase text-xs tracking-wider">{t("footer.customerServiceGroup")}</h4>
           <ul className="flex flex-col gap-2 text-slate-400">
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.helpFaq")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.orderTracking")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.returns")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.shippingInfo")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.liveSupport")}</a></li>
+            <li><Link href="/help" className="hover:text-white transition-colors">{t("footer.helpFaq")}</Link></li>
+            <li><Link href="/account/orders" className="hover:text-white transition-colors">{t("footer.orderTracking")}</Link></li>
+            <li><Link href="/returns" className="hover:text-white transition-colors">{t("footer.returns")}</Link></li>
+            <li><Link href="/shipping" className="hover:text-white transition-colors">{t("footer.shippingInfo")}</Link></li>
+            <li><Link href="/help" className="hover:text-white transition-colors">{t("footer.liveSupport")}</Link></li>
           </ul>
         </div>
 
-        {/* Col 4: For Sellers & Popular Categories */}
+        {/* Col 4: For Sellers */}
         <div className="flex flex-col gap-3">
           <h4 className="font-bold text-white uppercase text-xs tracking-wider">{t("footer.sellerGroup")}</h4>
           <ul className="flex flex-col gap-2 text-slate-400">
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.becomeSeller")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.sellerLogin")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.commissionRates")}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t("footer.fulfillment")}</a></li>
+            <li><Link href="/seller" className="hover:text-white transition-colors">{t("footer.becomeSeller")}</Link></li>
+            <li><Link href="/seller" className="hover:text-white transition-colors">{t("footer.sellerLogin")}</Link></li>
+            <li><Link href="/seller" className="hover:text-white transition-colors">{t("footer.commissionRates")}</Link></li>
+            <li><Link href="/seller" className="hover:text-white transition-colors">{t("footer.fulfillment")}</Link></li>
           </ul>
         </div>
       </div>
@@ -137,10 +138,9 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
         <div className="max-w-wide mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <span>{t("footer.copyright")}</span>
           <div className="flex items-center gap-4">
-            <a href="#" className="hover:text-white transition-colors">{t("footer.termsOfUse")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("footer.privacyPolicy")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("footer.kvkk")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("footer.cookieSettings")}</a>
+            <Link href="/terms" className="hover:text-white transition-colors">{t("footer.termsOfUse")}</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">{t("footer.privacyPolicy")}</Link>
+            <Link href="/kvkk" className="hover:text-white transition-colors">{t("footer.kvkk")}</Link>
           </div>
         </div>
       </div>
