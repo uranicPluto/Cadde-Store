@@ -43,7 +43,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ orders });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("GET Orders API Error:", error);
     return NextResponse.json({ error: "Siparişler getirilemedi.", code: "ORDERS_FETCH_ERROR" }, { status: 500 });
   }
@@ -348,10 +348,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, order: completeOrder });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST Order API Error:", error);
 
-    const errorMsg = error?.message || "";
+    const errorMsg = error instanceof Error ? error.message : String(error || "");
     if (errorMsg.startsWith("INSUFFICIENT_STOCK:")) {
       const prodName = errorMsg.split("INSUFFICIENT_STOCK:")[1] || "Ürün";
       return NextResponse.json(
