@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { Footer } from "@/components/layout/footer";
-import { getCategoryBySlug } from "@/lib/catalog/category-repository";
+import { getCategoryBySlug, isCategorySlugMatch } from "@/lib/catalog/category-repository";
 import { getFullCatalog } from "@/lib/catalog/product-repository";
 import { filterProducts, FilterCriteria } from "@/lib/catalog/filters";
 import { sortProducts, SortOption } from "@/lib/catalog/sorting";
@@ -26,8 +26,9 @@ export default function CategoryPage() {
   const categoryInfo = getCategoryBySlug(slug, language);
 
   const fullCatalog = getFullCatalog(language);
-  const categoryProducts = fullCatalog.filter((p) => p.categorySlug === slug);
-  const displayProducts = categoryProducts.length > 0 ? categoryProducts : fullCatalog;
+  
+  // STRICT CATEGORY FILTERING: Only include products that match this specific category
+  const categoryProducts = fullCatalog.filter((p) => isCategorySlugMatch(p.categorySlug, slug));
 
   const [sortOption, setSortOption] = useState<SortOption>("recommended");
   const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({});
@@ -47,7 +48,7 @@ export default function CategoryPage() {
     });
   };
 
-  const filtered = filterProducts(displayProducts, filterCriteria);
+  const filtered = filterProducts(categoryProducts, filterCriteria);
   const finalProducts = sortProducts(filtered, sortOption);
 
   return (
@@ -58,7 +59,7 @@ export default function CategoryPage() {
         {/* Breadcrumb Navigation */}
         <Breadcrumb
           items={[
-            { label: t("common.allProducts"), href: "/category/women" },
+            { label: t("common.allProducts"), href: "/category/kadin" },
             { label: categoryInfo?.name || slug },
           ]}
         />

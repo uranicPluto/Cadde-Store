@@ -16,11 +16,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   onSubmit,
 }) => {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isEn = language === "en";
 
   const [name, setName] = useState(initialProduct?.name || "");
   const [brand, setBrand] = useState(initialProduct?.brand || "Trend Fashion");
-  const [categorySlug, setCategorySlug] = useState(initialProduct?.categorySlug || "men");
+  const [categorySlug, setCategorySlug] = useState(initialProduct?.categorySlug || "kadin");
   const [price, setPrice] = useState(initialProduct?.price ? String(initialProduct.price) : "299.90");
   const [originalPrice, setOriginalPrice] = useState(initialProduct?.originalPrice ? String(initialProduct.originalPrice) : "399.90");
   const [stock, setStock] = useState(initialProduct?.stock ? String(initialProduct.stock) : "50");
@@ -30,6 +31,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [fastDelivery, setFastDelivery] = useState<boolean>(initialProduct?.badges?.fastDelivery ?? true);
   const [colorsText, setColorsText] = useState(initialProduct?.attributes?.color?.join(", ") || "Siyah, Beyaz, Mavi");
   const [sizesText, setSizesText] = useState(initialProduct?.attributes?.sizes?.join(", ") || "S, M, L, XL");
+
+  const categoryNamesMap: Record<string, { tr: string; en: string }> = {
+    kadin: { tr: "Kadın Giyim", en: "Women's Clothing" },
+    erkek: { tr: "Erkek Giyim", en: "Men's Clothing" },
+    cocuk: { tr: "Çocuk & Bebek", en: "Kids & Baby" },
+    elektronik: { tr: "Elektronik & Teknoloji", en: "Electronics & Tech" },
+    "ev-yasam": { tr: "Ev & Yaşam", en: "Home & Living" },
+    supermarket: { tr: "Süpermarket & Gıda", en: "Supermarket & Groceries" },
+    kozmetik: { tr: "Kozmetik & Kişisel Bakım", en: "Beauty & Personal Care" },
+    "ayakkabi-canta": { tr: "Ayakkabı & Çanta", en: "Shoes & Bags" },
+    spor: { tr: "Spor & Outdoor", en: "Sports & Outdoor" },
+    "kitap-kirtasiye": { tr: "Kitap & Hobi", en: "Books & Hobbies" },
+    "pet-shop": { tr: "Pet Shop", en: "Pet Shop" },
+    otomotiv: { tr: "Otomotiv Aksesuar", en: "Automotive Accessories" },
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,13 +59,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     const colors = colorsText.split(",").map((s) => s.trim()).filter(Boolean);
     const sizes = sizesText.split(",").map((s) => s.trim()).filter(Boolean);
 
+    const catMeta = categoryNamesMap[categorySlug] || { tr: categorySlug, en: categorySlug };
+
     const updatedProduct: DetailedProductMock = {
       id: initialProduct?.id || `sp-${Date.now()}`,
       slug,
       name,
       brand,
       categorySlug,
-      categoryName: categorySlug === "men" ? "Erkek Giyim" : categorySlug === "women" ? "Kadın Giyim" : "Elektronik",
+      categoryName: isEn ? catMeta.en : catMeta.tr,
       storeName: "Trend Fashion Mağazası",
       price: numPrice,
       originalPrice: numOrig,
@@ -64,7 +82,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       },
       attributes: { color: colors, sizes: sizes },
       description: description || name,
-      specifications: { "Kumaş Tipi": "%100 Pamuk", Menşei: "Türkiye" },
+      specifications: { [isEn ? "Material" : "Kumaş Tipi"]: "%100 Pamuk", [isEn ? "Origin" : "Menşei"]: "Türkiye" },
       stock: numStock,
       reviews: initialProduct?.reviews || [],
     };
@@ -133,12 +151,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               onChange={(e) => setCategorySlug(e.target.value)}
               className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary font-bold"
             >
-              <option value="men">Erkek Giyim (men)</option>
-              <option value="women">Kadın Giyim (women)</option>
-              <option value="electronics">Elektronik (electronics)</option>
-              <option value="shoes-bags">Ayakkabı & Çanta (shoes-bags)</option>
-              <option value="home-living">Ev & Yaşam (home-living)</option>
-              <option value="beauty-care">Kozmetik & Bakım (beauty-care)</option>
+              <option value="kadin">Kadın / Women (kadin)</option>
+              <option value="erkek">Erkek / Men (erkek)</option>
+              <option value="cocuk">Çocuk & Bebek / Kids & Baby (cocuk)</option>
+              <option value="elektronik">Elektronik / Electronics (elektronik)</option>
+              <option value="ev-yasam">Ev & Yaşam / Home & Living (ev-yasam)</option>
+              <option value="supermarket">Süpermarket / Supermarket (supermarket)</option>
+              <option value="kozmetik">Kozmetik / Beauty & Personal Care (kozmetik)</option>
+              <option value="ayakkabi-canta">Ayakkabı & Çanta / Shoes & Bags (ayakkabi-canta)</option>
+              <option value="spor">Spor & Outdoor / Sports & Outdoor (spor)</option>
+              <option value="kitap-kirtasiye">Kitap & Hobi / Books & Hobbies (kitap-kirtasiye)</option>
+              <option value="pet-shop">Pet Shop / Pet Shop (pet-shop)</option>
+              <option value="otomotiv">Otomotiv / Automotive (otomotiv)</option>
             </select>
           </div>
 
