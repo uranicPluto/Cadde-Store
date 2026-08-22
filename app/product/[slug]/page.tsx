@@ -34,7 +34,6 @@ import {
   ThumbsUp,
   ThumbsDown,
   Search,
-  SlidersHorizontal,
   Bell,
   Check,
   Sparkles,
@@ -43,7 +42,18 @@ import {
   Camera,
   Layers,
   Wind,
-  Flame,
+  Plus,
+  Trash2,
+  Edit3,
+  Building2,
+  Home,
+  Briefcase,
+  X,
+  Lock,
+  Wallet,
+  Landmark,
+  BadgePercent,
+  CheckCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +65,20 @@ interface ColorVariant {
   mainImage: string;
   gallery: string[];
   isHot?: boolean;
+}
+
+// User Delivery Address Definition
+interface DeliveryAddress {
+  id: string;
+  title: string;
+  name: string;
+  phone: string;
+  city: string;
+  district: string;
+  neighborhood: string;
+  addressLine: string;
+  postalCode: string;
+  isDefault?: boolean;
 }
 
 export default function ProductDetailPage() {
@@ -80,14 +104,73 @@ export default function ProductDetailPage() {
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0, bgX: 0, bgY: 0 });
   const imgContainerRef = useRef<HTMLDivElement>(null);
 
+  // Star Rating Hover Breakdown Popover State
+  const [showRatingPopover, setShowRatingPopover] = useState(false);
+
   // Selected Options
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [selectedSize, setSelectedSize] = useState("M");
   const [buyMoreQty, setBuyMoreQty] = useState(1); // 1 = 1 piece, 2 = 2 pieces (%10 discount)
 
-  // Modals
+  // Location & Address Management State
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("İstanbul - Kadıköy");
+  const [addresses, setAddresses] = useState<DeliveryAddress[]>([
+    {
+      id: "addr-1",
+      title: "Ev Adresim",
+      name: "Ahmet Yılmaz",
+      phone: "+90 532 123 45 67",
+      city: "İstanbul",
+      district: "Kadıköy",
+      neighborhood: "Caferağa Mah.",
+      addressLine: "Moda Cad. No: 14/3 Daire: 7",
+      postalCode: "34710",
+      isDefault: true,
+    },
+    {
+      id: "addr-2",
+      title: "Ofis Adresim",
+      name: "Ahmet Yılmaz",
+      phone: "+90 532 123 45 67",
+      city: "İstanbul",
+      district: "Beşiktaş",
+      neighborhood: "Levent Mah.",
+      addressLine: "Büyükdere Cad. No: 195 K: 12",
+      postalCode: "34394",
+      isDefault: false,
+    },
+    {
+      id: "addr-3",
+      title: "Ankara Ofis",
+      name: "Ahmet Yılmaz",
+      phone: "+90 532 123 45 67",
+      city: "Ankara",
+      district: "Çankaya",
+      neighborhood: "Kızılay Mah.",
+      addressLine: "Gazi Mustafa Kemal Bulvarı No: 42",
+      postalCode: "06420",
+      isDefault: false,
+    },
+  ]);
+  const [selectedAddressId, setSelectedAddressId] = useState("addr-1");
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState<DeliveryAddress>({
+    id: "",
+    title: "Ev Adresi",
+    name: "Ahmet Yılmaz",
+    phone: "+90 532 123 45 67",
+    city: "İstanbul",
+    district: "Kadıköy",
+    neighborhood: "Caferağa Mah.",
+    addressLine: "",
+    postalCode: "34710",
+  });
+
+  // Payment Options & Installments Modal State
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedBank, setSelectedBank] = useState("garanti");
+
+  // Ask Seller Question Modal State
   const [isAskQuestionModalOpen, setIsAskQuestionModalOpen] = useState(false);
   const [sellerQuestionText, setSellerQuestionText] = useState("");
   const [questionSubmitted, setQuestionSubmitted] = useState(false);
@@ -221,6 +304,60 @@ export default function ProductDetailPage() {
     },
   ];
 
+  // Bank Installment Rates Matrix
+  const bankInstallmentOptions: Record<string, { bankName: string; installments: { count: number; monthly: number; total: number; note?: string }[] }> = {
+    garanti: {
+      bankName: "Garanti BBVA Bonus",
+      installments: [
+        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
+        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
+        { count: 6, monthly: 81.25, total: 487.50, note: "%8.3 Vade Farkı" },
+        { count: 9, monthly: 57.10, total: 513.90, note: "%14.2 Vade Farkı" },
+        { count: 12, monthly: 48.43, total: 581.16, note: "%29.1 Vade Farkı" },
+      ],
+    },
+    yapikredi: {
+      bankName: "Yapı Kredi World",
+      installments: [
+        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
+        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
+        { count: 6, monthly: 81.25, total: 487.50, note: "%8.3 Vade Farkı" },
+        { count: 9, monthly: 57.10, total: 513.90, note: "%14.2 Vade Farkı" },
+        { count: 12, monthly: 48.43, total: 581.16, note: "%29.1 Vade Farkı" },
+      ],
+    },
+    isbank: {
+      bankName: "İş Bankası Maximum",
+      installments: [
+        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
+        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
+        { count: 6, monthly: 82.50, total: 495.00, note: "%10 Vade Farkı" },
+        { count: 9, monthly: 58.00, total: 522.00, note: "%16 Vade Farkı" },
+        { count: 12, monthly: 49.10, total: 589.20, note: "%31 Vade Farkı" },
+      ],
+    },
+    akbank: {
+      bankName: "Akbank Axess",
+      installments: [
+        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
+        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
+        { count: 6, monthly: 81.25, total: 487.50, note: "%8.3 Vade Farkı" },
+        { count: 9, monthly: 57.10, total: 513.90, note: "%14.2 Vade Farkı" },
+        { count: 12, monthly: 48.43, total: 581.16, note: "%29.1 Vade Farkı" },
+      ],
+    },
+    ziraat: {
+      bankName: "Ziraat Bankkart",
+      installments: [
+        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
+        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
+        { count: 6, monthly: 79.90, total: 479.40, note: "%6.5 Vade Farkı" },
+        { count: 9, monthly: 55.80, total: 502.20, note: "%11.6 Vade Farkı" },
+        { count: 12, monthly: 46.90, total: 562.80, note: "%25 Vade Farkı" },
+      ],
+    },
+  };
+
   useEffect(() => {
     if (slug) {
       fetchDbProductBySlug(slug, language).then((prod) => {
@@ -253,8 +390,9 @@ export default function ProductDetailPage() {
   const activeGallery = colorVariants[selectedColorIdx]?.gallery || [product.imageUrl];
   const activeImage = activeGallery[selectedImageIndex] || activeGallery[0] || product.imageUrl;
   const favActive = isFavorite(product.id);
+  const activeSelectedAddress = addresses.find((a) => a.id === selectedAddressId) || addresses[0];
 
-  // Interactive Lens Zoom Handler (Matches Screenshot 4)
+  // Interactive Lens Zoom Handler
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imgContainerRef.current) return;
     const { left, top, width, height } = imgContainerRef.current.getBoundingClientRect();
@@ -291,6 +429,13 @@ export default function ProductDetailPage() {
     router.push("/checkout");
   };
 
+  const handleScrollToReviews = () => {
+    const el = document.getElementById("reviews-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const handleVoteReview = (revId: string, type: "up" | "down") => {
     setHelpfulVoted((prev) => ({ ...prev, [revId]: type }));
   };
@@ -311,7 +456,54 @@ export default function ProductDetailPage() {
       setSellerQuestionText("");
       setToastMsg(isEn ? "Question sent to seller!" : "Sorunuz satıcıya iletildi!");
       setTimeout(() => setToastMsg(null), 3000);
-    }, 1500);
+    }, 1200);
+  };
+
+  // Address Handlers
+  const handleOpenAddAddress = () => {
+    setAddressForm({
+      id: `addr-${Date.now()}`,
+      title: "Yeni Adres",
+      name: "Ahmet Yılmaz",
+      phone: "+90 532 123 45 67",
+      city: "İstanbul",
+      district: "Kadıköy",
+      neighborhood: "",
+      addressLine: "",
+      postalCode: "34000",
+    });
+    setIsEditingAddress(true);
+  };
+
+  const handleOpenEditAddress = (addr: DeliveryAddress, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAddressForm(addr);
+    setIsEditingAddress(true);
+  };
+
+  const handleDeleteAddress = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (addresses.length <= 1) {
+      alert("En az 1 teslimat adresi bulunmalıdır.");
+      return;
+    }
+    const filtered = addresses.filter((a) => a.id !== id);
+    setAddresses(filtered);
+    if (selectedAddressId === id) {
+      setSelectedAddressId(filtered[0].id);
+    }
+  };
+
+  const handleSaveAddressForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    const exists = addresses.find((a) => a.id === addressForm.id);
+    if (exists) {
+      setAddresses(addresses.map((a) => (a.id === addressForm.id ? addressForm : a)));
+    } else {
+      setAddresses([...addresses, addressForm]);
+      setSelectedAddressId(addressForm.id);
+    }
+    setIsEditingAddress(false);
   };
 
   return (
@@ -325,7 +517,7 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* 1. Top Cadde Plus Strip (Matches Screenshot 1) */}
+      {/* 1. Top Cadde Plus Strip */}
       <div className="w-full bg-gradient-to-r from-slate-950 via-slate-900 to-rose-950 text-white py-2 px-4 shadow-sm select-none">
         <div className="max-w-wide mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs font-bold">
@@ -356,9 +548,9 @@ export default function ProductDetailPage() {
           ]}
         />
 
-        {/* 2. Main Product Hero Section (Grid Layout Matching Screenshot 1, 2, 4) */}
+        {/* 2. Main Product Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* LEFT 5 COLS: Main Product Gallery with Interactive Lens Zoom (Screenshot 4) */}
+          {/* LEFT 5 COLS: Main Product Gallery with Interactive Lens Zoom */}
           <div className="lg:col-span-5 flex flex-col gap-3 relative">
             {/* Main Interactive Zoom Box Container */}
             <div
@@ -368,7 +560,7 @@ export default function ProductDetailPage() {
               onMouseMove={handleMouseMove}
               className="relative w-full aspect-3/4 bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 shadow-sm cursor-crosshair select-none"
             >
-              {/* Left / Right Carousel Arrow Buttons */}
+              {/* Carousel Arrow Buttons */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -400,21 +592,21 @@ export default function ProductDetailPage() {
                 className="w-full h-full object-cover object-center"
               />
 
-              {/* Visual Feature Stamps on Bottom Right of Main Image (Screenshot 1 & 4) */}
+              {/* Visual Feature Stamps on Bottom Right */}
               <div className="absolute right-3 bottom-4 z-10 flex flex-col gap-2 pointer-events-none">
-                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/80 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
+                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/85 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
                   <Layers className="w-4 h-4 text-slate-800" />
                   <span className="text-[7px] font-black text-slate-900 leading-tight uppercase mt-0.5">
                     Kıvrılmaz Yaka
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/80 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
+                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/85 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
                   <Wind className="w-4 h-4 text-slate-800" />
                   <span className="text-[7px] font-black text-slate-900 leading-tight uppercase mt-0.5">
-                    Nefes Alabilir Çekmez Kumaş
+                    Nefes Alabilir
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/80 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
+                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/85 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
                   <Sparkles className="w-4 h-4 text-slate-800" />
                   <span className="text-[7px] font-black text-slate-900 leading-tight uppercase mt-0.5">
                     Esnek Hareket
@@ -422,7 +614,7 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Square Zoom Lens (Screenshot 4) */}
+              {/* Square Zoom Lens */}
               {isZooming && (
                 <div
                   className="absolute border-2 border-slate-900/60 bg-white/20 pointer-events-none rounded-lg"
@@ -436,20 +628,20 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* High-Resolution Magnified Zoom Flyout Panel (Screenshot 4) */}
+            {/* High-Resolution Magnified Zoom Flyout Panel */}
             {isZooming && (
               <div
-                className="hidden lg:block absolute left-[103%] top-0 w-[450px] h-[520px] bg-white border-2 border-slate-300 rounded-2xl shadow-2xl z-40 overflow-hidden pointer-events-none"
+                className="hidden lg:block absolute left-[103%] top-0 w-[460px] h-[520px] bg-white border-2 border-slate-300 rounded-2xl shadow-2xl z-40 overflow-hidden pointer-events-none"
                 style={{
                   backgroundImage: `url(${activeImage})`,
                   backgroundPosition: `${zoomPos.bgX}% ${zoomPos.bgY}%`,
-                  backgroundSize: "250%",
+                  backgroundSize: "260%",
                   backgroundRepeat: "no-repeat",
                 }}
               />
             )}
 
-            {/* Thumbnails Underneath Main Image (Screenshot 1 & 2) */}
+            {/* Thumbnails Underneath Main Image */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
               {activeGallery.map((img, idx) => (
                 <button
@@ -469,9 +661,9 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* MIDDLE 4 COLS: Product Info, Pricing, Multi-Quantity, Colors, Sizes (Screenshot 1 & 2) */}
+          {/* MIDDLE 4 COLS: Product Info, Pricing, Multi-Quantity, Colors, Sizes */}
           <div className="lg:col-span-4 flex flex-col gap-4">
-            {/* Category Rank Badge (Screenshot 1) */}
+            {/* Category Rank Badge */}
             <div className="flex items-center gap-2 flex-wrap text-xs">
               <span className="text-slate-500 font-semibold">Men Polo T-Shirts category</span>
               <span className="bg-amber-100 text-amber-900 font-black text-[10px] px-2 py-0.5 rounded-full">
@@ -486,27 +678,84 @@ export default function ProductDetailPage() {
                 <span>{product.name}</span>
               </h1>
 
-              {/* Rating & Social Metrics (Screenshot 1) */}
-              <div className="flex items-center gap-2.5 mt-1.5 text-xs text-slate-600 flex-wrap">
-                <span className="font-extrabold text-slate-900">{product.rating}</span>
-                <div className="flex items-center text-amber-400">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  ))}
+              {/* RATING BLOCK WITH HOVER STAR BREAKDOWN & SMOOTH CLICK SCROLL */}
+              <div className="relative inline-block mt-2">
+                <div
+                  onMouseEnter={() => setShowRatingPopover(true)}
+                  onMouseLeave={() => setShowRatingPopover(false)}
+                  onClick={handleScrollToReviews}
+                  className="flex items-center gap-2 text-xs text-slate-600 flex-wrap cursor-pointer hover:bg-slate-50 p-1.5 rounded-xl transition-colors border border-transparent hover:border-slate-200"
+                >
+                  <span className="font-black text-slate-900 text-sm">{product.rating}</span>
+                  <div className="flex items-center text-amber-400">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <span className="text-slate-500 font-bold hover:underline">• 24,247 ratings</span>
+                  <span className="text-slate-400 font-semibold">• 113 Q&amp;A</span>
                 </div>
-                <span className="text-slate-400 font-semibold">• 24247 ratings</span>
-                <span className="text-slate-400 font-semibold">• 113 Q&amp;A</span>
+
+                {/* Star Rating Breakdown Popover on Mouse Hover */}
+                {showRatingPopover && (
+                  <div className="absolute top-full left-0 z-50 mt-1 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-150 pointer-events-none">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-black text-slate-900">4.6</span>
+                        <div className="flex flex-col">
+                          <div className="flex items-center text-amber-400">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-slate-500 font-bold">24.247 değerlendirme</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        %94 Tavsiye
+                      </span>
+                    </div>
+
+                    {/* 5 Star to 1 Star Progress Breakdown Bars */}
+                    <div className="flex flex-col gap-1.5 text-[11px] font-bold">
+                      {[
+                        { stars: 5, pct: 78, count: "18.912" },
+                        { stars: 4, pct: 14, count: "3.394" },
+                        { stars: 3, pct: 5, count: "1.212" },
+                        { stars: 2, pct: 2, count: "485" },
+                        { stars: 1, pct: 1, count: "244" },
+                      ].map((item) => (
+                        <div key={item.stars} className="flex items-center gap-2">
+                          <span className="w-5 text-slate-600 font-extrabold">{item.stars} ★</span>
+                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-amber-400 rounded-full"
+                              style={{ width: `${item.pct}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-slate-400 w-12 text-right">{item.count}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <span className="text-[10px] text-primary font-black text-center pt-1 border-t border-slate-100">
+                      Tüm yorumları okumak için tıklayın ↓
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Customers Love It & Urgency Badge (Screenshot 1) */}
-              <div className="flex flex-col gap-1 mt-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+              {/* Customers Love It & Urgency Badge */}
+              <div className="flex flex-col gap-1 mt-1">
+                <button
+                  type="button"
+                  onClick={handleScrollToReviews}
+                  className="flex items-center gap-1.5 text-xs font-bold text-slate-800 text-left hover:text-primary transition-colors cursor-pointer"
+                >
                   <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                   <span>Customers love it!</span>
-                  <a href="#reviews-section" className="text-primary hover:underline font-extrabold">
-                    Read reviews &gt;
-                  </a>
-                </div>
+                  <span className="text-primary hover:underline font-extrabold">Read reviews &gt;</span>
+                </button>
 
                 <div className="flex items-center gap-1 text-[11px] font-bold text-orange-600">
                   <Eye className="w-3.5 h-3.5 text-orange-500" />
@@ -515,7 +764,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Price Block & Plus Exclusive (Screenshot 1) */}
+            {/* Price Block & Plus Exclusive */}
             <div className="flex flex-col gap-0.5 p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl">
               <div className="flex items-center gap-1 text-xs font-extrabold text-rose-600">
                 <span>+ Cadde Plus Exclusive</span>
@@ -529,7 +778,7 @@ export default function ProductDetailPage() {
               </span>
             </div>
 
-            {/* "Buy More, Pay Less" Volume Tier (Screenshot 1) */}
+            {/* "Buy More, Pay Less" Volume Tier */}
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-black text-slate-900">Buy more, pay less</span>
               <div className="grid grid-cols-2 gap-2">
@@ -569,7 +818,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Color Variations with Swatches (Screenshot 1 & 2) */}
+            {/* Color Variations with Swatches */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-900">
@@ -603,7 +852,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Size Selector with Out-of-Stock Slashes (Screenshot 1 & 2) */}
+            {/* Size Selector with Out-of-Stock Slashes */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-900">
@@ -630,7 +879,6 @@ export default function ProductDetailPage() {
                     )}
                   >
                     <span>{sz.size}</span>
-                    {/* Diagonal Slash for Out of Stock */}
                     {!sz.inStock && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="w-full h-[1.5px] bg-slate-400 rotate-45" />
@@ -642,7 +890,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Action Buttons: Buy Now & Add to Cart (Screenshot 2) */}
+            {/* Action Buttons: Buy Now & Add to Cart */}
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
@@ -676,8 +924,11 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Estimated Shipping & Delivery Location Box (Screenshot 2) */}
-            <div className="flex flex-col gap-2 p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-800">
+            {/* CLICKABLE LOCATION & ADDRESS SELECTOR BOX */}
+            <div
+              onClick={() => setIsLocationModalOpen(true)}
+              className="flex flex-col gap-2 p-3.5 bg-slate-50 hover:bg-orange-50/40 border border-slate-200/80 hover:border-orange-300 rounded-2xl text-xs text-slate-800 cursor-pointer transition-all shadow-2xs group"
+            >
               <div className="flex items-center gap-2 font-bold text-slate-700">
                 <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Estimated shipping: Ships in 1 day(s)</span>
@@ -687,31 +938,40 @@ export default function ProductDetailPage() {
                 <div className="flex items-center gap-1.5 text-slate-600 font-medium">
                   <MapPin className="w-4 h-4 text-[#f27a1a] shrink-0" />
                   <span>Estimated delivery:</span>
-                  <span className="font-bold text-slate-900">{selectedLocation}</span>
+                  <span className="font-black text-slate-900">
+                    {activeSelectedAddress.city} / {activeSelectedAddress.district} ({activeSelectedAddress.title})
+                  </span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsLocationModalOpen(true)}
-                  className="text-primary font-black text-xs hover:underline cursor-pointer"
-                >
-                  Select location &gt;
-                </button>
+                <span className="text-primary font-black text-xs group-hover:underline flex items-center gap-0.5">
+                  <span>Select location</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </span>
               </div>
             </div>
 
-            {/* Payment Options (Screenshot 2) */}
-            <div className="flex items-center gap-3 p-3 bg-white border border-slate-200/90 rounded-2xl">
-              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                <CreditCard className="w-4 h-4" />
+            {/* CLICKABLE PAYMENT OPTIONS & INSTALLMENTS BOX */}
+            <div
+              onClick={() => setIsPaymentModalOpen(true)}
+              className="flex items-center justify-between p-3.5 bg-white hover:bg-indigo-50/40 border border-slate-200/90 hover:border-indigo-300 rounded-2xl cursor-pointer transition-all shadow-2xs group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col text-xs">
+                  <span className="font-black text-slate-900">Installments up to 12 months</span>
+                  <span className="text-slate-500 font-medium">Starting at 48.43 TL/month • 0% Interest on 3 installments</span>
+                </div>
               </div>
-              <div className="flex flex-col text-xs">
-                <span className="font-black text-slate-900">Installments up to 12 months</span>
-                <span className="text-slate-500 font-medium">Installments starting at 48.43 TL/month</span>
-              </div>
+
+              <span className="text-indigo-600 font-black text-xs group-hover:underline flex items-center gap-0.5 shrink-0">
+                <span>View Options</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
             </div>
 
-            {/* Codes & Coupons Ticket Card (Screenshot 2) */}
+            {/* Codes & Coupons Ticket Card */}
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-black text-slate-900">Codes &amp; Coupons</span>
               <div className="relative p-4 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-center justify-between gap-3">
@@ -745,7 +1005,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Highlighted Features Grid (Screenshot 2) */}
+            {/* Highlighted Features Grid */}
             <div className="flex flex-col gap-2">
               <span className="text-xs font-black text-slate-900">Highlighted features:</span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
@@ -785,9 +1045,9 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* RIGHT 3 COLS: Campaigns, Seller Card, Questions, Follow (Screenshot 1) */}
+          {/* RIGHT 3 COLS: Campaigns, Seller Card, Questions, Follow */}
           <div className="lg:col-span-3 flex flex-col gap-4">
-            {/* Available Campaigns Card (Screenshot 1) */}
+            {/* Available Campaigns Card */}
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                 Available Campaigns
@@ -826,7 +1086,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Seller Details Card (Screenshot 1) */}
+            {/* Seller Details Card */}
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
               <div className="p-3 bg-sky-50/80 border border-sky-200 rounded-xl flex items-center justify-between">
                 <div className="flex flex-col">
@@ -881,8 +1141,8 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* 3. Comprehensive Reviews Section with Height/Weight Fit Metric Selector (Screenshot 3) */}
-        <div id="reviews-section" className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+        {/* 3. Comprehensive Reviews Section with Height/Weight Fit Metric Selector */}
+        <div id="reviews-section" className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 scroll-mt-20">
           {/* Header & Rating Overview */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
@@ -903,7 +1163,7 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          {/* Customer Photos Carousel Strip (Screenshot 3) */}
+          {/* Customer Photos Carousel Strip */}
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-slate-900">Reviews with images</span>
@@ -921,7 +1181,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Reviews Search & Filter Controls (Screenshot 3) */}
+          {/* Reviews Search & Filter Controls */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -951,7 +1211,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Body Fit / Height & Weight Metric Chips (Screenshot 3) */}
+          {/* Body Fit / Height & Weight Metric Chips */}
           <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-col gap-3">
             {/* Height Selector */}
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
@@ -1004,7 +1264,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Customer Reviews Feed List (Screenshot 3) */}
+          {/* Customer Reviews Feed List */}
           <div className="flex flex-col divide-y divide-slate-100">
             {customerReviewsData.map((rev) => (
               <div key={rev.id} className="py-5 flex flex-col gap-2.5">
@@ -1092,54 +1352,328 @@ export default function ProductDetailPage() {
         </div>
       </main>
 
-      {/* Location Selector Modal */}
+      {/* 5. COMPREHENSIVE DELIVERY LOCATION & ADDRESS MANAGER MODAL */}
       {isLocationModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-slate-100 flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-900">Select Delivery Location</h3>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#f27a1a]" />
+                <h3 className="text-base font-black text-slate-900">
+                  {isEditingAddress ? "Adres Bilgilerini Düzenle" : "Teslimat Adresi ve Konum Seçimi"}
+                </h3>
+              </div>
               <button
                 type="button"
-                onClick={() => setIsLocationModalOpen(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 font-bold"
+                onClick={() => {
+                  setIsLocationModalOpen(false);
+                  setIsEditingAddress(false);
+                }}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold"
               >
                 ✕
               </button>
             </div>
 
+            {isEditingAddress ? (
+              /* Add / Edit Address Form */
+              <form onSubmit={handleSaveAddressForm} className="flex flex-col gap-3.5 text-xs">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="font-extrabold text-slate-700">Adres Başlığı</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ev, İş, Yazlık vb."
+                      value={addressForm.title}
+                      onChange={(e) => setAddressForm({ ...addressForm, title: e.target.value })}
+                      className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary font-bold"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="font-extrabold text-slate-700">Ad Soyad</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ahmet Yılmaz"
+                      value={addressForm.name}
+                      onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
+                      className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="font-extrabold text-slate-700">İl (Şehir)</label>
+                    <select
+                      value={addressForm.city}
+                      onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                      className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary font-bold"
+                    >
+                      <option value="İstanbul">İstanbul</option>
+                      <option value="Ankara">Ankara</option>
+                      <option value="İzmir">İzmir</option>
+                      <option value="Bursa">Bursa</option>
+                      <option value="Antalya">Antalya</option>
+                      <option value="Adana">Adana</option>
+                      <option value="Konya">Konya</option>
+                      <option value="Gaziantep">Gaziantep</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="font-extrabold text-slate-700">İlçe</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Kadıköy, Çankaya vb."
+                      value={addressForm.district}
+                      onChange={(e) => setAddressForm({ ...addressForm, district: e.target.value })}
+                      className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="font-extrabold text-slate-700">Mahalle</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Caferağa Mah."
+                    value={addressForm.neighborhood}
+                    onChange={(e) => setAddressForm({ ...addressForm, neighborhood: e.target.value })}
+                    className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary font-bold"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="font-extrabold text-slate-700">Açık Adres (Cadde, Sokak, No, Daire)</label>
+                  <textarea
+                    rows={2}
+                    required
+                    placeholder="Moda Cad. No: 14/3 Daire: 7"
+                    value={addressForm.addressLine}
+                    onChange={(e) => setAddressForm({ ...addressForm, addressLine: e.target.value })}
+                    className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary font-medium"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingAddress(false)}
+                    className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl transition-colors cursor-pointer"
+                  >
+                    Vazgeç
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-[#f27a1a] hover:bg-[#d9660d] text-white font-extrabold rounded-xl shadow-xs transition-colors cursor-pointer"
+                  >
+                    Adresi Kaydet
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* Address List with Select, Edit, Delete */
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                    Kayıtlı Adresleriniz ({addresses.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleOpenAddAddress}
+                    className="text-xs font-extrabold text-primary hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Yeni Adres Ekle</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2.5">
+                  {addresses.map((addr) => {
+                    const isSelected = selectedAddressId === addr.id;
+                    return (
+                      <div
+                        key={addr.id}
+                        onClick={() => {
+                          setSelectedAddressId(addr.id);
+                          setIsLocationModalOpen(false);
+                          setToastMsg(`Teslimat konumu güncellendi: ${addr.city} / ${addr.district}`);
+                          setTimeout(() => setToastMsg(null), 3000);
+                        }}
+                        className={cn(
+                          "p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col gap-2 relative",
+                          isSelected
+                            ? "bg-orange-50/60 border-primary shadow-xs"
+                            : "bg-slate-50 border-slate-200 hover:bg-slate-100/70"
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-4 h-4 rounded-full border-2 flex items-center justify-center border-primary">
+                              {isSelected && <span className="w-2 h-2 rounded-full bg-primary" />}
+                            </span>
+                            <span className="text-xs font-black text-slate-900">{addr.title}</span>
+                            <span className="text-[10px] text-slate-400 font-bold">• {addr.city} / {addr.district}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={(e) => handleOpenEditAddress(addr, e)}
+                              className="p-1 text-slate-400 hover:text-primary transition-colors cursor-pointer"
+                              title="Düzenle"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteAddress(addr.id, e)}
+                              className="p-1 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                              title="Sil"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <p className="text-[11px] text-slate-600 font-medium pl-6 leading-relaxed">
+                          {addr.neighborhood} {addr.addressLine}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-2xl flex items-center gap-2.5 text-emerald-900 text-xs mt-1">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span className="font-semibold text-[11px]">
+                    Seçtiğiniz adrese göre tahmini teslimat tarihi: <strong>Yarın (24 Ağustos)</strong>
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 6. COMPREHENSIVE PAYMENT METHODS & BANK INSTALLMENTS MODAL */}
+      {isPaymentModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-xl w-full shadow-2xl border border-slate-100 flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-indigo-600" />
+                <h3 className="text-base font-black text-slate-900">Ödeme Seçenekleri &amp; Taksit Tablosu</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPaymentModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Bank Selector Chips */}
             <div className="flex flex-col gap-2">
-              {[
-                "İstanbul - Kadıköy",
-                "İstanbul - Beşiktaş",
-                "Ankara - Çankaya",
-                "İzmir - Karşıyaka",
-                "Bursa - Nilüfer",
-                "Antalya - Muratpaşa",
-              ].map((loc) => (
-                <button
-                  key={loc}
-                  type="button"
-                  onClick={() => {
-                    setSelectedLocation(loc);
-                    setIsLocationModalOpen(false);
-                  }}
-                  className={cn(
-                    "p-3 rounded-xl border text-xs font-bold text-left transition-colors flex items-center justify-between",
-                    selectedLocation === loc
-                      ? "bg-orange-50 border-primary text-primary"
-                      : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100"
-                  )}
-                >
-                  <span>{loc}</span>
-                  {selectedLocation === loc && <Check className="w-4 h-4" />}
-                </button>
-              ))}
+              <span className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                Kredi Kartı Bankanızı Seçin:
+              </span>
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                {Object.entries(bankInstallmentOptions).map(([key, data]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedBank(key)}
+                    className={cn(
+                      "px-3.5 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0",
+                      selectedBank === key
+                        ? "bg-slate-900 text-white border-slate-900 shadow-xs"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300"
+                    )}
+                  >
+                    {data.bankName}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Installments Table */}
+            <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3">Taksit Sayısı</th>
+                    <th className="p-3">Aylık Tutar</th>
+                    <th className="p-3">Toplam Tutar</th>
+                    <th className="p-3 text-right">Avantaj / Oran</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {bankInstallmentOptions[selectedBank].installments.map((inst) => (
+                    <tr key={inst.count} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="p-3 font-black text-slate-900">
+                        {inst.count === 1 ? "Tek Çekim" : `${inst.count} Taksit`}
+                      </td>
+                      <td className="p-3 font-bold text-slate-800">{inst.monthly.toFixed(2)} TL</td>
+                      <td className="p-3 font-black text-[#f27a1a]">{inst.total.toFixed(2)} TL</td>
+                      <td className="p-3 text-right">
+                        <span
+                          className={cn(
+                            "px-2 py-0.5 rounded-full text-[10px] font-black",
+                            inst.count === 3
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-slate-100 text-slate-600"
+                          )}
+                        >
+                          {inst.note}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Alternative Payment Methods Strip */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+              <span className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                Diğer Ödeme Seçenekleri:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-2.5">
+                  <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="font-black text-slate-900">Kapıda Ödeme</span>
+                    <span className="text-[10px] text-slate-500">Nakit veya Kredi Kartı ile</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-2.5">
+                  <Landmark className="w-4 h-4 text-primary shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="font-black text-slate-900">Havale / FAST / EFT</span>
+                    <span className="text-[10px] text-emerald-600 font-bold">%2 Ek İndirim Avantajı</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Guarantee Strip */}
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5 text-xs text-emerald-900">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="font-semibold text-[11px]">
+                Tüm ödemeler 256-Bit SSL ve 3D Secure güvencesiyle korunmaktadır.
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Ask Seller Question Modal */}
+      {/* 7. Ask Seller Question Modal */}
       {isAskQuestionModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
