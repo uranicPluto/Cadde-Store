@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { HeroSection } from "@/components/homepage/hero-section";
+import { BrandQuickStrip } from "@/components/homepage/brand-quick-strip";
+import { PopularProductsSection } from "@/components/homepage/popular-products-section";
 import { FlashSalesSection } from "@/components/homepage/flash-sales-section";
 import { CategoryGridStrips } from "@/components/homepage/category-grid-strips";
-import { BrandQuickStrip } from "@/components/homepage/brand-quick-strip";
 import { CampaignBannerStrips } from "@/components/homepage/campaign-banner-strips";
 import { FeaturedBrandsSection } from "@/components/homepage/featured-brands-section";
 import { StoreHighlightsSection } from "@/components/homepage/store-highlights-section";
@@ -35,6 +36,9 @@ export default function HomePage() {
 
         {/* Brand Logos & 3D Quick Action Strip */}
         <BrandQuickStrip />
+
+        {/* Popular Products Section (Placed directly after Brand For You Section as requested) */}
+        <PopularProductsSection />
 
         {/* Category Circle Strips */}
         <CategoryGridStrips />
