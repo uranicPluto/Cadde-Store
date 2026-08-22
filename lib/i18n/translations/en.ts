@@ -728,6 +728,11 @@ export const en = {
     switchToLogin: "Already have an account? Sign in",
     quickAdminLogin: "Demo Admin Sign In (admin@cadde-store.com)",
     quickSellerLogin: "Demo Seller Sign In (seller@cadde-store.com)",
+    quickTestLogins: "Quick Test Logins:",
+    adminLogin: "Admin Login",
+    sellerLogin: "Seller Login",
+    genericError: "An error occurred while signing in.",
+    invalidCredentials: "Invalid email address or password.",
     logout: "Sign Out",
   },
 };

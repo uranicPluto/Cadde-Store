@@ -46,7 +46,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || "İşlem sırasında bir hata oluştu.");
+        if (data.code === "INVALID_CREDENTIALS") {
+          setErrorMsg(t("auth.invalidCredentials"));
+        } else {
+          setErrorMsg(t("auth.genericError"));
+        }
         setLoading(false);
         return;
       }
@@ -76,7 +80,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       window.location.reload(); // Refresh session state across application
     } catch (err) {
       setLoading(false);
-      setErrorMsg("Sunucu ile bağlantı kurulamadı.");
+      setErrorMsg(t("auth.genericError"));
     }
   };
 
@@ -195,7 +199,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
         {/* Demo Fast Login Shortcuts */}
         <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-          <span className="text-[11px] font-bold text-text-subtle text-center">Hızlı Test Girişleri:</span>
+          <span className="text-[11px] font-bold text-text-subtle text-center">
+            {t("auth.quickTestLogins")}
+          </span>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -203,7 +209,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               className="p-2 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 hover:bg-indigo-100 transition-colors"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin Girişi</span>
+              <span>{t("auth.adminLogin")}</span>
             </button>
             <button
               type="button"
@@ -211,7 +217,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               className="p-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 hover:bg-amber-100 transition-colors"
             >
               <Store className="w-3.5 h-3.5" />
-              <span>Satıcı Girişi</span>
+              <span>{t("auth.sellerLogin")}</span>
             </button>
           </div>
         </div>

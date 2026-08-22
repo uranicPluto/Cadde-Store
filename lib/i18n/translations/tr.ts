@@ -728,6 +728,11 @@ export const tr = {
     switchToLogin: "Zaten hesabınız var mı? Giriş Yapın",
     quickAdminLogin: "Demo Yönetici Girişi (admin@cadde-store.com)",
     quickSellerLogin: "Demo Satıcı Girişi (seller@cadde-store.com)",
+    quickTestLogins: "Hızlı Test Girişleri:",
+    adminLogin: "Admin Girişi",
+    sellerLogin: "Satıcı Girişi",
+    genericError: "Giriş yapılırken bir hata oluştu.",
+    invalidCredentials: "Geçersiz e-posta veya şifre.",
     logout: "Çıkış Yap",
   },
 };
