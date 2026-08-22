@@ -1,16 +1,21 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { getMockProducts } from "@/lib/mock-data";
+import { fetchDbProducts, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { ProductCard } from "@/components/marketplace/product-card";
-import { Flame, Clock, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Flame, Clock } from "lucide-react";
 
 export const FlashSalesSection: React.FC = () => {
   const { language, t } = useLanguage();
-  const products = getMockProducts(language);
+  const [products, setProducts] = useState<DetailedProductMock[]>([]);
 
   // Live countdown timer simulation
   const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 12, seconds: 35 });
+
+  useEffect(() => {
+    fetchDbProducts(language).then((prods) => setProducts(prods));
+  }, [language]);
 
   useEffect(() => {
     const timer = setInterval(() => {

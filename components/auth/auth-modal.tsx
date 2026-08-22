@@ -51,6 +51,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         return;
       }
 
+      // Guest -> Authenticated Account Data Migration Sync
+      try {
+        const localFavs = localStorage.getItem("cadde-store-favorites");
+        const localAddrs = localStorage.getItem("cadde-store-addresses");
+
+        const favProductIds = localFavs ? JSON.parse(localFavs) : [];
+        const addresses = localAddrs ? JSON.parse(localAddrs) : [];
+
+        if (favProductIds.length > 0 || addresses.length > 0) {
+          await fetch("/api/auth/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ favoriteProductIds: favProductIds, addresses }),
+          });
+        }
+      } catch (syncErr) {
+        console.error("Guest data sync error:", syncErr);
+      }
+
       setLoading(false);
       onClose();
       if (onSuccess) onSuccess();
@@ -163,7 +182,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           <span>{loading ? "..." : mode === "login" ? t("auth.btnLogin") : t("auth.btnRegister")}</span>
         </Button>
 
-        {/* Mode Toggle Button */}
         <button
           type="button"
           onClick={() => {

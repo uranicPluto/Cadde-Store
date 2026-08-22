@@ -19,7 +19,78 @@ export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
 
   useEffect(() => {
-    setOrders(getSavedOrders());
+    fetch("/api/orders")
+      .then((res) => (res.ok ? res.json() : { orders: [] }))
+      .then((data) => {
+        if (data.orders && Array.isArray(data.orders) && data.orders.length > 0) {
+          const dbMapped: OrderRecord[] = data.orders.map((o: any) => ({
+            orderId: o.id,
+            orderNumber: o.orderNumber,
+            createdAt: o.createdAt,
+            customerInfo: {
+              firstName: o.customer?.firstName || "Müşteri",
+              lastName: o.customer?.lastName || "",
+              email: o.customer?.email || "",
+              phone: o.customer?.phone || "",
+            },
+            shippingAddress: JSON.parse(o.shippingAddressSnapshot || "{}"),
+            shippingMethod: { id: "std", name: "Standart Kargo", price: o.shippingFee, estimatedDelivery: "2-3 Gün" },
+            sellerGroups: Array.isArray(o.orderGroups)
+              ? o.orderGroups.map((g: any) => ({
+                  sellerId: g.sellerId,
+                  storeName: g.seller?.storeName || "Cadde Store Mağazası",
+                  items: Array.isArray(o.orderItems)
+                    ? o.orderItems
+                        .filter((item: any) => item.orderGroupId === g.id || !item.orderGroupId)
+                        .map((item: any) => ({
+                          id: item.id,
+                          product: {
+                            id: item.product?.id || item.productId,
+                            slug: item.product?.slug || item.productId,
+                            name: item.product?.name || "Ürün",
+                            brand: item.product?.brand || "Cadde Store",
+                            categorySlug: "general",
+                            categoryName: "Genel",
+                            storeName: g.seller?.storeName || "Mağaza",
+                            price: item.price,
+                            rating: 4.8,
+                            reviewCount: 10,
+                            imageUrl: item.product?.imageUrl || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
+                            galleryImages: [],
+                            description: "",
+                            specifications: {},
+                            stock: 10,
+                            reviews: [],
+                          },
+                          quantity: item.quantity,
+                          selectedColor: item.selectedColor,
+                          selectedSize: item.selectedSize,
+                        }))
+                    : [],
+                  subtotal: g.subtotal,
+                  shippingFee: 0,
+                  status: g.status.toLowerCase(),
+                }))
+              : [],
+            appliedCoupon: null,
+            paymentMethod: o.paymentMethod || "credit_card",
+            calculation: {
+              subtotal: o.subtotal,
+              productDiscount: o.productDiscount,
+              couponDiscount: o.couponDiscount,
+              shippingFee: o.shippingFee,
+              grandTotal: o.grandTotal,
+              currency: o.currency,
+              sellerGroups: [],
+            },
+            status: o.status.toLowerCase() as any,
+          }));
+          setOrders(dbMapped);
+        } else {
+          setOrders(getSavedOrders());
+        }
+      })
+      .catch(() => setOrders(getSavedOrders()));
   }, []);
 
   return (

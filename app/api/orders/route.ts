@@ -41,13 +41,11 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     const body = await request.json();
-    const { items, calculation, shippingAddress, paymentInfo, customerInfo } = body;
+    const { items, couponCode, shippingAddress, customerInfo } = body;
 
-    if (!items || items.length === 0 || !shippingAddress) {
+    if (!items || !Array.isArray(items) || items.length === 0 || !shippingAddress) {
       return NextResponse.json({ error: "Geçersiz sipariş verileri." }, { status: 400 });
     }
-
-    const orderNumber = `CS-${Date.now().toString().slice(-6)}`;
 
     // 1. Resolve Customer ID
     let customerId = session?.id;
@@ -67,136 +65,171 @@ export async function POST(request: Request) {
       customerId = guestUser.id;
     }
 
-    // 2. Fetch default seller & category for relational fallback if item product is not yet in DB
-    const defaultSeller = await prisma.seller.findFirst() || await prisma.seller.create({
-      data: {
-        userId: customerId,
-        storeName: "Cadde Store Mağazası",
-        slug: `cadde-store-${Date.now()}`,
-        description: "Varsayılan pazaryeri mağazası",
-        logo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-      },
-    });
-
-    const defaultCategory = await prisma.category.findFirst() || await prisma.category.create({
-      data: {
-        slug: "genel",
-        nameTR: "Genel",
-        nameEN: "General",
-        descriptionTR: "Genel kategorisi",
-        descriptionEN: "General category",
-        imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
-      },
-    });
-
-    // 3. Resolve DB Products & Group by Seller
-    const resolvedItems: {
-      productId: string;
-      sellerId: string;
-      price: number;
+    // 2. Fetch products from DB & Recalculate Subtotal & Validate Stock Server-Side
+    let serverSubtotal = 0;
+    const validatedItems: {
+      dbProd: any;
       quantity: number;
+      price: number;
       selectedColor?: string;
       selectedSize?: string;
     }[] = [];
 
-    const itemsBySeller: Record<string, typeof resolvedItems> = {};
-
     for (const item of items) {
-      let dbProd = await prisma.product.findFirst({
-        where: { OR: [{ id: item.product.id }, { slug: item.product.slug || item.product.id }] },
+      const targetId = item.product?.id;
+      const targetSlug = item.product?.slug;
+
+      const dbProd = await prisma.product.findFirst({
+        where: {
+          OR: [
+            ...(targetId ? [{ id: targetId }] : []),
+            ...(targetSlug ? [{ slug: targetSlug }] : []),
+          ],
+        },
+        include: { seller: true },
       });
 
-      if (!dbProd) {
-        // Create DB Product entry for custom seller item
-        const itemSlug = `prod-${item.product.id}-${Date.now()}`;
-        dbProd = await prisma.product.create({
-          data: {
-            sellerId: defaultSeller.id,
-            categoryId: defaultCategory.id,
-            name: item.product.name,
-            slug: itemSlug,
-            brand: item.product.brand || "Cadde Store",
-            description: item.product.description || item.product.name,
-            sku: `SKU-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            price: item.product.price,
-            stock: 100,
-            imageUrl: item.product.imageUrl || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
-          },
-        });
+      if (!dbProd || dbProd.status !== "ACTIVE") {
+        return NextResponse.json(
+          { error: `"${item.product?.name || 'Ürün'}" artık satışta bulunmamaktadır.` },
+          { status: 400 }
+        );
       }
 
-      const sellerId = dbProd.sellerId || defaultSeller.id;
-      const resolved = {
-        productId: dbProd.id,
-        sellerId,
-        price: item.product.price,
+      if (dbProd.stock < item.quantity) {
+        return NextResponse.json(
+          { error: `"${dbProd.name}" için yetersiz stok! Mevcut stok: ${dbProd.stock} adet.` },
+          { status: 400 }
+        );
+      }
+
+      const price = dbProd.price;
+      serverSubtotal += price * item.quantity;
+
+      validatedItems.push({
+        dbProd,
         quantity: item.quantity,
+        price,
         selectedColor: item.selectedColor,
         selectedSize: item.selectedSize,
-      };
-
-      resolvedItems.push(resolved);
-
-      if (!itemsBySeller[sellerId]) {
-        itemsBySeller[sellerId] = [];
-      }
-      itemsBySeller[sellerId].push(resolved);
+      });
     }
 
-    // 4. Create Order with OrderGroup and OrderItem records
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        customerId,
-        status: "CONFIRMED",
-        subtotal: calculation.subtotal,
-        productDiscount: calculation.productDiscount || 0,
-        couponDiscount: calculation.couponDiscount || 0,
-        shippingFee: calculation.shippingFee || 0,
-        grandTotal: calculation.grandTotal,
-        currency: calculation.currency || "TRY",
-        shippingAddressSnapshot: JSON.stringify(shippingAddress),
-        statusHistory: {
-          create: {
-            status: "CONFIRMED",
-            note: "Sipariş alındı ve onaylandı.",
-          },
-        },
-      },
-    });
+    // 3. Server-side Coupon Validation
+    let couponDiscount = 0;
+    let validCouponId: string | null = null;
 
-    // 5. Create OrderGroups and OrderItems
-    for (const sellerId of Object.keys(itemsBySeller)) {
-      const sellerItems = itemsBySeller[sellerId];
-      const groupSubtotal = sellerItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    if (couponCode) {
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: couponCode.toUpperCase().trim() },
+      });
 
-      const orderGroup = await prisma.orderGroup.create({
+      if (coupon && coupon.active && (!coupon.expiresAt || new Date(coupon.expiresAt) > new Date())) {
+        if (!coupon.minimumOrder || serverSubtotal >= coupon.minimumOrder) {
+          validCouponId = coupon.id;
+          if (coupon.type === "PERCENTAGE") {
+            couponDiscount = (serverSubtotal * coupon.value) / 100;
+            if (coupon.maximumDiscount && couponDiscount > coupon.maximumDiscount) {
+              couponDiscount = coupon.maximumDiscount;
+            }
+          } else if (coupon.type === "FIXED" || coupon.type === "FREE_SHIPPING") {
+            couponDiscount = coupon.value;
+          }
+        }
+      }
+    }
+
+    const shippingFee = serverSubtotal >= 200 ? 0 : 34.9;
+    const grandTotal = Math.max(0, serverSubtotal - couponDiscount + shippingFee);
+    const orderNumber = `CS-${Date.now().toString().slice(-6)}`;
+
+    // 4. Atomic Prisma Transaction: Create Order, OrderGroups, OrderItems, Redemptions & Decrement Stock
+    const result = await prisma.$transaction(async (tx) => {
+      // Create root Order
+      const order = await tx.order.create({
         data: {
-          orderId: order.id,
-          sellerId,
+          orderNumber,
+          customerId: customerId!,
           status: "CONFIRMED",
-          subtotal: groupSubtotal,
+          subtotal: serverSubtotal,
+          productDiscount: 0,
+          couponDiscount,
+          shippingFee,
+          grandTotal,
+          currency: "TRY",
+          shippingAddressSnapshot: JSON.stringify(shippingAddress),
+          statusHistory: {
+            create: {
+              status: "CONFIRMED",
+              note: "Sipariş alındı ve sunucu tarafından onaylandı.",
+            },
+          },
         },
       });
 
-      for (const item of sellerItems) {
-        await prisma.orderItem.create({
+      // Group items by Seller ID
+      const itemsBySeller: Record<string, typeof validatedItems> = {};
+      for (const item of validatedItems) {
+        const sellerId = item.dbProd.sellerId;
+        if (!itemsBySeller[sellerId]) itemsBySeller[sellerId] = [];
+        itemsBySeller[sellerId].push(item);
+      }
+
+      // Create OrderGroups, OrderItems, and Decrement Stock
+      for (const sellerId of Object.keys(itemsBySeller)) {
+        const groupItems = itemsBySeller[sellerId];
+        const groupSubtotal = groupItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+        const orderGroup = await tx.orderGroup.create({
           data: {
             orderId: order.id,
-            orderGroupId: orderGroup.id,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-            selectedColor: item.selectedColor || null,
-            selectedSize: item.selectedSize || null,
+            sellerId,
+            status: "CONFIRMED",
+            subtotal: groupSubtotal,
           },
         });
-      }
-    }
 
-    // 6. Fetch complete created order with relations
+        for (const item of groupItems) {
+          await tx.orderItem.create({
+            data: {
+              orderId: order.id,
+              orderGroupId: orderGroup.id,
+              productId: item.dbProd.id,
+              quantity: item.quantity,
+              price: item.price,
+              selectedColor: item.selectedColor || null,
+              selectedSize: item.selectedSize || null,
+            },
+          });
+
+          // Decrement Stock
+          await tx.product.update({
+            where: { id: item.dbProd.id },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
+      }
+
+      // Record Coupon Redemption if applicable
+      if (validCouponId) {
+        await tx.couponRedemption.create({
+          data: {
+            couponId: validCouponId,
+            userId: customerId!,
+            orderId: order.id,
+          },
+        });
+        await tx.coupon.update({
+          where: { id: validCouponId },
+          data: { usageCount: { increment: 1 } },
+        });
+      }
+
+      return order;
+    });
+
     const completeOrder = await prisma.order.findUnique({
-      where: { id: order.id },
+      where: { id: result.id },
       include: {
         orderItems: { include: { product: true } },
         orderGroups: { include: { seller: true, items: true } },
@@ -207,6 +240,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, order: completeOrder });
   } catch (error) {
     console.error("POST Order API Error:", error);
-    return NextResponse.json({ error: "Sipariş oluşturulurken bir hata oluştu." }, { status: 500 });
+    return NextResponse.json({ error: "Sipariş işlenirken bir sunucu hatası oluştu." }, { status: 500 });
   }
 }

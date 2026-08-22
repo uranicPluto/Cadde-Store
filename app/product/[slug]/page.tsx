@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { Footer } from "@/components/layout/footer";
-import { getFullCatalog, DetailedProductMock } from "@/lib/catalog/product-repository";
+import { fetchDbProductBySlug, fetchDbProducts, getFullCatalog, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useCart } from "@/lib/cart/cart-context";
 import { useFavorites } from "@/lib/favorites/favorites-context";
@@ -14,11 +14,10 @@ import { Price } from "@/components/ui/price";
 import { Rating } from "@/components/ui/rating";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StoreCard } from "@/components/marketplace/store-card";
 import { ProductCard } from "@/components/marketplace/product-card";
 import { Toast } from "@/components/ui/toast";
 import { Tabs } from "@/components/ui/tabs";
-import { ShieldCheck, Truck, RotateCcw, Heart, ShoppingBag, Check, Share2, Sparkles } from "lucide-react";
+import { ShieldCheck, Truck, RotateCcw, Heart, ShoppingBag } from "lucide-react";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -30,24 +29,43 @@ export default function ProductDetailPage() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { recentlyViewed, addRecentlyViewed } = useRecentlyViewed();
 
-  const catalog = getFullCatalog(language);
-  const product = catalog.find((p) => p.slug === slug) || catalog[0];
-
+  const [product, setProduct] = useState<DetailedProductMock | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<DetailedProductMock[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState<string>(product.attributes?.color?.[0] || "");
-  const [selectedSize, setSelectedSize] = useState<string>(product.attributes?.sizes?.[0] || "");
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
-
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (product) {
-      addRecentlyViewed(product);
-      if (product.attributes?.color?.[0]) setSelectedColor(product.attributes.color[0]);
-      if (product.attributes?.sizes?.[0]) setSelectedSize(product.attributes.sizes[0]);
+    if (slug) {
+      fetchDbProductBySlug(slug, language).then((prod) => {
+        if (prod) {
+          setProduct(prod);
+          addRecentlyViewed(prod);
+          if (prod.attributes?.color?.[0]) setSelectedColor(prod.attributes.color[0]);
+          if (prod.attributes?.sizes?.[0]) setSelectedSize(prod.attributes.sizes[0]);
+        }
+      });
+
+      fetchDbProducts(language).then((prods) => {
+        setRelatedProducts(prods.filter((p) => p.slug !== slug).slice(0, 6));
+      });
     }
-  }, [slug]);
+  }, [slug, language]);
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
+        <MarketplaceHeader />
+        <main className="max-w-wide mx-auto w-full px-4 py-16 flex items-center justify-center">
+          <div className="text-center font-bold text-slate-500">Ürün bilgileri yükleniyor...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const favActive = isFavorite(product.id);
   const gallery = product.galleryImages && product.galleryImages.length > 0 ? product.galleryImages : [product.imageUrl];
@@ -62,9 +80,6 @@ export default function ProductDetailPage() {
     addToCart(product, quantity, selectedColor, selectedSize);
     router.push("/cart");
   };
-
-  const relatedProducts = catalog.filter((p) => p.id !== product.id && p.categorySlug === product.categorySlug).slice(0, 6);
-  const fallbackRelated = relatedProducts.length > 0 ? relatedProducts : catalog.filter((p) => p.id !== product.id).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
@@ -199,12 +214,13 @@ export default function ProductDetailPage() {
                   <span className="px-4 py-1.5 text-xs font-bold text-text-main">{quantity}</span>
                   <button
                     type="button"
-                    onClick={() => setQuantity((q) => q + 1)}
+                    onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                     className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 font-bold"
                   >
                     +
                   </button>
                 </div>
+                <span className="text-xs font-semibold text-slate-500">(Stok: {product.stock} adet)</span>
               </div>
             </div>
 
@@ -215,16 +231,18 @@ export default function ProductDetailPage() {
                   variant="add-to-cart"
                   size="lg"
                   onClick={handleAddToCart}
+                  disabled={product.stock <= 0}
                   className="flex-1 font-extrabold shadow-md py-3"
                 >
                   <ShoppingBag className="w-5 h-5 mr-2" />
-                  <span>{t("productCard.addToCart")}</span>
+                  <span>{product.stock > 0 ? t("productCard.addToCart") : "Stok Tükendi"}</span>
                 </Button>
 
                 <Button
                   variant="primary"
                   size="lg"
                   onClick={handleBuyNow}
+                  disabled={product.stock <= 0}
                   className="flex-1 font-extrabold bg-slate-900 hover:bg-slate-800 shadow-md py-3"
                 >
                   <span>Hemen Satın Al</span>
@@ -309,27 +327,15 @@ export default function ProductDetailPage() {
           )}
         </div>
 
-        {/* Related Products Carousel Grid */}
+        {/* Related Products Grid */}
         <div className="flex flex-col gap-4">
           <h2 className="text-xl font-bold text-text-main tracking-tight">Benzer Ürünler</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {fallbackRelated.map((p) => (
+            {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </div>
-
-        {/* Recently Viewed Products */}
-        {recentlyViewed.length > 1 && (
-          <div className="flex flex-col gap-4 pt-4 border-t border-slate-200">
-            <h2 className="text-xl font-bold text-text-main tracking-tight">Son İncelediğiniz Ürünler</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {recentlyViewed.slice(0, 6).map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </div>
-        )}
       </main>
 
       <Footer />

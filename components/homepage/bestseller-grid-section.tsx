@@ -1,12 +1,18 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { getMockProducts } from "@/lib/mock-data";
+import { fetchDbProducts, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { ProductCard } from "@/components/marketplace/product-card";
 import { Sparkles, ArrowRight } from "lucide-react";
 
 export const BestsellerGridSection: React.FC = () => {
   const { language, t } = useLanguage();
-  const products = getMockProducts(language);
+  const [products, setProducts] = useState<DetailedProductMock[]>([]);
+
+  useEffect(() => {
+    fetchDbProducts(language).then((prods) => setProducts(prods));
+  }, [language]);
 
   return (
     <section className="w-full bg-white py-10 border-t border-slate-200">
@@ -21,7 +27,7 @@ export const BestsellerGridSection: React.FC = () => {
               {t("homepage.bestsellerSubtitle")}
             </p>
           </div>
-          <a href="#" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+          <a href="/search" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
             <span>{t("homepage.viewAll")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </a>

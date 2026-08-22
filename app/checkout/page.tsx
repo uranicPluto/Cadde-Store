@@ -91,9 +91,33 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      // Process payment through mock adapter
+      // 1. Send Order to Server API for DB Transaction & Stock Validation
+      const apiRes = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((i) => ({
+            id: i.id,
+            quantity: i.quantity,
+            selectedColor: i.selectedColor,
+            selectedSize: i.selectedSize,
+            product: i.product,
+          })),
+          shippingAddress: activeAddress,
+          customerInfo: customerData,
+        }),
+      });
+
+      const apiData = await apiRes.json();
+      if (!apiRes.ok || !apiData.success) {
+        setErrorMsg(apiData.error || (language === "en" ? "Order placement failed." : "Sipariş işlenirken hata oluştu."));
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 2. Payment Adapter Simulation
       const paymentRes = await paymentAdapter.processPayment({
-        orderId: generateOrderNumber(),
+        orderId: apiData.order.orderNumber,
         amount: calculation.grandTotal,
         currency,
         paymentMethod: paymentType,
@@ -106,10 +130,10 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Build & Save Order Record
+      // 3. Save Order to Client History & Clear Cart
       const orderRecord: OrderRecord = {
-        orderId: `ORD-${Date.now()}`,
-        orderNumber: generateOrderNumber(),
+        orderId: apiData.order.id,
+        orderNumber: apiData.order.orderNumber,
         createdAt: new Date().toISOString(),
         customerInfo: customerData,
         shippingAddress: activeAddress,
@@ -123,11 +147,7 @@ export default function CheckoutPage() {
       };
 
       saveOrderToHistory(orderRecord);
-
-      // Clear Cart
       clearCart();
-
-      // Redirect to Order Success page
       router.push("/order/success");
     } catch (e) {
       console.error("Order processing failed", e);
@@ -143,7 +163,7 @@ export default function CheckoutPage() {
       {/* Error Toast */}
       {errorMsg && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200">
-          <Toast type="error" title="Hata" message={errorMsg} onClose={() => setErrorMsg(null)} />
+          <Toast type="error" title="Sipariş Hatası" message={errorMsg} onClose={() => setErrorMsg(null)} />
         </div>
       )}
 

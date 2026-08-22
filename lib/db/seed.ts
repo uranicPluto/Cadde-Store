@@ -4,9 +4,9 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Seeding database for Stage 09...");
 
-  // Password hashes (Password: Password123!)
+  // Common password hash for test accounts (Password: Password123!)
   const passwordHash = await bcrypt.hash("Password123!", 10);
 
   // 1. Admin User
@@ -16,14 +16,14 @@ async function main() {
     create: {
       email: "admin@cadde-store.com",
       passwordHash,
-      firstName: "Admin",
-      lastName: "User",
+      firstName: "Sistem",
+      lastName: "Yöneticisi",
       role: "ADMIN",
     },
   });
 
-  // 2. Seller User & Profile
-  const sellerUser = await prisma.user.upsert({
+  // 2. Seller User 1 & Profile
+  const sellerUser1 = await prisma.user.upsert({
     where: { email: "seller@cadde-store.com" },
     update: {},
     create: {
@@ -36,11 +36,11 @@ async function main() {
     },
   });
 
-  const sellerProfile = await prisma.seller.upsert({
+  const sellerProfile1 = await prisma.seller.upsert({
     where: { slug: "trend-fashion-magazasi" },
     update: {},
     create: {
-      userId: sellerUser.id,
+      userId: sellerUser1.id,
       storeName: "Trend Fashion Mağazası",
       slug: "trend-fashion-magazasi",
       description: "Kadın ve erkek giyimde en son moda kıyafetler, aksesuarlar ve özel tasarım koleksiyonlar.",
@@ -48,6 +48,36 @@ async function main() {
       rating: 4.8,
       verified: true,
       followers: 1240,
+      status: "ACTIVE",
+    },
+  });
+
+  // Seller User 2 & Profile
+  const sellerUser2 = await prisma.user.upsert({
+    where: { email: "tech@cadde-store.com" },
+    update: {},
+    create: {
+      email: "tech@cadde-store.com",
+      passwordHash,
+      firstName: "Cadde",
+      lastName: "Teknoloji",
+      phone: "0850 987 6543",
+      role: "SELLER",
+    },
+  });
+
+  const sellerProfile2 = await prisma.seller.upsert({
+    where: { slug: "cadde-teknoloji" },
+    update: {},
+    create: {
+      userId: sellerUser2.id,
+      storeName: "Cadde Teknoloji & Aksesuar",
+      slug: "cadde-teknoloji",
+      description: "Orijinal kulaklıklar, akıllı saatler, telefon aksesuarları ve en yeni teknolojik cihazlar.",
+      logo: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=80",
+      rating: 4.9,
+      verified: true,
+      followers: 890,
       status: "ACTIVE",
     },
   });
@@ -93,12 +123,25 @@ async function main() {
     },
   });
 
+  const catElectronics = await prisma.category.upsert({
+    where: { slug: "electronics" },
+    update: {},
+    create: {
+      slug: "electronics",
+      nameTR: "Elektronik",
+      nameEN: "Electronics",
+      descriptionTR: "Akıllı telefonlar, kulaklıklar ve bilgisayarlar.",
+      descriptionEN: "Smartphones, headphones, and laptops.",
+      imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80",
+    },
+  });
+
   // 5. Products
   const prod1 = await prisma.product.upsert({
     where: { slug: "oversize-pamuk-tisort" },
     update: {},
     create: {
-      sellerId: sellerProfile.id,
+      sellerId: sellerProfile1.id,
       categoryId: catMen.id,
       name: "Oversize %100 Pamuklu Erkek Tişört",
       slug: "oversize-pamuk-tisort",
@@ -113,6 +156,52 @@ async function main() {
       imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
       colors: JSON.stringify(["Siyah", "Beyaz", "Gri"]),
       sizes: JSON.stringify(["S", "M", "L", "XL"]),
+      status: "ACTIVE",
+    },
+  });
+
+  const prod2 = await prisma.product.upsert({
+    where: { slug: "cicek-desenli-yazlik-elbise" },
+    update: {},
+    create: {
+      sellerId: sellerProfile1.id,
+      categoryId: catWomen.id,
+      name: "Çiçek Desenli Kemerli Yazlık Elbise",
+      slug: "cicek-desenli-yazlik-elbise",
+      brand: "Trend Fashion",
+      description: "Hafif vual kumaştan üretilmiş, belden bağlamalı şık çiçek desenli yazlık kadın elbise.",
+      sku: "CS-WDR-002",
+      price: 599.9,
+      originalPrice: 799.9,
+      stock: 28,
+      rating: 4.9,
+      reviewCount: 52,
+      imageUrl: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80",
+      colors: JSON.stringify(["Kırmızı", "Mavi", "Desenli"]),
+      sizes: JSON.stringify(["36", "38", "40"]),
+      status: "ACTIVE",
+    },
+  });
+
+  const prod3 = await prisma.product.upsert({
+    where: { slug: "kablosuz-anc-kulaklik" },
+    update: {},
+    create: {
+      sellerId: sellerProfile2.id,
+      categoryId: catElectronics.id,
+      name: "Bluetooth 5.3 Aktif Gürültü Önleyici Kulaklık",
+      slug: "kablosuz-anc-kulaklik",
+      brand: "SoundMaster",
+      description: "40 saat pil ömrü, ANC aktif gürültü engelleme teknolojisi ve ergo dinamik kulak süngerleri.",
+      sku: "CS-ELC-003",
+      price: 1299.0,
+      originalPrice: 1699.0,
+      stock: 15,
+      rating: 4.8,
+      reviewCount: 19,
+      imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
+      colors: JSON.stringify(["Mat Siyah", "Gümüş"]),
+      sizes: JSON.stringify(["Standart"]),
       status: "ACTIVE",
     },
   });
@@ -142,7 +231,50 @@ async function main() {
     },
   });
 
-  // 7. Platform Settings
+  await prisma.coupon.upsert({
+    where: { code: "FREESHIP" },
+    update: {},
+    create: {
+      code: "FREESHIP",
+      type: "FREE_SHIPPING",
+      value: 34.9,
+      minimumOrder: 200,
+      active: true,
+    },
+  });
+
+  // 7. Customer Address
+  await prisma.address.createMany({
+    data: [
+      {
+        userId: customer.id,
+        title: "Ev Adresi",
+        firstName: "Ahmet",
+        lastName: "Yılmaz",
+        phone: "0532 123 4567",
+        email: "customer@cadde-store.com",
+        city: "İstanbul",
+        district: "Kadıköy",
+        addressLine: "Caferağa Mah. Moda Cad. No: 42 D: 5",
+        country: "Türkiye",
+        isDefault: true,
+      },
+    ],
+  });
+
+  // 8. Reviews
+  await prisma.review.create({
+    data: {
+      productId: prod1.id,
+      userId: customer.id,
+      rating: 5,
+      comment: "Kumaşı ve kalıbı mükemmel! Yıkandıktan sonra hiç çekme yapmadı.",
+      status: "PUBLISHED",
+      sellerReply: "Güzel yorumunuz için çok teşekkür ederiz, keyifle kullanmanız dileğiyle!",
+    },
+  });
+
+  // 9. Platform Settings
   await prisma.platformSettings.upsert({
     where: { id: "default" },
     update: {},
@@ -158,7 +290,7 @@ async function main() {
     },
   });
 
-  console.log("Database seeded successfully!");
+  console.log("Database seeded successfully with rich Stage 09 catalog!");
 }
 
 main()
