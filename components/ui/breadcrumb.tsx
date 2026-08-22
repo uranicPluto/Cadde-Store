@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ChevronRight, Home } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
@@ -21,13 +22,14 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
       aria-label="Breadcrumb"
       className={cn("flex items-center gap-1.5 text-xs text-text-muted overflow-x-auto no-scrollbar py-1", className)}
     >
-      <a
-        href="#"
+      {/* Home Icon & Text Link - Sends directly to / (Home Page) */}
+      <Link
+        href="/"
         className="inline-flex items-center gap-1 hover:text-primary transition-colors shrink-0"
       >
         <Home className="w-3.5 h-3.5" />
         <span>{t("breadcrumb.home")}</span>
-      </a>
+      </Link>
 
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
@@ -40,12 +42,12 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
                 {item.label}
               </span>
             ) : (
-              <a
-                href={item.href || "#"}
+              <Link
+                href={item.href || "/"}
                 className="hover:text-primary transition-colors shrink-0"
               >
                 {item.label}
-              </a>
+              </Link>
             )}
           </React.Fragment>
         );
