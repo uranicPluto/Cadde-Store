@@ -17,6 +17,8 @@ import {
   Palette,
   HeartHandshake,
   Percent,
+  Flame,
+  Truck,
 } from "lucide-react";
 
 export const BrandQuickStrip: React.FC = () => {
@@ -123,20 +125,33 @@ export const BrandQuickStrip: React.FC = () => {
       icon: Coins,
       ringColor: "border-amber-400 bg-amber-100 text-amber-800",
     },
+    {
+      label: isEn ? "Flash Deals" : "Flaş Satışlar",
+      href: "/search?q=flash",
+      icon: Flame,
+      badge: "Flaş",
+      ringColor: "border-rose-500 bg-rose-100 text-rose-700",
+    },
+    {
+      label: isEn ? "Free Delivery" : "Hızlı Kargo",
+      href: "/shipping",
+      icon: Truck,
+      ringColor: "border-emerald-400 bg-emerald-50 text-emerald-600",
+    },
   ];
 
   return (
-    <div className="w-full bg-slate-50/80 py-6 border-b border-slate-200 select-none">
-      <div className="max-w-wide mx-auto px-4 sm:px-6 flex flex-col gap-5">
-        {/* Section Title: Brands for You (Matches Reference Image 2 & 3) */}
+    <div className="w-full bg-slate-50/80 py-6 border-b border-slate-200 select-none overflow-hidden">
+      <div className="max-w-wide mx-auto px-4 sm:px-6 flex flex-col gap-5 w-full">
+        {/* Section Title: Brands for You */}
         <div className="flex items-center justify-between">
           <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
             {isEn ? "Brands for You" : "Sana Özel Markalar"}
           </h3>
         </div>
 
-        {/* Row 1: Squarish Brand Logo Cards Carousel with Left/Right Arrow Buttons (Matches Reference Image 2 & 3) */}
-        <div className="relative group">
+        {/* Row 1: Squarish Brand Logo Cards Carousel with Left/Right Arrow Buttons */}
+        <div className="relative group w-full">
           <button
             type="button"
             onClick={scrollLeft}
@@ -148,7 +163,7 @@ export const BrandQuickStrip: React.FC = () => {
 
           <div
             ref={scrollRef}
-            className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 scroll-smooth"
+            className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 scroll-smooth w-full"
           >
             {featuredBrands.map((b) => (
               <Link
@@ -173,19 +188,19 @@ export const BrandQuickStrip: React.FC = () => {
           </button>
         </div>
 
-        {/* Row 2: 3D Circular Quick Link Action Buttons (Matches Reference Image 2) */}
-        <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar py-2">
+        {/* Row 2: 3D Circular Action Buttons Spanning Full Width (End to Last) */}
+        <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-2 w-full">
           {quickActions.map((qa, idx) => {
             const IconComponent = qa.icon;
             return (
               <Link
                 key={idx}
                 href={qa.href}
-                className="flex flex-col items-center gap-2 group shrink-0 select-none w-20"
+                className="flex flex-col items-center gap-2 group shrink-0 select-none flex-1 min-w-[70px]"
               >
                 <div className="relative">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 ${qa.ringColor} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform`}>
-                    <IconComponent className="w-6 h-6 stroke-[2]" />
+                  <div className={`w-13 h-13 sm:w-15 sm:h-15 rounded-full border-2 ${qa.ringColor} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform`}>
+                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
                   </div>
                   {qa.badge && (
                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-rose-600 text-white text-[8px] font-black px-1.5 py-0.2 rounded-full uppercase shadow-2xs whitespace-nowrap">
