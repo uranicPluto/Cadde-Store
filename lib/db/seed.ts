@@ -136,73 +136,180 @@ async function main() {
     },
   });
 
+  // 4.1 Brands
+  const brandNike = await prisma.brand.upsert({
+    where: { slug: "nike" },
+    update: {},
+    create: {
+      name: "Nike",
+      slug: "nike",
+      logoUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=200&q=80",
+      descriptionTR: "Dünyaca ünlü spor giyim, ayakkabı ve ekipman markası.",
+      descriptionEN: "World-renowned sportswear, footwear, and equipment brand.",
+      isFeatured: true,
+      status: "ACTIVE",
+    },
+  });
+
+  const brandZara = await prisma.brand.upsert({
+    where: { slug: "zara" },
+    update: {},
+    create: {
+      name: "Zara",
+      slug: "zara",
+      logoUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=200&q=80",
+      descriptionTR: "Özgün tasarımlar ve trend giyim koleksiyonları.",
+      descriptionEN: "Original designs and trending apparel collections.",
+      isFeatured: true,
+      status: "ACTIVE",
+    },
+  });
+
+  const brandApple = await prisma.brand.upsert({
+    where: { slug: "apple" },
+    update: {},
+    create: {
+      name: "Apple",
+      slug: "apple",
+      logoUrl: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=200&q=80",
+      descriptionTR: "Yenilikçi akıllı telefon, tablet ve bilgisayar teknolojileri.",
+      descriptionEN: "Innovative smartphone, tablet, and computer technology.",
+      isFeatured: true,
+      status: "ACTIVE",
+    },
+  });
+
+  const brandSamsung = await prisma.brand.upsert({
+    where: { slug: "samsung" },
+    update: {},
+    create: {
+      name: "Samsung",
+      slug: "samsung",
+      logoUrl: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=200&q=80",
+      descriptionTR: "Akıllı cihazlar, giyilebilir teknoloji ve ev aletleri.",
+      descriptionEN: "Smart devices, wearables, and consumer electronics.",
+      isFeatured: true,
+      status: "ACTIVE",
+    },
+  });
+
+  const brandKaraca = await prisma.brand.upsert({
+    where: { slug: "karaca" },
+    update: {},
+    create: {
+      name: "Karaca",
+      slug: "karaca",
+      logoUrl: "https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=200&q=80",
+      descriptionTR: "Mutfak, sofra ve ev tekstili ürünleri.",
+      descriptionEN: "Kitchenware, tableware, and home textile collections.",
+      isFeatured: true,
+      status: "ACTIVE",
+    },
+  });
+
   // 5. Products
   const prod1 = await prisma.product.upsert({
-    where: { slug: "oversize-pamuk-tisort" },
-    update: {},
+    where: { slug: "oversize-pamuklu-erkek-tisort" },
+    update: { brandId: brandZara.id },
     create: {
       sellerId: sellerProfile1.id,
       categoryId: catMen.id,
-      name: "Oversize %100 Pamuklu Erkek Tişört",
-      slug: "oversize-pamuk-tisort",
-      brand: "Trendyol Collection",
-      description: "Rahat kesim, nefes alabilen %100 pamuklu kumaştan üretilmiş premium günlük erkek tişört.",
-      sku: "CS-MTS-001",
-      price: 249.9,
-      originalPrice: 349.9,
-      stock: 45,
-      rating: 4.7,
-      reviewCount: 38,
+      brandId: brandZara.id,
+      name: "Oversize Pamuklu Erkek Tişört",
+      slug: "oversize-pamuklu-erkek-tisort",
+      description: "Yüksek kaliteli %100 pamuklu kumaştan üretilmiş, rahat kalıp nefes alabilen oversize tişört.",
+      brand: "Zara",
+      sku: "TSH-OVR-001",
+      price: 299.9,
+      originalPrice: 449.9,
+      stock: 50,
+      rating: 4.9,
+      reviewCount: 42,
       imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
-      colors: JSON.stringify(["Siyah", "Beyaz", "Gri"]),
+      colors: JSON.stringify(["Beyaz", "Siyah", "Haki"]),
       sizes: JSON.stringify(["S", "M", "L", "XL"]),
       status: "ACTIVE",
     },
   });
 
   const prod2 = await prisma.product.upsert({
-    where: { slug: "cicek-desenli-yazlik-elbise" },
-    update: {},
-    create: {
-      sellerId: sellerProfile1.id,
-      categoryId: catWomen.id,
-      name: "Çiçek Desenli Kemerli Yazlık Elbise",
-      slug: "cicek-desenli-yazlik-elbise",
-      brand: "Trend Fashion",
-      description: "Hafif vual kumaştan üretilmiş, belden bağlamalı şık çiçek desenli yazlık kadın elbise.",
-      sku: "CS-WDR-002",
-      price: 599.9,
-      originalPrice: 799.9,
-      stock: 28,
-      rating: 4.9,
-      reviewCount: 52,
-      imageUrl: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80",
-      colors: JSON.stringify(["Kırmızı", "Mavi", "Desenli"]),
-      sizes: JSON.stringify(["36", "38", "40"]),
-      status: "ACTIVE",
-    },
-  });
-
-  const prod3 = await prisma.product.upsert({
-    where: { slug: "kablosuz-anc-kulaklik" },
-    update: {},
+    where: { slug: "kablosuz-anc-bluetooth-kulaklik" },
+    update: { brandId: brandApple.id },
     create: {
       sellerId: sellerProfile2.id,
       categoryId: catElectronics.id,
-      name: "Bluetooth 5.3 Aktif Gürültü Önleyici Kulaklık",
-      slug: "kablosuz-anc-kulaklik",
-      brand: "SoundMaster",
-      description: "40 saat pil ömrü, ANC aktif gürültü engelleme teknolojisi ve ergo dinamik kulak süngerleri.",
-      sku: "CS-ELC-003",
-      price: 1299.0,
-      originalPrice: 1699.0,
-      stock: 15,
+      brandId: brandApple.id,
+      name: "Aktif Gürültü Engelleyici Kablosuz Kulaklık",
+      slug: "kablosuz-anc-bluetooth-kulaklik",
+      description: "40 saate varan pil ömrü, hibrit aktif gürültü engelleme (ANC) ve kristal netliğinde ses kalitesi.",
+      brand: "Apple",
+      sku: "TECH-ANC-002",
+      price: 1499.0,
+      originalPrice: 1999.0,
+      stock: 25,
       rating: 4.8,
       reviewCount: 19,
       imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
       colors: JSON.stringify(["Mat Siyah", "Gümüş"]),
       sizes: JSON.stringify(["Standart"]),
       status: "ACTIVE",
+    },
+  });
+
+  // 5.1 Homepage CMS Sections & Banners
+  const heroSection = await prisma.homepageSection.upsert({
+    where: { id: "hero-main-section" },
+    update: {},
+    create: {
+      id: "hero-main-section",
+      titleTR: "Ana Sayfa Vitrin Hero",
+      titleEN: "Homepage Main Hero",
+      type: "HERO",
+      orderIndex: 0,
+      active: true,
+      configJson: JSON.stringify({ autoplay: true, intervalMs: 5000 }),
+    },
+  });
+
+  await prisma.banner.upsert({
+    where: { id: "banner-autumn-sale" },
+    update: {},
+    create: {
+      id: "banner-autumn-sale",
+      sectionId: heroSection.id,
+      titleTR: "Büyük Sonbahar Fırsatları",
+      titleEN: "Big Autumn Sale Deals",
+      subtitleTR: "Seçili Moda ve Ayakkabı Ürünlerinde Net %50 İndirim",
+      subtitleEN: "Flat 50% Off Selected Fashion & Footwear",
+      imageUrlDesktop: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80",
+      targetType: "CATEGORY",
+      targetValue: "/category/women",
+      badgeTextTR: "Sınırlı Süre",
+      badgeTextEN: "Limited Time",
+      orderIndex: 0,
+      active: true,
+    },
+  });
+
+  await prisma.banner.upsert({
+    where: { id: "banner-tech-days" },
+    update: {},
+    create: {
+      id: "banner-tech-days",
+      sectionId: heroSection.id,
+      titleTR: "Elektronik Günleri Başladı!",
+      titleEN: "Electronics Days Started!",
+      subtitleTR: "Telefon, Laptop ve Kulaklıklarda Peşin Fiyatına 6 Taksit",
+      subtitleEN: "6 Installments on Phones, Laptops & Headphones",
+      imageUrlDesktop: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
+      targetType: "CATEGORY",
+      targetValue: "/category/electronics",
+      badgeTextTR: "Vade Farksız Taksit",
+      badgeTextEN: "0% Interest",
+      orderIndex: 1,
+      active: true,
     },
   });
 

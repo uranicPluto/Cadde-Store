@@ -10,8 +10,11 @@ import {
   ShoppingCart,
   Users,
   Grid,
+  Award,
+  Sliders,
   Tag,
   Star,
+  FileText,
   Settings,
   ArrowLeft,
   ShieldCheck,
@@ -30,8 +33,11 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
     { href: "/admin/orders", icon: ShoppingCart, label: t("admin.navigation.orders") },
     { href: "/admin/customers", icon: Users, label: t("admin.navigation.customers") },
     { href: "/admin/categories", icon: Grid, label: t("admin.navigation.categories") },
+    { href: "/admin/brands", icon: Award, label: t("admin.navigation.brands") },
+    { href: "/admin/cms", icon: Sliders, label: t("admin.navigation.cms") },
     { href: "/admin/coupons", icon: Tag, label: t("admin.navigation.coupons") },
     { href: "/admin/reviews", icon: Star, label: t("admin.navigation.reviews") },
+    { href: "/admin/audit", icon: FileText, label: t("admin.navigation.audit") },
     { href: "/admin/settings", icon: Settings, label: t("admin.navigation.settings") },
   ];
 

@@ -14,6 +14,8 @@ export async function getSession(): Promise<UserSessionPayload | null> {
   }
 }
 
+export const getSessionUser = getSession;
+
 export function getSessionCookieOptions() {
   return {
     name: SESSION_COOKIE_NAME,

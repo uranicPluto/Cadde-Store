@@ -19,12 +19,14 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  sellerProfile Seller?
-  orders        Order[]
-  addresses     Address[]
-  favorites     Favorite[]
-  reviews       Review[]
-  redemptions   CouponRedemption[]
+  sellerProfile  Seller?
+  orders         Order[]
+  addresses      Address[]
+  favorites      Favorite[]
+  reviews        Review[]
+  redemptions    CouponRedemption[]
+  returnRequests ReturnRequest[]
+  notifications  Notification[]
 }
 
 model Seller {
@@ -46,8 +48,9 @@ model Seller {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  products    Product[]
-  orderGroups OrderGroup[]
+  products       Product[]
+  orderGroups    OrderGroup[]
+  returnRequests ReturnRequest[]
 }
 
 model Category {
@@ -66,12 +69,30 @@ model Category {
   products Product[]
 }
 
+model Brand {
+  id            String    @id @default(uuid())
+  name          String
+  slug          String    @unique
+  logoUrl       String
+  bannerUrl     String?
+  descriptionTR String?
+  descriptionEN String?
+  isFeatured    Boolean   @default(false)
+  status        String    @default("ACTIVE") // ACTIVE | INACTIVE
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  products      Product[]
+}
+
 model Product {
   id            String   @id @default(uuid())
   sellerId      String
   seller        Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   categoryId    String
   category      Category @relation(fields: [categoryId], references: [id])
+  brandId       String?
+  brandRef      Brand?   @relation(fields: [brandId], references: [id])
   name          String
   slug          String   @unique
   description   String
@@ -110,43 +131,49 @@ model Order {
   paymentStatus           String   @default("paid")
   paymentMethod           String   @default("credit_card")
   trackingNumber          String?
+  carrierName             String?  @default("Yurtiçi Kargo")
   estimatedDelivery       String?
   shippingAddressSnapshot String // JSON string of address
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
-  orderItems    OrderItem[]
-  orderGroups   OrderGroup[]
-  statusHistory OrderStatusHistory[]
-  redemptions   CouponRedemption[]
+  orderItems     OrderItem[]
+  orderGroups    OrderGroup[]
+  statusHistory  OrderStatusHistory[]
+  redemptions    CouponRedemption[]
+  returnRequests ReturnRequest[]
 }
 
 model OrderGroup {
-  id        String   @id @default(uuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  sellerId  String
-  seller    Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  status    String   @default("CONFIRMED")
-  subtotal  Float
-  createdAt DateTime @default(now())
+  id              String   @id @default(uuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sellerId        String
+  seller          Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  status          String   @default("CONFIRMED")
+  subtotal        Float
+  carrierName     String?  @default("Yurtiçi Kargo")
+  trackingNumber  String?
+  createdAt       DateTime @default(now())
 
   items OrderItem[]
 }
 
 model OrderItem {
-  id            String      @id @default(uuid())
-  orderId       String
-  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderGroupId  String?
-  orderGroup    OrderGroup? @relation(fields: [orderGroupId], references: [id], onDelete: Cascade)
-  productId     String
-  product       Product     @relation(fields: [productId], references: [id])
-  quantity      Int
-  price         Float
-  selectedColor String?
-  selectedSize  String?
-  createdAt     DateTime    @default(now())
+  id             String          @id @default(uuid())
+  orderId        String
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderGroupId   String?
+  orderGroup     OrderGroup?     @relation(fields: [orderGroupId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product         @relation(fields: [productId], references: [id])
+  quantity       Int
+  price          Float
+  selectedColor  String?
+  selectedSize   String?
+  createdAt      DateTime        @default(now())
+
+  returnRequests ReturnRequest[]
 }
 
 model OrderStatusHistory {
@@ -243,3 +270,89 @@ model PlatformSettings {
   freeShippingThreshold       Float    @default(200.0)
   updatedAt                   DateTime @updatedAt
 }
+
+model HomepageSection {
+  id          String    @id @default(uuid())
+  titleTR     String
+  titleEN     String
+  type        String    @default("HERO") // HERO | BANNER_STRIP | FLASH_DEALS | PRODUCT_CAROUSEL | CATEGORY_GRID | BRAND_STRIP | STORE_HIGHLIGHTS
+  orderIndex  Int       @default(0)
+  active      Boolean   @default(true)
+  configJson  String    @default("{}")
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  banners     Banner[]
+}
+
+model Banner {
+  id              String           @id @default(uuid())
+  sectionId       String?
+  section         HomepageSection? @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  titleTR         String?
+  titleEN         String?
+  subtitleTR      String?
+  subtitleEN      String?
+  imageUrlDesktop String
+  imageUrlMobile  String?
+  targetType      String           @default("CATEGORY") // CATEGORY | PRODUCT | BRAND | SELLER | URL
+  targetValue     String           @default("/")
+  badgeTextTR     String?
+  badgeTextEN     String?
+  orderIndex      Int              @default(0)
+  active          Boolean          @default(true)
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ReturnRequest {
+  id             String      @id @default(uuid())
+  orderId        String
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItemId    String
+  orderItem      OrderItem   @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sellerId       String
+  seller         Seller      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  reason         String
+  status         String      @default("PENDING") // PENDING | APPROVED | REJECTED | CARGO_RECEIVED | REFUNDED
+  refundAmount   Float
+  evidenceImages String      @default("[]") // JSON string of URLs
+  sellerNote     String?
+  adminNote      String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titleTR   String
+  titleEN   String
+  messageTR String
+  messageEN String
+  type      String   @default("ORDER") // ORDER | PROMOTION | SYSTEM | SELLER
+  linkUrl   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  actorId      String?
+  actorEmail   String?
+  actorRole    String?
+  action       String   // e.g. SELLER_APPROVED, PRODUCT_STATUS_CHANGED, SETTINGS_UPDATED
+  entityType   String   // SELLER | PRODUCT | ORDER | CATEGORY | COUPON | SETTINGS | BRAND | CMS
+  entityId     String?
+  metadataJson String   @default("{}")
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+}
+

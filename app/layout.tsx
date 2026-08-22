@@ -6,8 +6,10 @@ import { RecentlyViewedProvider } from "@/lib/recently-viewed/recently-viewed-co
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Cadde Store — Turkish Multi-Vendor Marketplace",
-  description: "Turkish Multi-Vendor E-Commerce Marketplace Frontend & Reusable Design System",
+  title: "Cadde Store — Türkiye'nin Çok Satıcılı Pazaryeri",
+  description: "Türkiye'nin en hızlı büyüyen çok satıcılı e-ticaret pazaryeri platformu. Milyonlarca ürün, hızlı teslimat ve güvenli ödeme.",
+  manifest: "/manifest.json",
+  themeColor: "#ea580c",
 };
 
 export default function RootLayout({

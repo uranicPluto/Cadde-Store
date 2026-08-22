@@ -1,24 +1,58 @@
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { getMockBanners, getMockCategories } from "@/lib/mock-data";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { ChevronLeft, ChevronRight, ArrowRight, Tag, Flame, ShieldAlert, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, Tag, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const HeroSection: React.FC = () => {
-  const { language, t } = useLanguage();
-  const banners = getMockBanners(language);
+  const { language } = useLanguage();
+  const isEn = language === "en";
+  const defaultBanners = getMockBanners(language);
   const categories = getMockCategories(language);
 
+  const [banners, setBanners] = useState(defaultBanners);
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
+    async function loadCmsBanners() {
+      try {
+        const res = await fetch("/api/cms/sections");
+        const data = await res.json();
+        if (data.sections && data.sections.length > 0) {
+          const hero = data.sections.find((s: any) => s.type === "HERO") || data.sections[0];
+          if (hero && hero.banners && hero.banners.length > 0) {
+            setBanners(
+              hero.banners.map((b: any, i: number) => ({
+                id: b.id,
+                title: isEn ? b.titleEN || b.titleTR : b.titleTR || b.titleEN,
+                subtitle: isEn ? b.subtitleEN || b.subtitleTR : b.subtitleTR || b.subtitleEN,
+                ctaText: isEn ? "Explore Now" : "Fırsatı İncele",
+                badge: isEn ? b.badgeTextEN || b.badgeTextTR : b.badgeTextTR || b.badgeTextEN,
+                bgGradient: i % 2 === 0 ? "from-orange-500 to-amber-600" : "from-indigo-600 to-purple-700",
+                imageUrl: b.imageUrlDesktop,
+                targetUrl: b.targetValue || "/category/women",
+              }))
+            );
+          }
+        }
+      } catch (e) {
+        // Fall back to default banners
+      }
+    }
+    loadCmsBanners();
+  }, [language, isEn]);
+
+  useEffect(() => {
+    if (banners.length === 0) return;
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % banners.length);
     }, 5000);
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  const currentBanner = banners[activeIndex] || banners[0];
+  const currentBanner = banners[activeIndex] || banners[0] || defaultBanners[0];
+  const targetUrl = (currentBanner as any).targetUrl || "/category/women";
 
   return (
     <section className="w-full bg-slate-100 pt-4 pb-6">
@@ -49,14 +83,16 @@ export const HeroSection: React.FC = () => {
             <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed max-w-lg">
               {currentBanner.subtitle}
             </p>
-            <Button
-              variant="primary"
-              size="lg"
-              className="mt-2 font-bold shadow-lg hover:scale-105 transition-transform"
-            >
-              <span>{currentBanner.ctaText}</span>
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+            <Link href={targetUrl}>
+              <Button
+                variant="primary"
+                size="lg"
+                className="mt-2 font-bold shadow-lg hover:scale-105 transition-transform"
+              >
+                <span>{currentBanner.ctaText}</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
           </div>
 
           {/* Slide Arrow Navigation */}

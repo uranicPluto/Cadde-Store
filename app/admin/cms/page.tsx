@@ -1,0 +1,678 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { AdminHeader } from "@/components/admin/admin-header";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { useLanguage } from "@/lib/i18n/language-context";
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import {
+  Sliders,
+  Plus,
+  Edit2,
+  Trash2,
+  Eye,
+  ArrowUp,
+  ArrowDown,
+  Layers,
+  Image as ImageIcon,
+  Link2,
+  Calendar,
+  Sparkles,
+  CheckCircle,
+} from "lucide-react";
+import { Footer } from "@/components/layout/footer";
+
+interface BannerItem {
+  id: string;
+  sectionId?: string | null;
+  titleTR?: string | null;
+  titleEN?: string | null;
+  subtitleTR?: string | null;
+  subtitleEN?: string | null;
+  imageUrlDesktop: string;
+  imageUrlMobile?: string | null;
+  targetType: string;
+  targetValue: string;
+  badgeTextTR?: string | null;
+  badgeTextEN?: string | null;
+  orderIndex: number;
+  active: boolean;
+}
+
+interface SectionItem {
+  id: string;
+  titleTR: string;
+  titleEN: string;
+  type: string;
+  orderIndex: number;
+  active: boolean;
+  configJson: string;
+  banners: BannerItem[];
+}
+
+export default function AdminCmsPage() {
+  const { language } = useLanguage();
+  const isEn = language === "en";
+
+  const [sections, setSections] = useState<SectionItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSectionModalOpen, setIsSectionModalOpen] = useState(false);
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [editingSection, setEditingSection] = useState<Partial<SectionItem>>({});
+  const [editingBanner, setEditingBanner] = useState<Partial<BannerItem>>({});
+  const [targetSectionId, setTargetSectionId] = useState<string>("");
+  const [previewBanner, setPreviewBanner] = useState<BannerItem | null>(null);
+
+  const fetchCmsData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/cms/sections");
+      const data = await res.json();
+      if (data.sections) {
+        setSections(data.sections);
+      }
+    } catch (e) {
+      console.error("Failed to load CMS data:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCmsData();
+  }, []);
+
+  const handleOpenAddSection = () => {
+    setEditingSection({
+      titleTR: "",
+      titleEN: "",
+      type: "HERO",
+      orderIndex: sections.length,
+      active: true,
+      configJson: "{}",
+    });
+    setIsSectionModalOpen(true);
+  };
+
+  const handleOpenAddBanner = (sectionId: string) => {
+    setTargetSectionId(sectionId);
+    setEditingBanner({
+      sectionId,
+      titleTR: "",
+      titleEN: "",
+      subtitleTR: "",
+      subtitleEN: "",
+      imageUrlDesktop: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80",
+      targetType: "CATEGORY",
+      targetValue: "/category/women",
+      badgeTextTR: "Yeni Fırsat",
+      badgeTextEN: "New Deal",
+      orderIndex: 0,
+      active: true,
+    });
+    setIsBannerModalOpen(true);
+  };
+
+  const handleSaveSection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSection.titleTR || !editingSection.titleEN) return;
+
+    try {
+      if (editingSection.id) {
+        await fetch("/api/cms/sections", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingSection),
+        });
+      } else {
+        await fetch("/api/cms/sections", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingSection),
+        });
+      }
+      await fetchCmsData();
+      setIsSectionModalOpen(false);
+    } catch (err) {
+      console.error("Save section error:", err);
+    }
+  };
+
+  const handleSaveBanner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBanner.imageUrlDesktop || !editingBanner.targetValue) return;
+
+    try {
+      if (editingBanner.id) {
+        await fetch("/api/cms/banners", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingBanner),
+        });
+      } else {
+        await fetch("/api/cms/banners", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingBanner),
+        });
+      }
+      await fetchCmsData();
+      setIsBannerModalOpen(false);
+    } catch (err) {
+      console.error("Save banner error:", err);
+    }
+  };
+
+  const handleDeleteBanner = async (bannerId: string) => {
+    if (!confirm(isEn ? "Delete this banner?" : "Bu banner'ı silmek istediğinize emin misiniz?")) return;
+    try {
+      await fetch(`/api/cms/banners?id=${bannerId}`, { method: "DELETE" });
+      await fetchCmsData();
+    } catch (err) {
+      console.error("Delete banner error:", err);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between">
+      <div>
+        <AdminHeader />
+
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-1">
+              <AdminSidebar />
+            </div>
+
+            <div className="md:col-span-3 space-y-6">
+              {/* Header Card */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-md">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                      <Sliders className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-extrabold text-white">
+                        {isEn ? "Homepage CMS & Merchandising Studio" : "Ana Sayfa CMS & Vitrin Yönetimi"}
+                      </h1>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {isEn
+                          ? "Design, schedule, and reorder public homepage banners, hero carousels, and promotional strips without code changes."
+                          : "Geliştirici müdahalesi olmadan vitrin bannerlarını, hero slaytlarını ve kampanya şeritlerini anında yönetin."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleOpenAddSection}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{isEn ? "Add New CMS Section" : "Yeni Vitrin Bölümü Ekle"}</span>
+                </Button>
+              </div>
+
+              {/* CMS Sections & Banners List */}
+              {loading ? (
+                <div className="bg-slate-950 p-12 rounded-2xl border border-slate-800 text-center text-slate-400 text-xs">
+                  <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto mb-3" />
+                  {isEn ? "Loading CMS layout..." : "Vitrin yerleşimi yükleniyor..."}
+                </div>
+              ) : sections.length === 0 ? (
+                <div className="bg-slate-950 p-12 rounded-2xl border border-slate-800 text-center text-slate-400 text-xs">
+                  <Layers className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <p className="font-bold text-sm text-slate-300">
+                    {isEn ? "No CMS Sections Configured" : "Henüz Vitrin Bölümü Eklenmemiş"}
+                  </p>
+                  <p className="mt-1 text-slate-500">
+                    {isEn ? "Click '+ Add New CMS Section' to get started." : "Başlamak için '+ Yeni Vitrin Bölümü Ekle' butonuna tıklayın."}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {sections.map((section, idx) => (
+                    <div
+                      key={section.id}
+                      className="bg-slate-950 rounded-2xl border border-slate-800 p-6 shadow-md space-y-4"
+                    >
+                      {/* Section Header */}
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 text-xs font-black flex items-center justify-center border border-slate-700">
+                            {idx + 1}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-extrabold text-white">
+                                {isEn ? section.titleEN : section.titleTR}
+                              </h3>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase">
+                                {section.type}
+                              </span>
+                              {section.active ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                  {isEn ? "Live" : "Yayında"}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                  {isEn ? "Draft / Hidden" : "Taslak"}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-400 font-mono mt-0.5">
+                              Section ID: {section.id}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => handleOpenAddBanner(section.id)}
+                            size="sm"
+                            className="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>{isEn ? "Add Banner" : "Banner Ekle"}</span>
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Section Banners Carousel / List */}
+                      {section.banners.length === 0 ? (
+                        <div className="p-6 bg-slate-900/50 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-500">
+                          {isEn ? "No banners attached to this section. Click '+ Add Banner'." : "Bu bölüme henüz banner eklenmedi. '+ Banner Ekle'ye tıklayın."}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {section.banners.map((banner) => (
+                            <div
+                              key={banner.id}
+                              className="group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between"
+                            >
+                              <div>
+                                {/* Banner Image Preview */}
+                                <div className="relative aspect-16/9 bg-slate-950 overflow-hidden">
+                                  <img
+                                    src={banner.imageUrlDesktop}
+                                    alt={banner.titleTR || "Banner"}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                  {banner.badgeTextTR && (
+                                    <span className="absolute top-2 left-2 bg-amber-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded shadow-md uppercase">
+                                      {isEn ? banner.badgeTextEN || banner.badgeTextTR : banner.badgeTextTR}
+                                    </span>
+                                  )}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                                    <button
+                                      onClick={() => {
+                                        setPreviewBanner(banner);
+                                        setIsPreviewOpen(true);
+                                      }}
+                                      className="text-[11px] font-bold text-white flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md hover:bg-black/80"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
+                                      <span>{isEn ? "Preview Full" : "Önizle"}</span>
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Banner Details */}
+                                <div className="p-3.5 space-y-1.5">
+                                  <h4 className="text-xs font-bold text-white truncate">
+                                    {isEn ? banner.titleEN || banner.titleTR : banner.titleTR || banner.titleEN}
+                                  </h4>
+                                  <p className="text-[11px] text-slate-400 line-clamp-1">
+                                    {isEn ? banner.subtitleEN || banner.subtitleTR : banner.subtitleTR || banner.subtitleEN}
+                                  </p>
+                                  <div className="flex items-center gap-1.5 text-[10px] text-indigo-400 font-mono pt-1">
+                                    <Link2 className="w-3 h-3 shrink-0" />
+                                    <span className="truncate">{banner.targetType}: {banner.targetValue}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-slate-400">
+                                  Sıra: {banner.orderIndex}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => {
+                                      setEditingBanner({ ...banner });
+                                      setIsBannerModalOpen(true);
+                                    }}
+                                    className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteBanner(banner.id)}
+                                    className="p-1.5 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* Section Create/Edit Modal */}
+      <Modal
+        isOpen={isSectionModalOpen}
+        onClose={() => setIsSectionModalOpen(false)}
+        title={isEn ? "Configure Homepage Section" : "Vitrin Bölümü Yapılandır"}
+      >
+        <form onSubmit={handleSaveSection} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Turkish Title *" : "Türkçe Bölüm Başlığı *"}
+              </label>
+              <input
+                type="text"
+                required
+                value={editingSection.titleTR || ""}
+                onChange={(e) => setEditingSection((p) => ({ ...p, titleTR: e.target.value }))}
+                placeholder="Örn: Ana Sayfa Vitrin Hero"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "English Title *" : "İngilizce Bölüm Başlığı *"}
+              </label>
+              <input
+                type="text"
+                required
+                value={editingSection.titleEN || ""}
+                onChange={(e) => setEditingSection((p) => ({ ...p, titleEN: e.target.value }))}
+                placeholder="Ex: Main Homepage Hero"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Section Type *" : "Bölüm Tipi *"}
+              </label>
+              <select
+                value={editingSection.type || "HERO"}
+                onChange={(e) => setEditingSection((p) => ({ ...p, type: e.target.value }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-indigo-500"
+              >
+                <option value="HERO">HERO — Ana Slider / Carousel</option>
+                <option value="BANNER_STRIP">BANNER_STRIP — İkili/Üçlü Kampanya Şeridi</option>
+                <option value="FLASH_DEALS">FLASH_DEALS — Süreli Flaş İndirimler</option>
+                <option value="PRODUCT_CAROUSEL">PRODUCT_CAROUSEL — Özel Ürün Vitrini</option>
+                <option value="CATEGORY_GRID">CATEGORY_GRID — Kategori Izgarası</option>
+                <option value="BRAND_STRIP">BRAND_STRIP — Öne Çıkan Markalar</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Display Order Position" : "Sıralama Pozisyonu"}
+              </label>
+              <input
+                type="number"
+                value={editingSection.orderIndex ?? 0}
+                onChange={(e) => setEditingSection((p) => ({ ...p, orderIndex: Number(e.target.value) }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editingSection.active ?? true}
+                onChange={(e) => setEditingSection((p) => ({ ...p, active: e.target.checked }))}
+                className="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-indigo-500"
+              />
+              <span className="font-bold text-slate-200">
+                {isEn ? "Publish Immediately on Homepage" : "Ana Sayfada Hemen Yayınla"}
+              </span>
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsSectionModalOpen(false)}
+              className="bg-slate-900 border-slate-700 text-slate-300 hover:text-white"
+            >
+              {isEn ? "Cancel" : "Vazgeç"}
+            </Button>
+            <Button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5"
+            >
+              {isEn ? "Save Section" : "Bölümü Kaydet"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Banner Create/Edit Modal */}
+      <Modal
+        isOpen={isBannerModalOpen}
+        onClose={() => setIsBannerModalOpen(false)}
+        title={editingBanner?.id ? (isEn ? "Edit Campaign Banner" : "Kampanya Bannerını Düzenle") : (isEn ? "Add Campaign Banner" : "Yeni Kampanya Bannerı Ekle")}
+      >
+        <form onSubmit={handleSaveBanner} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Banner Title (TR)" : "Banner Başlığı (Türkçe)"}
+              </label>
+              <input
+                type="text"
+                value={editingBanner.titleTR || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, titleTR: e.target.value }))}
+                placeholder="Örn: Büyük Sonbahar Fırsatları"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Banner Title (EN)" : "Banner Başlığı (İngilizce)"}
+              </label>
+              <input
+                type="text"
+                value={editingBanner.titleEN || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, titleEN: e.target.value }))}
+                placeholder="Ex: Big Autumn Sale Deals"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Subtitle (TR)" : "Alt Başlık (Türkçe)"}
+              </label>
+              <input
+                type="text"
+                value={editingBanner.subtitleTR || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, subtitleTR: e.target.value }))}
+                placeholder="Örn: Seçili Ürünlerde Net %50 İndirim"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Subtitle (EN)" : "Alt Başlık (İngilizce)"}
+              </label>
+              <input
+                type="text"
+                value={editingBanner.subtitleEN || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, subtitleEN: e.target.value }))}
+                placeholder="Ex: Flat 50% Off Selected Collections"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-slate-300 font-bold mb-1">
+              {isEn ? "Desktop Image URL (1200x500 or 16:9) *" : "Masaüstü Görsel URL (1200x500 / 16:9) *"}
+            </label>
+            <input
+              type="url"
+              required
+              value={editingBanner.imageUrlDesktop || ""}
+              onChange={(e) => setEditingBanner((p) => ({ ...p, imageUrlDesktop: e.target.value }))}
+              placeholder="https://images.unsplash.com/..."
+              className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Target Destination Type *" : "Hedef Yönlendirme Tipi *"}
+              </label>
+              <select
+                value={editingBanner.targetType || "CATEGORY"}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, targetType: e.target.value }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              >
+                <option value="CATEGORY">Kategori Sayfası (Örn: /category/women)</option>
+                <option value="BRAND">Marka Sayfası (Örn: /brand/nike)</option>
+                <option value="SELLER">Satıcı Mağazası (Örn: /seller/cadde-store)</option>
+                <option value="PRODUCT">Doğrudan Ürün Sayfası</option>
+                <option value="URL">Özel URL / Kampanya Bağlantısı</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Target Path or URL *" : "Hedef URL / Yol *"}
+              </label>
+              <input
+                type="text"
+                required
+                value={editingBanner.targetValue || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, targetValue: e.target.value }))}
+                placeholder="Örn: /category/women veya /search?q=ayakkabi"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Badge Text (TR)" : "Rozet Metni (Türkçe)"}
+              </label>
+              <input
+                type="text"
+                value={editingBanner.badgeTextTR || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, badgeTextTR: e.target.value }))}
+                placeholder="Örn: Sınırlı Süre, Vade Farksız Taksit"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Display Order Position" : "Sıralama Pozisyonu"}
+              </label>
+              <input
+                type="number"
+                value={editingBanner.orderIndex ?? 0}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, orderIndex: Number(e.target.value) }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsBannerModalOpen(false)}
+              className="bg-slate-900 border-slate-700 text-slate-300 hover:text-white"
+            >
+              {isEn ? "Cancel" : "Vazgeç"}
+            </Button>
+            <Button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5"
+            >
+              {isEn ? "Save Banner" : "Banner'ı Kaydet"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Live Preview Modal */}
+      {previewBanner && (
+        <Modal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          title={isEn ? "Live Banner Preview" : "Canlı Banner Vitrin Önizlemesi"}
+        >
+          <div className="space-y-4">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+              <img
+                src={previewBanner.imageUrlDesktop}
+                alt={previewBanner.titleTR || "Preview"}
+                className="w-full aspect-16/9 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6">
+                {previewBanner.badgeTextTR && (
+                  <span className="bg-amber-500 text-slate-950 font-black text-xs px-2.5 py-1 rounded w-fit uppercase mb-2">
+                    {isEn ? previewBanner.badgeTextEN || previewBanner.badgeTextTR : previewBanner.badgeTextTR}
+                  </span>
+                )}
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  {isEn ? previewBanner.titleEN || previewBanner.titleTR : previewBanner.titleTR || previewBanner.titleEN}
+                </h2>
+                <p className="text-sm text-slate-200 mt-1 max-w-xl">
+                  {isEn ? previewBanner.subtitleEN || previewBanner.subtitleTR : previewBanner.subtitleTR || previewBanner.subtitleEN}
+                </p>
+                <div className="mt-4">
+                  <span className="bg-white text-slate-950 font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-lg inline-block">
+                    {isEn ? "Explore Now →" : "Fırsatı İncele →"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+              <span>Hedef Yönlendirme: <strong className="text-indigo-400">{previewBanner.targetValue}</strong></span>
+              <span className="text-emerald-400 font-bold">✓ Piksel & Renk Standartları Onaylı</span>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      <Footer />
+    </div>
+  );
+}
