@@ -37,6 +37,11 @@ import {
   Store,
   Tag,
   Check,
+  PackageCheck,
+  Truck,
+  Sparkles,
+  Award,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +90,7 @@ export default function SellerStorefrontPage() {
 
   // Seller Profile Modal State (Image 2)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [profileReviewTab, setProfileReviewTab] = useState<"product" | "seller">("product");
+  const [profileReviewTab, setProfileReviewTab] = useState<"product" | "seller">("seller");
   const [starFilter, setStarFilter] = useState<number | null>(null);
 
   // Follow & Coupon State
@@ -130,18 +135,23 @@ export default function SellerStorefrontPage() {
     }, 1200);
   };
 
-  // Mock Reviews for Seller Profile View
-  const sellerReviewsData = [
+  // 1. SELLER SPECIFIC REVIEWS DATA (Focus: Packaging, Delivery Speed, Seller Communication, Authenticity)
+  const sellerSpecificReviews = [
     {
       id: "sr-1",
       author: "Ece K.",
       date: "12 Ağustos 2026",
       rating: 5,
-      product: "Desenli Şifon Midi Elbise - Bordo",
-      comment: "Kargo hızı muhteşem! Siparişi dün öğlen verdim, bu sabah kapımdaydı. Paketleme çok özenliydi.",
-      likes: 34,
-      verified: true,
-      reply: "Değerli müşterimiz, bizi tercih ettiğiniz için teşekkür ederiz. Güzel günlerde kullanmanız dileğiyle!",
+      sellerAspects: [
+        { label: "🚀 Hızlı Kargo", high: true },
+        { label: "🎁 Özenli Paketleme", high: true },
+        { label: "💯 Orijinal & Faturalı", high: true },
+      ],
+      serviceScore: { speed: "5/5", packaging: "5/5", response: "5/5" },
+      comment: "Kargo hızı inanılmazdı! Dün saat 15:30'da sipariş verdim, bugün sabah 10:00'da kapıma teslim edildi. Hediye paketi gibi kat kat balonlu korumaya sarılmıştı, faturası kutunun içerisindeydi. Mükemmel bir mağaza!",
+      likes: 54,
+      verifiedOrder: "Sipariş No: #CS-89211",
+      reply: "Değerli müşterimiz, siparişinizin sorunsuz ve hızlı ulaşmasına çok sevindik. Bizi tercih ettiğiniz için teşekkür ederiz!",
       replyDate: "13 Ağustos 2026",
     },
     {
@@ -149,20 +159,64 @@ export default function SellerStorefrontPage() {
       author: "Caner T.",
       date: "28 Temmuz 2026",
       rating: 5,
-      product: "Pamuklu Slim Fit Polo Yaka Tişört",
-      comment: "Kalıp tam oturdu, kumaşı kaliteli ve dikişleri kusursuz. Orijinal faturalı ürün.",
-      likes: 18,
-      verified: true,
+      sellerAspects: [
+        { label: "💬 İlgili Satıcı", high: true },
+        { label: "🔄 Kolay İade/Değişim", high: true },
+      ],
+      serviceScore: { speed: "5/5", packaging: "5/5", response: "5/5" },
+      comment: "Sipariş öncesi beden tablosuyla ilgili satıcıya soru sormuştum, 10 dakika içinde çok detaylı yardımcı oldular. Kargo 1 günde geldi, kutusu tertemizdi.",
+      likes: 29,
+      verifiedOrder: "Sipariş No: #CS-78144",
+      reply: "Memnuniyetiniz bizim için en büyük önceliktir. Güzel günlerde kullanmanızı dileriz.",
+      replyDate: "29 Temmuz 2026",
     },
     {
       id: "sr-3",
-      author: "Melis B.",
-      date: "15 Temmuz 2026",
+      author: "Ahmet V.",
+      date: "04 Temmuz 2026",
       rating: 4,
-      product: "Oversize Keten Gömlek",
-      comment: "Ürün çok güzel ancak kargo firması teslimatı 1 gün geciktirdi. Mağaza desteği çok ilgiliydi.",
-      likes: 7,
-      verified: true,
+      sellerAspects: [
+        { label: "🎁 Sağlam Paketleme", high: true },
+        { label: "📦 Eksiksiz Teslimat", high: true },
+      ],
+      serviceScore: { speed: "4/5", packaging: "5/5", response: "4/5" },
+      comment: "Satıcının ürün hazırlama ve paketlemesi kusursuzdu. Kargo şirketi dağıtımı 1 gün geciktirdi fakat satıcı mesaj atıp kargo sürecini bizzat takip etti ve bilgi verdi. İlgileri için teşekkürler.",
+      likes: 12,
+      verifiedOrder: "Sipariş No: #CS-66420",
+    },
+  ];
+
+  // 2. PRODUCT SPECIFIC REVIEWS DATA (Focus: Fabric quality, Fit, Body size, Color)
+  const productSpecificReviews = [
+    {
+      id: "pr-1",
+      author: "Mehmet S.",
+      date: "10 Ağustos 2026",
+      rating: 5,
+      productName: "Pamuklu Slim Fit Polo Yaka Tişört - Beyaz",
+      purchasedSize: "Size: L (Boy: 182 cm • Kilo: 78 kg)",
+      productAspects: [
+        { label: "Kalıp: Tam Kalıp", high: true },
+        { label: "Kumaş: %100 Pamuk", high: true },
+      ],
+      comment: "Kumaş dokusu çok tok ve kaliteli, terletmiyor. 1.82 boy 78 kiloyum L beden tam oturdu. Yıkamada çekme veya sarkma yapmadı.",
+      photos: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80"],
+      likes: 41,
+    },
+    {
+      id: "pr-2",
+      author: "Zeynep A.",
+      date: "01 Ağustos 2026",
+      rating: 5,
+      productName: "Desenli Şifon Midi Elbise - Bordo",
+      purchasedSize: "Size: S (Boy: 165 cm • Kilo: 54 kg)",
+      productAspects: [
+        { label: "Kalıp: Rahat Kalıp", high: true },
+        { label: "Renk: Fotoğraftaki Gibi Canlı", high: true },
+      ],
+      comment: "Rengi ve duruşu muazzam. Astarı olduğu için iç göstermiyor, şifon kumaşı uçuş uçuş.",
+      photos: ["https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=300&q=80"],
+      likes: 23,
     },
   ];
 
@@ -325,7 +379,7 @@ export default function SellerStorefrontPage() {
           </div>
         </div>
 
-        {/* 3. STORE HOME TAB: CAMPAIGNS CAROUSELS & PRODUCT CATALOG (Matches Screenshot 1) */}
+        {/* 3. STORE HOME TAB: CAMPAIGNS CAROUSELS & PRODUCT CATALOG */}
         {activeNavTab === "home" && (
           <div className="flex flex-col gap-6">
             {/* Campaigns Section Header */}
@@ -483,7 +537,7 @@ export default function SellerStorefrontPage() {
         )}
       </main>
 
-      {/* 6. COMPREHENSIVE SELLER PROFILE MODAL (Matches Screenshot 2) */}
+      {/* 6. COMPREHENSIVE SELLER PROFILE MODAL (Matches Screenshot 2 & Differentiates Product vs Seller Reviews) */}
       {isProfileModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl border border-slate-100 flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
@@ -514,7 +568,7 @@ export default function SellerStorefrontPage() {
               </button>
             </div>
 
-            {/* 5 OPERATIONAL TRUST METRICS CARDS (Matches Screenshot 2) */}
+            {/* 5 OPERATIONAL TRUST METRICS CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               {/* Duration on Cadde Store */}
               <div className="p-4 bg-orange-50/50 border border-orange-200/70 rounded-2xl flex items-center gap-3.5">
@@ -550,7 +604,7 @@ export default function SellerStorefrontPage() {
               </div>
             </div>
 
-            {/* Operational Times 2-Card Row (Matches Screenshot 2) */}
+            {/* Operational Times 2-Card Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {/* Average time to ship */}
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
@@ -583,7 +637,7 @@ export default function SellerStorefrontPage() {
               </div>
             </div>
 
-            {/* TABBED REVIEWS SUBSYSTEM (Matches Screenshot 2) */}
+            {/* DISTINCT REVIEWS SUBSYSTEM (Product Reviews vs Seller Reviews) */}
             <div className="flex flex-col gap-4 pt-2 border-t border-slate-100">
               {/* Reviews Sub-tabs */}
               <div className="flex items-center gap-6 border-b border-slate-200 text-xs font-black">
@@ -595,7 +649,7 @@ export default function SellerStorefrontPage() {
                     profileReviewTab === "product" ? "text-primary" : "text-slate-500 hover:text-slate-900"
                   )}
                 >
-                  <span>Product reviews</span>
+                  <span>Product reviews ({productSpecificReviews.length})</span>
                   {profileReviewTab === "product" && (
                     <span className="absolute bottom-0 inset-x-0 h-0.5 bg-primary rounded-full" />
                   )}
@@ -609,93 +663,226 @@ export default function SellerStorefrontPage() {
                     profileReviewTab === "seller" ? "text-primary" : "text-slate-500 hover:text-slate-900"
                   )}
                 >
-                  <span>Seller reviews</span>
+                  <span>Seller reviews ({sellerSpecificReviews.length})</span>
                   {profileReviewTab === "seller" && (
                     <span className="absolute bottom-0 inset-x-0 h-0.5 bg-primary rounded-full" />
                   )}
                 </button>
               </div>
 
-              {/* Rating Score Summary Line */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xl font-black text-slate-900">4.4</span>
-                  <div className="flex items-center text-amber-400">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <span className="text-slate-500 font-bold">• 46973 Reviews • 9423 Ratings</span>
-                </div>
-
-                <span className="text-xs font-bold text-slate-400 hover:text-primary cursor-pointer">
-                  Reviews Policy &gt;
-                </span>
-              </div>
-
-              {/* Star Filter Chips */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-                <span className="text-xs font-bold text-slate-500 shrink-0">Filter by stars:</span>
-                {[
-                  { star: null, label: "Tümü" },
-                  { star: 5, label: "5 Yıldız (38.420)" },
-                  { star: 4, label: "4 Yıldız (5.210)" },
-                  { star: 3, label: "3 Yıldız (1.840)" },
-                  { star: 2, label: "2 Yıldız (890)" },
-                  { star: 1, label: "1 Yıldız (613)" },
-                ].map((item, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setStarFilter(item.star)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0",
-                      starFilter === item.star
-                        ? "bg-[#f27a1a] text-white border-[#f27a1a] shadow-2xs"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300"
-                    )}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Reviews Feed */}
-              <div className="flex flex-col divide-y divide-slate-100">
-                {sellerReviewsData.map((rev) => (
-                  <div key={rev.id} className="py-4 flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center text-amber-400">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                          ))}
-                        </div>
-                        <span className="text-xs font-black text-slate-900">{rev.author}</span>
-                        <span className="text-[11px] text-slate-400">• {rev.date}</span>
+              {/* SELLER REVIEWS VIEW (Evaluates Store Logistics, Packaging, Response Speed) */}
+              {profileReviewTab === "seller" && (
+                <div className="flex flex-col gap-4">
+                  {/* Seller Operational Performance Scorecards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                    <div className="p-3 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Paketleme Kalitesi</span>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <PackageCheck className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm font-black text-slate-900">4.9 / 5.0</span>
                       </div>
-
-                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                        Doğrulanmış Alıcı
-                      </span>
+                      <span className="text-[9px] text-emerald-700 font-bold mt-0.5">%99 Hasarsız Teslim</span>
                     </div>
 
-                    <span className="text-xs font-bold text-primary">{rev.product}</span>
-                    <p className="text-xs text-slate-700 font-medium leading-relaxed">{rev.comment}</p>
-
-                    {/* Official Seller Reply */}
-                    {rev.reply && (
-                      <div className="mt-1 p-3 bg-orange-50/60 border border-orange-200/80 rounded-xl text-xs flex flex-col gap-1">
-                        <span className="font-extrabold text-primary flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Yetkili Mağaza Yanıtı ({rev.replyDate})</span>
-                        </span>
-                        <p className="text-slate-800">{rev.reply}</p>
+                    <div className="p-3 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Kargo Hızı</span>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Truck className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-black text-slate-900">4.9 / 5.0</span>
                       </div>
-                    )}
+                      <span className="text-[9px] text-primary font-bold mt-0.5">Aynı Gün Gönderim</span>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Müşteri İletişimi</span>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <MessageSquare className="w-4 h-4 text-indigo-600" />
+                        <span className="text-sm font-black text-slate-900">4.8 / 5.0</span>
+                      </div>
+                      <span className="text-[9px] text-indigo-700 font-bold mt-0.5">Ort. 30 Dk Yanıt</span>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Orijinallik &amp; Fatura</span>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <ShieldCheck className="w-4 h-4 text-amber-600" />
+                        <span className="text-sm font-black text-slate-900">5.0 / 5.0</span>
+                      </div>
+                      <span className="text-[9px] text-amber-700 font-bold mt-0.5">%100 E-Fatura Güvencesi</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  {/* Rating Score Summary Line */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pt-1">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl font-black text-slate-900">4.9</span>
+                      <div className="flex items-center text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <span className="text-slate-500 font-bold">• 12,480 Satıcı Değerlendirmesi</span>
+                    </div>
+
+                    <span className="text-xs font-bold text-slate-400 hover:text-primary cursor-pointer">
+                      Satıcı Değerlendirme Politikası &gt;
+                    </span>
+                  </div>
+
+                  {/* Star Filter Chips */}
+                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                    <span className="text-xs font-bold text-slate-500 shrink-0">Filter by stars:</span>
+                    {[
+                      { star: null, label: "Tümü" },
+                      { star: 5, label: "5 Yıldız (11.840)" },
+                      { star: 4, label: "4 Yıldız (510)" },
+                      { star: 3, label: "3 Yıldız (90)" },
+                      { star: 2, label: "2 Yıldız (25)" },
+                      { star: 1, label: "1 Yıldız (15)" },
+                    ].map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setStarFilter(item.star)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0",
+                          starFilter === item.star
+                            ? "bg-[#f27a1a] text-white border-[#f27a1a] shadow-2xs"
+                            : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300"
+                        )}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Seller Reviews Feed */}
+                  <div className="flex flex-col divide-y divide-slate-100">
+                    {sellerSpecificReviews.map((rev) => (
+                      <div key={rev.id} className="py-4 flex flex-col gap-2.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center text-amber-400">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                              ))}
+                            </div>
+                            <span className="text-xs font-black text-slate-900">{rev.author}</span>
+                            <span className="text-[11px] text-slate-400">• {rev.date}</span>
+                          </div>
+
+                          <span className="text-[11px] font-mono font-bold text-slate-400">
+                            {rev.verifiedOrder}
+                          </span>
+                        </div>
+
+                        {/* Aspect Pills */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {rev.sellerAspects.map((asp, aIdx) => (
+                            <span
+                              key={aIdx}
+                              className="text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/60 px-2 py-0.5 rounded-md"
+                            >
+                              {asp.label}
+                            </span>
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-slate-700 font-medium leading-relaxed">{rev.comment}</p>
+
+                        {/* Official Seller Reply */}
+                        {rev.reply && (
+                          <div className="mt-1 p-3 bg-orange-50/60 border border-orange-200/80 rounded-xl text-xs flex flex-col gap-1">
+                            <span className="font-extrabold text-primary flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Yetkili Mağaza Yanıtı ({rev.replyDate})</span>
+                            </span>
+                            <p className="text-slate-800">{rev.reply}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* PRODUCT REVIEWS VIEW (Evaluates Physical Clothes, Sizing, Colors, Fabrics) */}
+              {profileReviewTab === "product" && (
+                <div className="flex flex-col gap-4">
+                  {/* Rating Score Summary Line */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl font-black text-slate-900">4.7</span>
+                      <div className="flex items-center text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <span className="text-slate-500 font-bold">• 34,493 Ürün Değerlendirmesi</span>
+                    </div>
+
+                    <span className="text-xs font-bold text-slate-400 hover:text-primary cursor-pointer">
+                      Ürün Değerlendirme Politikası &gt;
+                    </span>
+                  </div>
+
+                  {/* Product Reviews Feed */}
+                  <div className="flex flex-col divide-y divide-slate-100">
+                    {productSpecificReviews.map((rev) => (
+                      <div key={rev.id} className="py-4 flex flex-col gap-2.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center text-amber-400">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                              ))}
+                            </div>
+                            <span className="text-xs font-black text-slate-900">{rev.author}</span>
+                            <span className="text-[11px] text-slate-400">• {rev.date}</span>
+                          </div>
+
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            Doğrulanmış Ürün Yorumu
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs font-extrabold text-primary">{rev.productName}</span>
+                          <span className="text-[11px] font-bold text-slate-500">{rev.purchasedSize}</span>
+                        </div>
+
+                        {/* Product Aspect Pills */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {rev.productAspects.map((asp, aIdx) => (
+                            <span
+                              key={aIdx}
+                              className="text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-200 px-2 py-0.5 rounded-md"
+                            >
+                              {asp.label}
+                            </span>
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-slate-700 font-medium leading-relaxed">{rev.comment}</p>
+
+                        {/* Customer Photos */}
+                        {rev.photos && (
+                          <div className="flex items-center gap-2 mt-1">
+                            {rev.photos.map((ph, idx) => (
+                              <img
+                                key={idx}
+                                src={ph}
+                                alt=""
+                                className="w-14 h-14 object-cover rounded-xl border border-slate-200"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
