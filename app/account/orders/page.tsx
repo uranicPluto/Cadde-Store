@@ -9,14 +9,18 @@ import { getSavedOrders } from "@/lib/orders/order-utils";
 import { OrderRecord } from "@/lib/orders/order-types";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { EmptyState } from "@/components/marketplace/empty-state";
-import { Package } from "lucide-react";
+import { Search, Package, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function OrderHistoryPage() {
   const router = useRouter();
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
+  const isEn = language === "en";
+
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [activeFilter, setActiveFilter] = useState<"all" | "in_progress" | "cancelled" | "returned">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetch("/api/orders")
@@ -34,7 +38,7 @@ export default function OrderHistoryPage() {
               phone: o.customer?.phone || "",
             },
             shippingAddress: JSON.parse(o.shippingAddressSnapshot || "{}"),
-            shippingMethod: { id: "std", name: "Standart Kargo", price: o.shippingFee, estimatedDelivery: "2-3 Gün" },
+            shippingMethod: { id: "std", name: { tr: "Standart Kargo", en: "Standard Shipping" }, deliveryDays: { tr: "2-3 Gün", en: "2-3 Days" }, price: o.shippingFee },
             sellerGroups: Array.isArray(o.orderGroups)
               ? o.orderGroups.map((g: any) => ({
                   sellerId: g.sellerId,
@@ -68,7 +72,9 @@ export default function OrderHistoryPage() {
                         }))
                     : [],
                   subtotal: g.subtotal,
+                  freeShippingThreshold: 500,
                   shippingFee: 0,
+                  isFreeShipping: true,
                   status: g.status.toLowerCase(),
                 }))
               : [],
@@ -78,9 +84,8 @@ export default function OrderHistoryPage() {
               subtotal: o.subtotal,
               productDiscount: o.productDiscount,
               couponDiscount: o.couponDiscount,
-              shippingFee: o.shippingFee,
+              totalShipping: o.shippingFee,
               grandTotal: o.grandTotal,
-              currency: o.currency,
               sellerGroups: [],
             },
             status: o.status.toLowerCase() as any,
@@ -93,6 +98,21 @@ export default function OrderHistoryPage() {
       .catch(() => setOrders(getSavedOrders()));
   }, []);
 
+  const filteredOrders = orders.filter((o) => {
+    const statusStr = String(o.status);
+    if (activeFilter === "in_progress" && statusStr === "delivered") return false;
+    if (activeFilter === "cancelled" && statusStr !== "cancelled") return false;
+    if (activeFilter === "returned" && statusStr !== "returned") return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return (
+        o.orderNumber.toLowerCase().includes(q) ||
+        o.sellerGroups.some((sg) => sg.items.some((it) => it.product.name.toLowerCase().includes(q) || it.product.brand.toLowerCase().includes(q)))
+      );
+    }
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
       <MarketplaceHeader />
@@ -100,8 +120,8 @@ export default function OrderHistoryPage() {
       <main className="max-w-wide mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6 flex-1">
         <Breadcrumb
           items={[
-            { label: language === "en" ? "My Account" : "Hesabım", href: "/account" },
-            { label: language === "en" ? "My Orders" : "Siparişlerim" },
+            { label: isEn ? "My Account" : "Hesabım", href: "/account" },
+            { label: isEn ? "My Orders" : "Siparişlerim" },
           ]}
         />
 
@@ -111,40 +131,104 @@ export default function OrderHistoryPage() {
           </div>
 
           <div className="lg:col-span-9 flex flex-col gap-6">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-                  <Package className="w-5 h-5" />
+            {/* Header Box (Matches User Screenshots 1 & 2) */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h1 className="text-2xl font-black text-slate-900">{isEn ? "My Orders" : "Siparişlerim"}</h1>
+                {/* Search Bar */}
+                <div className="relative w-full sm:w-80">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder={isEn ? "Search by item or brand name..." : "Ürün veya marka ismiyle ara..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium placeholder:text-slate-400 outline-none focus:border-primary"
+                  />
                 </div>
-                <div className="flex flex-col">
-                  <h1 className="text-xl font-black text-text-main flex items-center gap-2">
-                    <span>{language === "en" ? "My Orders" : "Siparişlerim"}</span>
-                    <span className="text-xs bg-indigo-600 text-white font-extrabold px-2 py-0.5 rounded-full">
-                      {orders.length} Sipariş
-                    </span>
-                  </h1>
-                  <span className="text-xs text-text-muted">
-                    Geçmiş ve aktif tüm siparişlerinizin durumunu buradan takip edebilirsiniz.
-                  </span>
+              </div>
+
+              {/* Status Filter Pills & Date Select (User Screenshots 1 & 2) */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("all")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-black transition-colors ${
+                      activeFilter === "all" ? "bg-primary text-white shadow-xs" : "bg-white border border-slate-200 text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    {isEn ? "All" : "Tüm Siparişler"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("in_progress")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-black transition-colors ${
+                      activeFilter === "in_progress" ? "bg-primary text-white shadow-xs" : "bg-white border border-slate-200 text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    {isEn ? "In progress" : "Devam Edenler"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("cancelled")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-black transition-colors ${
+                      activeFilter === "cancelled" ? "bg-primary text-white shadow-xs" : "bg-white border border-slate-200 text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    {isEn ? "Cancelled" : "İptaller"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("returned")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-black transition-colors ${
+                      activeFilter === "returned" ? "bg-primary text-white shadow-xs" : "bg-white border border-slate-200 text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    {isEn ? "Returned" : "İadeler"}
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 shrink-0">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <select className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-bold outline-none">
+                    <option>{isEn ? "All dates" : "Tüm Tarihler"}</option>
+                    <option>Son 30 Gün</option>
+                    <option>Son 3 Ay</option>
+                    <option>2026 Sezonu</option>
+                  </select>
                 </div>
               </div>
             </div>
 
-            {orders.length === 0 ? (
-              <EmptyState
-                type="no-orders"
-                title={language === "en" ? "No Orders Yet" : "Henüz Siparişiniz Bulunmuyor"}
-                description={
-                  language === "en"
-                    ? "Start shopping to place your first order on Cadde Store."
-                    : "Cadde Store'dan ilk siparişinizi vermek için hemen alışverişe başlayın."
-                }
-                actionText={language === "en" ? "Start Shopping" : "Alışverişe Başla"}
-                onActionClick={() => router.push("/")}
-              />
+            {/* Orders List or Competitor Screenshot 1 Empty State */}
+            {filteredOrders.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-xs my-4">
+                <div className="w-20 h-20 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-200">
+                  <Package className="w-10 h-10 stroke-[1.5]" />
+                </div>
+                <div className="flex flex-col gap-1 max-w-md">
+                  <h2 className="text-xl font-black text-slate-900">
+                    {isEn ? "There are currently no orders to display here." : "Henüz görüntülenecek bir siparişiniz yok."}
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    {isEn
+                      ? "Discover thousands of products from top brands and start shopping now."
+                      : "Binlerce marka ve ürünü keşfedin, fırsat dolu dünyamıza hemen adım atın."}
+                  </p>
+                </div>
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => router.push("/")}
+                  className="font-black bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-xl shadow-md mt-2"
+                >
+                  {isEn ? "Start shopping" : "Alışverişe Başla"}
+                </Button>
+              </div>
             ) : (
               <div className="flex flex-col gap-4">
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <OrderCard key={order.orderId} order={order} />
                 ))}
               </div>
