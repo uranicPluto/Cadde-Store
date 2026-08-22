@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await getSession();
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Geçersiz sipariş verileri." }, { status: 400 });
     }
 
-    // 1. Resolve Customer ID
+    // 1. Resolve Customer ID (Guest support preserved)
     let customerId = session?.id;
     if (!customerId) {
       const guestEmail = customerInfo?.email || `guest-${Date.now()}@cadde.store`;
@@ -65,7 +67,7 @@ export async function POST(request: Request) {
       customerId = guestUser.id;
     }
 
-    // 2. Fetch products from DB & Recalculate Subtotal & Validate Stock Server-Side
+    // 2. Database-Authoritative Product Resolution & Server-Side Price / Stock Recalculation
     let serverSubtotal = 0;
     const validatedItems: {
       dbProd: any;
@@ -76,22 +78,23 @@ export async function POST(request: Request) {
     }[] = [];
 
     for (const item of items) {
-      const targetId = item.product?.id;
-      const targetSlug = item.product?.slug;
+      const productId = typeof item.product === "object" ? item.product?.id : item.productId || item.id;
+      const productSlug = typeof item.product === "object" ? item.product?.slug : undefined;
 
       const dbProd = await prisma.product.findFirst({
         where: {
           OR: [
-            ...(targetId ? [{ id: targetId }] : []),
-            ...(targetSlug ? [{ slug: targetSlug }] : []),
+            ...(productId ? [{ id: String(productId) }] : []),
+            ...(productSlug ? [{ slug: String(productSlug) }] : []),
           ],
         },
         include: { seller: true },
       });
 
-      if (!dbProd || dbProd.status !== "ACTIVE") {
+      // Strict Validation: Product MUST exist in DB with ACTIVE status. No fallback product/seller/category creation!
+      if (!dbProd || dbProd.status !== "ACTIVE" || !dbProd.seller) {
         return NextResponse.json(
-          { error: `"${item.product?.name || 'Ürün'}" artık satışta bulunmamaktadır.` },
+          { error: `"${item.product?.name || item.name || 'Seçilen ürün'}" mevcut değildir veya artık satışta bulunmamaktadır.` },
           { status: 400 }
         );
       }
@@ -103,6 +106,7 @@ export async function POST(request: Request) {
         );
       }
 
+      // Authoritative DB Price
       const price = dbProd.price;
       serverSubtotal += price * item.quantity;
 
@@ -121,7 +125,7 @@ export async function POST(request: Request) {
 
     if (couponCode) {
       const coupon = await prisma.coupon.findUnique({
-        where: { code: couponCode.toUpperCase().trim() },
+        where: { code: String(couponCode).toUpperCase().trim() },
       });
 
       if (coupon && coupon.active && (!coupon.expiresAt || new Date(coupon.expiresAt) > new Date())) {
@@ -161,13 +165,13 @@ export async function POST(request: Request) {
           statusHistory: {
             create: {
               status: "CONFIRMED",
-              note: "Sipariş alındı ve sunucu tarafından onaylandı.",
+              note: "Sipariş veritabanı ürünleri ile doğrulandı ve onaylandı.",
             },
           },
         },
       });
 
-      // Group items by Seller ID
+      // Group items by Seller ID derived directly from database Product relation
       const itemsBySeller: Record<string, typeof validatedItems> = {};
       for (const item of validatedItems) {
         const sellerId = item.dbProd.sellerId;
@@ -175,7 +179,7 @@ export async function POST(request: Request) {
         itemsBySeller[sellerId].push(item);
       }
 
-      // Create OrderGroups, OrderItems, and Decrement Stock
+      // Create OrderGroups, OrderItems, and Decrement Stock for valid merchants
       for (const sellerId of Object.keys(itemsBySeller)) {
         const groupItems = itemsBySeller[sellerId];
         const groupSubtotal = groupItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
