@@ -4,9 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/cart-context";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { formatCurrency, cn } from "@/lib/utils";
-import { ShoppingCart, Trash2, Zap, ChevronRight, Minimize2, Maximize2, X, CheckSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils";
+import { ShoppingCart, Trash2, Zap, ChevronRight, CheckSquare } from "lucide-react";
 
 export const RightCartDrawer: React.FC = () => {
   const { items, removeFromCart, updateQuantity, subtotal, totalCount, isOpen, closeCartDrawer, openCartDrawer } = useCart();
@@ -19,7 +18,7 @@ export const RightCartDrawer: React.FC = () => {
 
   return (
     <>
-      {/* Floating Minimized Floating Toggle Button when Drawer is Collapsed or Closed */}
+      {/* Floating Minimized Toggle Button when Collapsed or Closed */}
       {(!isOpen || isCollapsed) && (
         <button
           type="button"
@@ -27,145 +26,127 @@ export const RightCartDrawer: React.FC = () => {
             setIsCollapsed(false);
             openCartDrawer();
           }}
-          className="fixed right-0 top-1/2 -translate-y-1/2 z-50 bg-primary hover:bg-primary/90 text-white font-black text-xs px-3 py-4 rounded-l-2xl shadow-2xl flex flex-col items-center gap-2 border-l border-t border-b border-primary-hover animate-in slide-in-from-right duration-200"
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-50 bg-[#f27a1a] hover:bg-[#d9660d] text-white font-black text-xs px-2.5 py-4 rounded-l-2xl shadow-2xl flex flex-col items-center gap-2 border-l border-t border-b border-[#f27a1a] animate-in slide-in-from-right duration-200"
+          aria-label="Open mini cart"
         >
           <div className="relative">
-            <ShoppingCart className="w-5 h-5" />
-            <span className="absolute -top-2 -right-2 bg-amber-400 text-slate-950 font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+            <ShoppingCart className="w-4 h-4" />
+            <span className="absolute -top-2 -right-2 bg-amber-300 text-slate-950 font-black text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center">
               {totalCount}
             </span>
           </div>
-          <span className="writing-mode-vertical text-[10px] uppercase tracking-widest font-extrabold pt-1">
+          <span className="writing-mode-vertical text-[9px] uppercase tracking-widest font-extrabold pt-1">
             {isEn ? "Cart" : "Sepetim"}
           </span>
         </button>
       )}
 
-      {/* Main Slide-out Right Cart Drawer (Matches Competitor Screenshot 3) */}
+      {/* Main Slim Compact Right Cart Drawer (Matches Reference Image 2) */}
       {isOpen && !isCollapsed && (
-        <div className="fixed right-0 top-0 bottom-0 w-80 sm:w-96 bg-white z-50 shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-200 font-sans">
-          {/* Header Controls & Action CTAs */}
-          <div className="p-4 border-b border-slate-100 flex flex-col gap-3 bg-white">
-            <div className="flex items-center justify-between">
-              <span className="font-black text-sm text-slate-900 flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4 text-primary" />
-                <span>{isEn ? "Shopping Cart" : "Alışveriş Sepetim"} ({totalCount})</span>
-              </span>
-              <button
-                type="button"
-                onClick={closeCartDrawer}
-                className="p-1 text-slate-400 hover:text-slate-700 rounded-full"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Primary CTA: Go to Payment (2 products) */}
+        <div className="fixed right-0 top-0 bottom-0 w-[210px] sm:w-[225px] bg-white z-50 shadow-2xl border-l border-slate-200 flex flex-col justify-between p-3 animate-in slide-in-from-right duration-200 font-sans select-none">
+          {/* Top CTAs & Subtotal Container */}
+          <div className="flex flex-col gap-2">
+            {/* Primary CTA: Go to payment (2 products) */}
             <Link href="/checkout" onClick={closeCartDrawer} className="w-full">
               <button
                 type="button"
-                className="w-full bg-primary hover:bg-primary/90 text-white font-black text-xs py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5"
+                className="w-full bg-[#f27a1a] hover:bg-[#d9660d] text-white font-extrabold text-xs py-2.5 px-2 rounded-xl shadow-xs transition-colors flex flex-col items-center justify-center leading-tight"
               >
-                <span>{isEn ? `Go to payment (${totalCount} products)` : `Ödemeye Git (${totalCount} Ürün)`}</span>
+                <span className="text-xs">{isEn ? "Go to payment" : "Ödemeye Git"}</span>
+                <span className="text-[11px] font-bold opacity-90">({totalCount} {isEn ? "products" : "ürün"})</span>
               </button>
             </Link>
 
-            {/* Secondary CTA: Go to Cart */}
+            {/* Secondary CTA: Go to cart */}
             <Link href="/cart" onClick={closeCartDrawer} className="w-full">
               <button
                 type="button"
-                className="w-full bg-white hover:bg-slate-50 border-2 border-primary text-primary font-black text-xs py-2.5 rounded-xl transition-colors flex items-center justify-center"
+                className="w-full bg-white hover:bg-orange-50/50 border border-[#f27a1a] text-[#f27a1a] font-bold text-xs py-2 rounded-xl transition-colors text-center"
               >
                 <span>{isEn ? "Go to cart" : "Sepete Git"}</span>
               </button>
             </Link>
 
-            {/* Subtotal Pill Box (Matches Screenshot 3) */}
+            {/* Subtotal Display (Matches Reference Image 2) */}
             <div className="flex flex-col items-center justify-center pt-2">
-              <span className="text-xs font-black text-slate-900">{isEn ? "Subtotal" : "Ara Toplam"}</span>
-              <div className="mt-1 bg-amber-50/80 border border-amber-200/80 px-5 py-1.5 rounded-lg text-primary font-black text-base shadow-2xs">
+              <span className="text-xs font-black text-slate-800">{isEn ? "Subtotal" : "Ara Toplam"}</span>
+              <div className="mt-1 bg-[#fff8f2] border border-[#ffe0c2] text-[#f27a1a] font-black text-sm px-4 py-1.5 rounded-lg text-center shadow-2xs">
                 {formatCurrency(subtotal, currency)}
               </div>
             </div>
+
+            <div className="border-t border-slate-200/80 my-1" />
           </div>
 
-          {/* Cart Products List (Matches Screenshot 3 Cards) */}
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 divide-y divide-slate-100">
+          {/* Vertical Stack Product List (Matches Reference Image 2) */}
+          <div className="flex-1 overflow-y-auto pr-0.5 flex flex-col gap-3 my-2 no-scrollbar">
             {items.map((item) => (
-              <div key={item.id} className="pt-3 first:pt-0 flex items-start gap-3 relative group">
-                {/* Checkbox Icon */}
-                <div className="pt-1">
-                  <div className="w-4 h-4 rounded bg-primary text-white flex items-center justify-center shadow-2xs">
+              <div
+                key={item.id}
+                className="border border-slate-200/90 rounded-xl p-2 flex flex-col gap-2 relative bg-white shadow-2xs group"
+              >
+                {/* Product Image Box with Overlay Checkbox & Flash Badge */}
+                <div className="relative w-full h-32 rounded-lg overflow-hidden bg-slate-100">
+                  {/* Top-Left Checkbox Icon */}
+                  <div className="absolute top-1.5 left-1.5 z-10 w-4 h-4 rounded bg-[#f27a1a] text-white flex items-center justify-center shadow-xs">
                     <CheckSquare className="w-3 h-3" />
                   </div>
-                </div>
 
-                {/* Product Card Image with Flash Badge */}
-                <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                   <img
                     src={item.product.imageUrl}
                     alt={item.product.name}
                     className="w-full h-full object-cover"
                   />
-                  {/* Hot Pink Flash Product Badge (Matches Screenshot 3) */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[8px] font-black py-0.5 px-1 text-center flex items-center justify-center gap-0.5">
+
+                  {/* Hot Pink Flash Product Badge (Matches Reference Image 2) */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-pink-500 to-rose-600 text-white text-[9px] font-black py-0.5 px-1 text-center flex items-center justify-center gap-0.5">
                     <Zap className="w-2.5 h-2.5 fill-amber-300 text-amber-300" />
                     <span>{isEn ? "Flash product!" : "Flaş ürün!"}</span>
                   </div>
                 </div>
 
-                {/* Info & Quantity Selector */}
-                <div className="flex flex-col justify-between flex-1 min-h-[96px]">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-black text-slate-900 line-clamp-1">{item.product.brand}</span>
-                    <span className="text-[11px] text-slate-500 font-medium line-clamp-1">{item.product.name}</span>
-                    <span className="text-xs font-black text-primary mt-1">
-                      {formatCurrency(item.product.price, currency)}
-                    </span>
-                  </div>
+                {/* Price Display */}
+                <div className="text-center font-extrabold text-[#f27a1a] text-sm">
+                  {formatCurrency(item.product.price, currency)}
+                </div>
 
-                  {/* Quantity Dropdown & Trash Delete Button */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <select
-                      value={item.quantity}
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10))}
-                      className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-900 font-black outline-none"
-                    >
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                        <option key={num} value={num}>
-                          {num}
-                        </option>
-                      ))}
-                    </select>
+                {/* Quantity Select & Trash Delete Controls */}
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <select
+                    value={item.quantity}
+                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10))}
+                    className="w-14 h-7 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 font-bold px-1 outline-none text-center"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <option key={num} value={num}>
+                        {num}
+                      </option>
+                    ))}
+                  </select>
 
-                    <button
-                      type="button"
-                      onClick={() => removeFromCart(item.id)}
-                      className="p-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-400 transition-colors"
-                      title={isEn ? "Remove item" : "Ürünü Sil"}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFromCart(item.id)}
+                    className="w-7 h-7 flex items-center justify-center border border-slate-200 hover:border-rose-300 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600 transition-colors"
+                    title={isEn ? "Remove item" : "Ürünü Sil"}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Footer Minimize Bar (Matches Screenshot 3) */}
-          <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          {/* Bottom Bar: Minimize >| Button (Matches Reference Image 2) */}
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
             <button
               type="button"
               onClick={() => setIsCollapsed(true)}
-              className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-2xs"
+              className="px-2.5 py-1 bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold text-[11px] rounded-lg flex items-center gap-1 transition-colors shadow-2xs"
             >
               <span>{isEn ? "Minimize" : "Küçült"}</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
-
-            <span className="text-[10px] text-slate-500 font-bold">
-              {isEn ? "Free Shipping Applied!" : "Kargo Bedava Fırsatı!"}
-            </span>
           </div>
         </div>
       )}
