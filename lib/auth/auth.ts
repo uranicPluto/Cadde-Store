@@ -1,9 +1,6 @@
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "cadde-store-super-secret-jwt-key-stage-08"
-);
+import { getAuthSecret } from "./config";
 
 export interface UserSessionPayload {
   id: string;
@@ -23,16 +20,18 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export async function createSessionToken(payload: UserSessionPayload): Promise<string> {
+  const secret = getAuthSecret();
   return await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(JWT_SECRET);
+    .sign(secret);
 }
 
 export async function verifySessionToken(token: string): Promise<UserSessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const secret = getAuthSecret();
+    const { payload } = await jwtVerify(token, secret);
     return payload as unknown as UserSessionPayload;
   } catch (error) {
     return null;

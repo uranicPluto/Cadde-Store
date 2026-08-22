@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "cadde-store-super-secret-jwt-key-stage-08"
-);
+import { getAuthSecret } from "@/lib/auth/config";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,7 +11,8 @@ export async function middleware(request: NextRequest) {
 
   if (token) {
     try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
+      const secret = getAuthSecret();
+      const { payload } = await jwtVerify(token, secret);
       user = payload as unknown as { role: string; sellerSlug?: string };
     } catch (e) {
       user = null;
