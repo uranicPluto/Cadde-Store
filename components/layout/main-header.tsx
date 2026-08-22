@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { SearchComponent } from "@/components/marketplace/search-component";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { HeaderFavorites } from "@/components/layout/header-favorites";
@@ -28,9 +29,9 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
       )}
     >
       <div className="max-w-wide mx-auto flex items-center justify-between gap-6">
-        {/* LEFT: Logo Wordmark */}
-        <a
-          href="#"
+        {/* LEFT: Logo Wordmark - Clicking sends to home page / */}
+        <Link
+          href="/"
           aria-label="Cadde Store Anasayfa"
           className="flex items-center gap-2 text-text-main group shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded"
         >
@@ -45,7 +46,7 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
               Pazaryeri
             </span>
           </div>
-        </a>
+        </Link>
 
         {/* CENTER: Search Bar */}
         <div className="flex-1 max-w-2xl mx-auto hidden lg:block">

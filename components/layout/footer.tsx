@@ -62,12 +62,12 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
       <div className="max-w-wide mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
         {/* Col 1: Brand Info & Callout */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white font-black text-lg shadow-sm">
+          <Link href="/" className="flex items-center gap-3 w-fit group">
+            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white font-black text-lg shadow-sm group-hover:bg-primary-hover transition-colors">
               C
             </div>
-            <span className="font-black text-lg tracking-tight text-white">CADDE STORE</span>
-          </div>
+            <span className="font-black text-lg tracking-tight text-white group-hover:text-amber-400 transition-colors">CADDE STORE</span>
+          </Link>
           <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
             {t("footer.aboutCompany")}
           </p>

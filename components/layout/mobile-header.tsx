@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Link from "next/link";
 import { Menu, Heart, ShoppingCart } from "lucide-react";
 import { SearchComponent } from "@/components/marketplace/search-component";
 import { MobileCategoryDrawer } from "@/components/layout/mobile-category-drawer";
@@ -39,19 +40,19 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Logo */}
-          <a href="#" className="flex items-center gap-1.5 text-text-main">
+          {/* Logo - Clicking sends to home page / */}
+          <Link href="/" className="flex items-center gap-1.5 text-text-main">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-black text-base">
               C
             </div>
             <span className="font-extrabold text-base tracking-tight">CADDE STORE</span>
-          </a>
+          </Link>
         </div>
 
         {/* Mobile Action Icons */}
         <div className="flex items-center gap-1">
-          <a
-            href="#"
+          <Link
+            href="/favorites"
             aria-label={t("common.favorites")}
             className="relative p-2 rounded-lg text-text-main hover:text-rose-500 transition-colors"
           >
@@ -61,10 +62,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
                 {favoriteCount}
               </span>
             )}
-          </a>
+          </Link>
 
-          <a
-            href="#"
+          <Link
+            href="/cart"
             aria-label={t("common.cart")}
             className="relative p-2 rounded-lg text-text-main hover:text-primary transition-colors"
           >
@@ -74,7 +75,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
                 {cartCount}
               </span>
             )}
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -89,16 +90,16 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
           const categoryName = t(`categories.${cat.slug}`) || cat.name;
 
           return (
-            <a
+            <Link
               key={cat.id}
-              href="#"
+              href={`/category/${cat.slug}`}
               className={cn(
                 "px-3 py-1 bg-slate-100 hover:bg-primary-light hover:text-primary text-text-main rounded-full font-semibold shrink-0 transition-colors",
                 cat.isHot && "bg-rose-50 text-rose-600 border border-rose-200"
               )}
             >
               {categoryName}
-            </a>
+            </Link>
           );
         })}
       </div>
