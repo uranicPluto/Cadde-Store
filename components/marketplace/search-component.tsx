@@ -27,13 +27,14 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
   const brands = getMockBrands(language);
   const categories = getMockCategories(language);
 
-  const searchPlaceholderText = placeholder || t("common.searchPlaceholder");
+  const isEn = language === "en";
+  const searchPlaceholderText = placeholder || (isEn ? "Search for product, category, or brand" : "Aradığınız ürün, marka veya kategoriyi yazınız...");
 
-  const recentSearches = language === "en"
+  const recentSearches = isEn
     ? ["Black T-Shirt", "Nike Sports Shoes", "Bluetooth Headphones", "Coffee Maker"]
     : ["Siyah Tişört", "Nike Spor Ayakkabı", "Bluetooth Kulaklık", "Kahve Makinesi"];
 
-  const popularSearches = language === "en"
+  const popularSearches = isEn
     ? ["Autumn Sale", "Women's Dress", "iPhone 15 Screen Protector", "Air Fryer", "Gaming Chair"]
     : ["Sonbahar İndirimi", "Kadın Elbise", "iPhone 15 Ekran Koruyucu", "Air Fryer", "Oyuncu Koltuğu"];
 
@@ -94,18 +95,26 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
 
   return (
     <div className={cn("relative w-full max-w-2xl", className)} ref={containerRef}>
-      {/* Input Bar */}
+      {/* Trendyol-Style Light Integrated Search Bar (Matches User Screenshot) */}
       <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full">
+        <button
+          type="submit"
+          className="absolute left-3.5 text-primary hover:text-primary/80 transition-colors p-1"
+          aria-label={t("common.search")}
+        >
+          <Search className="w-5 h-5 text-primary stroke-[2.2]" />
+        </button>
+
         <input
           type="text"
           value={query}
           onFocus={() => setIsOpen(true)}
           onChange={handleInputChange}
           placeholder={searchPlaceholderText}
-          className="w-full h-11 pl-4 pr-24 text-sm bg-slate-50 border-2 border-primary/20 rounded-lg text-text-main placeholder:text-text-subtle focus:outline-none focus:border-primary focus:bg-white transition-all shadow-xs"
+          className="w-full h-11 pl-11 pr-10 text-xs sm:text-sm font-medium bg-[#f3f3f4] border border-transparent rounded-lg text-slate-900 placeholder:text-slate-500 focus:outline-none focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
         />
 
-        <div className="absolute right-2 flex items-center gap-1.5">
+        <div className="absolute right-3 flex items-center gap-1.5">
           {query && !isLoading && (
             <button
               type="button"
@@ -116,27 +125,19 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
             </button>
           )}
 
-          {isLoading && <Loader2 className="w-4 h-4 text-primary animate-spin mr-1" />}
-
-          <button
-            type="submit"
-            className="bg-primary hover:bg-primary-hover text-white p-2 rounded-md transition-colors flex items-center justify-center"
-            aria-label={t("common.search")}
-          >
-            <Search className="w-4 h-4" />
-          </button>
+          {isLoading && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
         </div>
       </form>
 
       {/* Suggestions Modal Popup */}
       {isOpen && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-200 rounded-lg shadow-xl overflow-hidden text-sm animate-in fade-in-50 duration-150">
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden text-sm animate-in fade-in-50 duration-150">
           {!query.trim() ? (
             /* Recent & Popular Searches when query is empty */
             <div className="p-4 flex flex-col gap-4">
               {/* Recent Searches */}
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-bold text-text-muted mb-2 uppercase tracking-wide">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">
                   <Clock className="w-3.5 h-3.5 text-primary" />
                   <span>{t("search.recentSearches")}</span>
                 </div>
@@ -148,7 +149,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                         setQuery(term);
                         executeSearch(term);
                       }}
-                      className="px-2.5 py-1 bg-slate-100 hover:bg-primary-light hover:text-primary text-text-main text-xs rounded-full font-medium transition-colors"
+                      className="px-2.5 py-1 bg-slate-100 hover:bg-primary-light hover:text-primary text-slate-800 text-xs rounded-full font-medium transition-colors"
                     >
                       {term}
                     </button>
@@ -158,7 +159,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
 
               {/* Popular Searches */}
               <div className="pt-3 border-t border-slate-100">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-text-muted mb-2 uppercase tracking-wide">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">
                   <TrendingUp className="w-3.5 h-3.5 text-amber-500" />
                   <span>{t("search.popularSearches")}</span>
                 </div>
@@ -170,7 +171,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                         setQuery(term);
                         executeSearch(term);
                       }}
-                      className="flex items-center justify-between p-2 rounded hover:bg-slate-50 text-left text-xs text-text-main group"
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 text-left text-xs text-slate-800 group"
                     >
                       <span>{term}</span>
                       <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-primary transition-colors" />
@@ -189,7 +190,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                     <div
                       key={c.id}
                       onClick={() => executeSearch(c.name)}
-                      className="flex items-center gap-2 p-1.5 rounded hover:bg-white cursor-pointer text-xs font-semibold text-primary"
+                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer text-xs font-semibold text-primary"
                     >
                       <Tag className="w-3.5 h-3.5 text-primary" />
                       <span>{t("search.categoryLabel")}: {c.name}</span>
@@ -199,7 +200,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                     <div
                       key={b.id}
                       onClick={() => executeSearch(b.name)}
-                      className="flex items-center gap-2 p-1.5 rounded hover:bg-white cursor-pointer text-xs font-semibold text-amber-700"
+                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer text-xs font-semibold text-amber-700"
                     >
                       <Store className="w-3.5 h-3.5 text-amber-600" />
                       <span>{t("search.brandLabel")}: {b.name}</span>
@@ -210,11 +211,11 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
 
               {/* Product Matches */}
               <div className="p-3">
-                <div className="text-xs font-bold text-text-muted mb-2 uppercase tracking-wide">
+                <div className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">
                   {t("search.productResults", { count: filteredProducts.length })}
                 </div>
                 {filteredProducts.length === 0 ? (
-                  <div className="py-4 text-center text-xs text-text-muted">
+                  <div className="py-4 text-center text-xs text-slate-500">
                     {t("search.noResults", { query })}
                   </div>
                 ) : (
@@ -223,16 +224,16 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
                       <div
                         key={p.id}
                         onClick={() => executeSearch(p.name)}
-                        className="flex items-center gap-3 p-2 rounded hover:bg-slate-50 cursor-pointer transition-colors"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                       >
                         <img
                           src={p.imageUrl}
                           alt={p.name}
-                          className="w-10 h-10 object-cover rounded border border-slate-200"
+                          className="w-10 h-10 object-cover rounded-md border border-slate-200"
                         />
                         <div className="flex flex-col flex-1 min-w-0">
-                          <span className="text-xs font-bold text-text-main">{p.brand}</span>
-                          <span className="text-xs text-text-muted truncate">{p.name}</span>
+                          <span className="text-xs font-bold text-slate-900">{p.brand}</span>
+                          <span className="text-xs text-slate-500 truncate">{p.name}</span>
                         </div>
                         <span className="text-xs font-bold text-primary shrink-0">
                           {formatCurrency(p.price, currency)}
