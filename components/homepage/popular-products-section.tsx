@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatCurrency } from "@/lib/utils";
-import { Heart, Star, ShoppingBag, Tag, ChevronRight, ChevronLeft, Flame, TrendingDown } from "lucide-react";
+import { Heart, Star, ShoppingBag, Tag, ChevronRight, ChevronLeft } from "lucide-react";
 
 export const PopularProductsSection: React.FC = () => {
   const { language, currency } = useLanguage();
@@ -14,11 +14,11 @@ export const PopularProductsSection: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: -320, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: 320, behavior: "smooth" });
   };
 
   const bestsellers = [
@@ -33,7 +33,7 @@ export const PopularProductsSection: React.FC = () => {
       reviewCount: 56581,
       urgencyTag: isEn ? "🚀 10K+ purchases in the last 3 days!" : "🚀 Son 3 günde 10K+ satıldı!",
       promoTag: isEn ? "Buy 3, pay 2" : "3 Al 2 Öde",
-      imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=500&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80",
       freeShipping: true,
       unitPriceInfo: "5.83 TL / tablet",
     },
@@ -48,7 +48,7 @@ export const PopularProductsSection: React.FC = () => {
       reviewCount: 34247,
       urgencyTag: isEn ? "🚀 10K+ purchases in the last 3 days!" : "🚀 Son 3 günde 10K+ satıldı!",
       promoTag: isEn ? "Lowest price in 10 days" : "Son 10 günün en düşük fiyatı",
-      imageUrl: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=500&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80",
       freeShipping: true,
     },
     {
@@ -62,7 +62,7 @@ export const PopularProductsSection: React.FC = () => {
       reviewCount: 34600,
       urgencyTag: isEn ? "🚀 10K+ purchases in the last 3 days!" : "🚀 Son 3 günde 10K+ satıldı!",
       promoTag: isEn ? "+ Cadde Plus Exclusive / At checkout 426.55 TL" : "+ Cadde Plus Özel / Sepette 426.55 TL",
-      imageUrl: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=500&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80",
       freeShipping: true,
     },
     {
@@ -76,7 +76,7 @@ export const PopularProductsSection: React.FC = () => {
       reviewCount: 84063,
       urgencyTag: isEn ? "🚀 5K+ purchases in the last 3 days!" : "🚀 Son 3 günde 5K+ satıldı!",
       promoTag: isEn ? "+ Cadde Plus Exclusive / At checkout 398.05 TL" : "+ Cadde Plus Özel / Sepette 398.05 TL",
-      imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=500&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
       freeShipping: true,
     },
     {
@@ -90,7 +90,7 @@ export const PopularProductsSection: React.FC = () => {
       reviewCount: 28598,
       urgencyTag: isEn ? "🚀 5K+ purchases in the last 3 days!" : "🚀 Son 3 günde 5K+ satıldı!",
       promoTag: isEn ? "+ Cadde Plus Exclusive / At checkout 426.55 TL" : "+ Cadde Plus Özel / Sepette 426.55 TL",
-      imageUrl: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=500&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=600&q=80",
       freeShipping: true,
     },
     {
@@ -104,7 +104,7 @@ export const PopularProductsSection: React.FC = () => {
       reviewCount: 11169,
       urgencyTag: isEn ? "🚀 5K+ purchases in the last 3 days!" : "🚀 Son 3 günde 5K+ satıldı!",
       promoTag: isEn ? "Lowest price in 10 days" : "Son 10 günün en düşük fiyatı",
-      imageUrl: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=500&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80",
       freeShipping: true,
     },
     {
@@ -118,7 +118,7 @@ export const PopularProductsSection: React.FC = () => {
       reviewCount: 1424,
       urgencyTag: isEn ? "⭐ 57.4K favorites!" : "⭐ 57.4K favorilendi!",
       promoTag: isEn ? "Buy 3, pay 2" : "3 Al 2 Öde",
-      imageUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=500&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80",
       freeShipping: true,
     },
   ];
@@ -126,7 +126,7 @@ export const PopularProductsSection: React.FC = () => {
   return (
     <section className="w-full bg-slate-100 py-4 select-none">
       <div className="max-w-wide mx-auto px-4 sm:px-6">
-        {/* Grey Card Wrap Shell Container (Matches Reference Screenshot 2) */}
+        {/* Grey Card Wrap Shell Container */}
         <div className="bg-[#eef0f2] border border-slate-200/90 rounded-3xl p-4 sm:p-6 shadow-2xs relative">
           {/* Header Title: Bestsellers */}
           <div className="flex items-center justify-between mb-4">
@@ -134,12 +134,12 @@ export const PopularProductsSection: React.FC = () => {
               {isEn ? "Bestsellers" : "En Çok Satanlar"}
             </h2>
 
-            {/* Right Carousel Arrow Button */}
+            {/* Right Carousel Arrow Buttons */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={scrollLeft}
-                className="w-8 h-8 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
+                className="w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
                 aria-label="Previous bestsellers"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -147,7 +147,7 @@ export const PopularProductsSection: React.FC = () => {
               <button
                 type="button"
                 onClick={scrollRight}
-                className="w-8 h-8 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
+                className="w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
                 aria-label="Next bestsellers"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -155,20 +155,20 @@ export const PopularProductsSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Carousel Scrollable Bestsellers Cards (Matches Reference Image 2) */}
+          {/* Carousel Scrollable Bestsellers Cards (Longer vertical length) */}
           <div
             ref={scrollRef}
-            className="flex items-stretch gap-3 sm:gap-4 overflow-x-auto no-scrollbar py-1 scroll-smooth"
+            className="flex items-stretch gap-4 overflow-x-auto no-scrollbar py-2 scroll-smooth"
           >
             {bestsellers.map((p) => (
               <div
                 key={p.id}
-                className="w-48 sm:w-52 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col justify-between group relative shrink-0"
+                className="w-52 sm:w-56 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col justify-between group relative shrink-0"
               >
-                {/* Product Image Box with 3D Stamp & Favorites */}
-                <div className="relative w-full h-44 sm:h-48 bg-slate-50 overflow-hidden">
-                  {/* Circular 3D BEST SELLING Stamp Badge (Matches Reference Screenshot 2) */}
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex flex-col items-center justify-center text-[8px] font-black leading-none uppercase shadow-md rotate-[-12deg] z-10 absolute top-2 left-2 border-2 border-white text-center">
+                {/* Product Image Box - Increased height for longer vertical proportion */}
+                <div className="relative w-full h-56 sm:h-64 bg-slate-50 overflow-hidden">
+                  {/* Circular 3D BEST SELLING Stamp Badge */}
+                  <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex flex-col items-center justify-center text-[8px] sm:text-[9px] font-black leading-none uppercase shadow-md rotate-[-12deg] z-10 absolute top-2.5 left-2.5 border-2 border-white text-center">
                     <span>BEST</span>
                     <span>SELLING</span>
                   </div>
@@ -176,7 +176,7 @@ export const PopularProductsSection: React.FC = () => {
                   {/* Favorite Heart Button */}
                   <button
                     type="button"
-                    className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
+                    className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 shadow-md flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
                     aria-label="Add to favorites"
                   >
                     <Heart className="w-4 h-4" />
@@ -189,60 +189,60 @@ export const PopularProductsSection: React.FC = () => {
                   />
 
                   {/* Dark Bottom Shipping Strip */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-slate-700 text-white text-[10px] font-bold text-center py-1 shadow-2xs">
+                  <div className="absolute bottom-0 left-0 right-0 bg-slate-700 text-white text-[10px] sm:text-[11px] font-bold text-center py-1.5 shadow-2xs">
                     {p.freeShipping ? (isEn ? "Free shipping" : "Kargo Bedava") : (isEn ? "Fast Delivery" : "Hızlı Teslimat")}
                   </div>
                 </div>
 
                 {/* Card Body */}
-                <div className="p-3 flex flex-col justify-between flex-1 gap-2">
+                <div className="p-3.5 flex flex-col justify-between flex-1 gap-2.5">
                   <div>
                     {/* Brand & Title */}
                     <Link href={`/product/${p.slug}`}>
-                      <h3 className="text-xs font-black text-slate-900 line-clamp-2 hover:text-primary transition-colors leading-tight">
+                      <h3 className="text-xs sm:text-sm font-black text-slate-900 line-clamp-2 hover:text-primary transition-colors leading-tight">
                         <span className="font-extrabold text-slate-950 mr-1">{p.brand}</span>
                         <span>{p.name}</span>
                       </h3>
                     </Link>
 
-                    {/* Urgency Purchase Metric Tag (Matches Reference Screenshot 2) */}
-                    <div className="mt-1 text-[10px] font-extrabold text-orange-600 bg-orange-50/90 px-1.5 py-0.5 rounded w-fit leading-none">
+                    {/* Urgency Purchase Metric Tag */}
+                    <div className="mt-1.5 text-[10px] sm:text-[11px] font-extrabold text-orange-600 bg-orange-50/90 px-2 py-0.5 rounded w-fit leading-none">
                       {p.urgencyTag}
                     </div>
 
                     {/* Rating & Review Count */}
-                    <div className="flex items-center gap-1 mt-1 text-[11px]">
+                    <div className="flex items-center gap-1 mt-1.5 text-xs">
                       <span className="font-bold text-slate-800">{p.rating}</span>
                       <div className="flex items-center text-amber-400">
-                        <Star className="w-3 h-3 fill-amber-400" />
+                        <Star className="w-3.5 h-3.5 fill-amber-400" />
                       </div>
                       <span className="text-[10px] text-slate-400 font-medium">({p.reviewCount})</span>
                     </div>
 
                     {/* Promo Discount Tag */}
                     {p.promoTag && (
-                      <div className="mt-1 flex items-center gap-1 text-[10px] font-extrabold text-[#f27a1a] leading-tight">
-                        <Tag className="w-3 h-3 shrink-0" />
+                      <div className="mt-1.5 flex items-center gap-1 text-[10px] sm:text-[11px] font-extrabold text-[#f27a1a] leading-tight">
+                        <Tag className="w-3.5 h-3.5 shrink-0" />
                         <span className="line-clamp-1">{p.promoTag}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Price & Add to Cart Action */}
-                  <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+                  <div className="pt-2.5 border-t border-slate-100 flex flex-col gap-2">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-sm font-black text-[#f27a1a]">
+                      <span className="text-base font-black text-[#f27a1a]">
                         {formatCurrency(p.price, currency)}
                       </span>
                       {p.originalPrice && (
-                        <span className="text-[11px] text-slate-400 line-through font-semibold">
+                        <span className="text-xs text-slate-400 line-through font-semibold">
                           {formatCurrency(p.originalPrice, currency)}
                         </span>
                       )}
                     </div>
 
                     {p.unitPriceInfo && (
-                      <span className="text-[9px] text-slate-400 font-bold -mt-1">{p.unitPriceInfo}</span>
+                      <span className="text-[10px] text-slate-400 font-bold -mt-1">{p.unitPriceInfo}</span>
                     )}
 
                     <button
@@ -269,7 +269,7 @@ export const PopularProductsSection: React.FC = () => {
                           reviews: [],
                         })
                       }
-                      className="w-full bg-[#f27a1a] hover:bg-[#d9660d] text-white font-extrabold text-xs py-1.5 rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1"
+                      className="w-full bg-[#f27a1a] hover:bg-[#d9660d] text-white font-extrabold text-xs py-2 rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1.5"
                     >
                       <ShoppingBag className="w-3.5 h-3.5" />
                       <span>{isEn ? "Add to Cart" : "Sepete Ekle"}</span>
