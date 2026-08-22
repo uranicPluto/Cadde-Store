@@ -20,44 +20,48 @@ export const CategoryGridStrips: React.FC = () => {
   };
 
   const categorySlugs: Record<string, string> = {
-    c1: "women",
-    c2: "men",
-    c3: "shoes",
-    c4: "electronics",
-    c5: "home",
-    c6: "cosmetics",
-    c7: "sports",
+    c1: "kadin",
+    c2: "erkek",
+    c3: "ayakkabi-canta",
+    c4: "elektronik",
+    c5: "ev-yasam",
+    c6: "kozmetik",
+    c7: "spor",
     c8: "supermarket",
   };
 
   return (
-    <section className="w-full bg-white py-8 border-b border-slate-200">
+    <section className="w-full bg-white py-8 border-b border-slate-200 select-none">
       <div className="max-w-wide mx-auto px-4 sm:px-6 flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-text-main tracking-tight">
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
             {t("homepage.categoryStripsTitle")}
           </h2>
-          <Link href="/category/women" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+          <Link href="/category/kadin" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
             <span>{t("homepage.viewAll")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
-          {categories.map((c) => (
-            <Link
-              key={c.id}
-              href={`/category/${categorySlugs[c.id] || "women"}`}
-              className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200/80 rounded-xl hover:border-primary hover:bg-primary-light/30 transition-all text-center gap-2 group shadow-2xs"
-            >
-              <div className="w-12 h-12 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center group-hover:scale-110 transition-transform">
-                {categoryIcons[c.icon] || <Shirt className="w-5 h-5 text-primary" />}
-              </div>
-              <span className="text-xs font-bold text-text-main group-hover:text-primary transition-colors line-clamp-1">
-                {c.name}
-              </span>
-            </Link>
-          ))}
+          {categories.map((c) => {
+            const targetSlug = categorySlugs[c.id] || "kadin";
+
+            return (
+              <Link
+                key={c.id}
+                href={`/category/${targetSlug}`}
+                className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200/80 rounded-xl hover:border-primary hover:bg-orange-50/40 transition-all text-center gap-2 group shadow-2xs cursor-pointer"
+              >
+                <div className="w-12 h-12 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center group-hover:scale-110 transition-transform">
+                  {categoryIcons[c.icon] || <Shirt className="w-5 h-5 text-primary" />}
+                </div>
+                <span className="text-xs font-extrabold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">
+                  {c.name}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
