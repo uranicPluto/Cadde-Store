@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { Footer } from "@/components/layout/footer";
@@ -16,18 +15,35 @@ import { FilterSidebar, FilterState } from "@/components/marketplace/filter-side
 import { EmptyState } from "@/components/marketplace/empty-state";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
-import { Filter as FilterIcon, ArrowUpDown } from "lucide-react";
+import { Filter as FilterIcon, ArrowUpDown, Tag } from "lucide-react";
 
-export default function CategoryPage() {
+export default function SubcategoryPage() {
   const params = useParams();
   const slug = params?.slug as string;
+  const subcategory = params?.subcategory as string;
 
   const { language, t } = useLanguage();
   const categoryInfo = getCategoryBySlug(slug, language);
 
+  const subInfo = categoryInfo?.subcategories?.find(
+    (s) => s.slug.toLowerCase() === subcategory.toLowerCase()
+  );
+  const subName = subInfo?.name || subcategory.toUpperCase();
+
   const fullCatalog = getFullCatalog(language);
-  const categoryProducts = fullCatalog.filter((p) => p.categorySlug === slug);
-  const displayProducts = categoryProducts.length > 0 ? categoryProducts : fullCatalog;
+  
+  // Filter products by category AND subcategory
+  const subProducts = fullCatalog.filter((p) => {
+    const catMatch = p.categorySlug.toLowerCase() === slug.toLowerCase();
+    const subMatch =
+      p.subcategorySlug?.toLowerCase() === subcategory.toLowerCase() ||
+      p.slug.toLowerCase().includes(subcategory.toLowerCase()) ||
+      p.name.toLowerCase().includes(subName.toLowerCase());
+    return catMatch && subMatch;
+  });
+
+  // Fallback to category products if specific subcategory has fewer items
+  const displayProducts = subProducts.length > 0 ? subProducts : fullCatalog.filter((p) => p.categorySlug === slug);
 
   const [sortOption, setSortOption] = useState<SortOption>("recommended");
   const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({});
@@ -59,39 +75,24 @@ export default function CategoryPage() {
         <Breadcrumb
           items={[
             { label: t("common.allProducts"), href: "/category/women" },
-            { label: categoryInfo?.name || slug },
+            { label: categoryInfo?.name || slug, href: `/category/${slug}` },
+            { label: subName },
           ]}
         />
 
-        {/* Category Header Banner */}
-        <div className="relative w-full rounded-2xl overflow-hidden bg-slate-900 text-white p-6 sm:p-10 border border-slate-200 shadow-md">
-          <div className="absolute inset-0 z-0 opacity-30">
-            <img src={categoryInfo?.bannerImage} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900 to-transparent" />
-          </div>
+        {/* Subcategory Header Banner */}
+        <div className="relative w-full rounded-2xl overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-10 border border-slate-200 shadow-md">
           <div className="relative z-10 flex flex-col gap-2 max-w-xl">
-            <span className="text-xs font-black text-amber-400 uppercase tracking-widest">Kategori</span>
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">{categoryInfo?.name}</h1>
+            <div className="inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-amber-300 font-extrabold px-2.5 py-0.5 rounded-full text-xs w-fit">
+              <Tag className="w-3.5 h-3.5" />
+              <span>{categoryInfo?.name} / {subName}</span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight">{subName}</h1>
             <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
-              {categoryInfo?.description}
+              {categoryInfo?.name} kategorisi altındaki en popüler {subName} modelleri, özel indirimler ve aynı gün kargo fırsatıyla.
             </p>
           </div>
         </div>
-
-        {/* Subcategory Filter Chips */}
-        {categoryInfo?.subcategories && categoryInfo.subcategories.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            {categoryInfo.subcategories.map((sub) => (
-              <Link
-                key={sub.slug}
-                href={`/category/${slug}/${sub.slug}`}
-                className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-primary hover:text-primary text-xs font-bold rounded-full transition-colors shrink-0 shadow-2xs"
-              >
-                {sub.name}
-              </Link>
-            ))}
-          </div>
-        )}
 
         {/* Controls & Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
