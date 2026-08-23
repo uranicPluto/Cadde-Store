@@ -22,6 +22,7 @@ import {
   Compass,
   Image as ImageIcon,
   TrendingUp,
+  RotateCcw,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
     { href: "/admin/sellers", icon: Store, label: t("admin.navigation.sellers") },
     { href: "/admin/products", icon: Package, label: t("admin.navigation.products") },
     { href: "/admin/orders", icon: ShoppingCart, label: t("admin.navigation.orders") },
+    { href: "/admin/returns", icon: RotateCcw, label: isEn ? "Returns & Refunds" : "İade & Geri Ödeme" },
     { href: "/admin/customers", icon: Users, label: t("admin.navigation.customers") },
     { href: "/admin/categories", icon: Grid, label: t("admin.navigation.categories") },
     { href: "/admin/brands", icon: Award, label: t("admin.navigation.brands") },

@@ -44,7 +44,7 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
 
         <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200 font-bold">
           <Lock className="w-3 h-3 text-emerald-600" />
-          <span>256-Bit iyzico Altyapısı</span>
+          <span>{language === "en" ? "256-Bit SSL Encrypted" : "256-Bit iyzico Altyapısı"}</span>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span>Kredi / Banka Kartı</span>
+          <span>{language === "en" ? "Credit / Debit Card" : "Kredi / Banka Kartı"}</span>
         </button>
 
         <button
@@ -73,7 +73,7 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
           }`}
         >
           <Banknote className="w-4 h-4" />
-          <span>Kapıda Ödeme</span>
+          <span>{language === "en" ? "Cash on Delivery" : "Kapıda Ödeme"}</span>
         </button>
       </div>
 
@@ -83,7 +83,7 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
           {/* Cardholder Name */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold text-text-muted">
-              Kart Üzerindeki İsim <span className="text-rose-500">*</span>
+              {language === "en" ? "Name on Card" : "Kart Üzerindeki İsim"} <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
@@ -99,7 +99,7 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
           {/* Card Number */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold text-text-muted">
-              Kart Numarası <span className="text-rose-500">*</span>
+              {language === "en" ? "Card Number" : "Kart Numarası"} <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
@@ -116,7 +116,7 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
           {/* Expiry & CVV */}
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-text-muted">Ay (MM)</label>
+              <label className="text-xs font-bold text-text-muted">{language === "en" ? "Month (MM)" : "Ay (MM)"}</label>
               <input
                 type="text"
                 value={cardDetails.expiryMonth}
@@ -127,7 +127,7 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-text-muted">Yıl (YY)</label>
+              <label className="text-xs font-bold text-text-muted">{language === "en" ? "Year (YY)" : "Yıl (YY)"}</label>
               <input
                 type="text"
                 value={cardDetails.expiryYear}
@@ -152,7 +152,9 @@ export const PaymentMethodSection: React.FC<PaymentMethodSectionProps> = ({
         </div>
       ) : (
         <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-medium leading-relaxed">
-          Kapıda nakit veya kredi kartı ile ödemeyi seçtiniz. Kargo teslimatı sırasında <strong>19.90 TL</strong> kapıda ödeme hizmet bedeli yansıtılacaktır.
+          {language === "en"
+            ? "You have selected cash or card on delivery. A service fee of 19.90 TL will be added upon courier handover."
+            : "Kapıda nakit veya kredi kartı ile ödemeyi seçtiniz. Kargo teslimatı sırasında 19.90 TL kapıda ödeme hizmet bedeli yansıtılacaktır."}
         </div>
       )}
     </div>

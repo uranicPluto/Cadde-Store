@@ -94,18 +94,20 @@ export default function AddressManagerPage() {
                   <h1 className="text-xl font-black text-text-main flex items-center gap-2">
                     <span>{language === "en" ? "My Addresses" : "Adreslerim"}</span>
                     <span className="text-xs bg-emerald-600 text-white font-extrabold px-2 py-0.5 rounded-full">
-                      {addresses.length} Adres
+                      {addresses.length} {language === "en" ? "Addresses" : "Adres"}
                     </span>
                   </h1>
                   <span className="text-xs text-text-muted">
-                    Teslimat ve fatura adreslerinizi kolayca güncelleyin.
+                    {language === "en"
+                      ? "Manage your delivery and billing addresses effortlessly."
+                      : "Teslimat ve fatura adreslerinizi kolayca güncelleyin."}
                   </span>
                 </div>
               </div>
 
               <Button variant="primary" size="sm" onClick={handleOpenAdd} className="font-bold text-xs bg-emerald-600 hover:bg-emerald-700">
                 <Plus className="w-4 h-4 mr-1" />
-                <span>Yeni Adres Ekle</span>
+                <span>{language === "en" ? "+ Add New Address" : "Yeni Adres Ekle"}</span>
               </Button>
             </div>
 
@@ -126,10 +128,14 @@ export default function AddressManagerPage() {
       </main>
 
       {/* Add / Edit Address Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Teslimat Adresi Ekle / Düzenle">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={language === "en" ? "Add / Edit Delivery Address" : "Teslimat Adresi Ekle / Düzenle"}
+      >
         <form onSubmit={handleSaveModal} className="flex flex-col gap-3 text-xs p-1">
           <div className="flex flex-col gap-1">
-            <label className="font-bold">Adres Başlığı (örn: Ev, İş):</label>
+            <label className="font-bold">{language === "en" ? "Address Title (e.g. Home, Work):" : "Adres Başlığı (örn: Ev, İş):"}</label>
             <input
               type="text"
               value={editingAddress.title || ""}
@@ -141,7 +147,7 @@ export default function AddressManagerPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="font-bold">Ad:</label>
+              <label className="font-bold">{language === "en" ? "First Name:" : "Ad:"}</label>
               <input
                 type="text"
                 value={editingAddress.firstName || ""}
@@ -151,7 +157,7 @@ export default function AddressManagerPage() {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="font-bold">Soyad:</label>
+              <label className="font-bold">{language === "en" ? "Last Name:" : "Soyad:"}</label>
               <input
                 type="text"
                 value={editingAddress.lastName || ""}
@@ -164,7 +170,7 @@ export default function AddressManagerPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="font-bold">İl / City:</label>
+              <label className="font-bold">{language === "en" ? "City:" : "İl / City:"}</label>
               <input
                 type="text"
                 value={editingAddress.city || ""}
@@ -174,7 +180,7 @@ export default function AddressManagerPage() {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="font-bold">İlçe / District:</label>
+              <label className="font-bold">{language === "en" ? "District:" : "İlçe / District:"}</label>
               <input
                 type="text"
                 value={editingAddress.district || ""}
@@ -186,7 +192,7 @@ export default function AddressManagerPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-bold">Açık Adres:</label>
+            <label className="font-bold">{language === "en" ? "Street Address:" : "Açık Adres:"}</label>
             <textarea
               value={editingAddress.addressLine || ""}
               onChange={(e) => setEditingAddress({ ...editingAddress, addressLine: e.target.value })}
@@ -204,35 +210,43 @@ export default function AddressManagerPage() {
               className="w-4 h-4 text-primary rounded"
             />
             <label htmlFor="isDefaultCheck" className="font-bold cursor-pointer">
-              Varsayılan Adresim Olsun
+              {language === "en" ? "Set as default shipping address" : "Varsayılan Adresim Olsun"}
             </label>
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
             <Button variant="outline" size="sm" type="button" onClick={() => setIsModalOpen(false)}>
-              İptal
+              {language === "en" ? "Cancel" : "İptal"}
             </Button>
             <Button variant="primary" size="sm" type="submit" className="font-bold bg-emerald-600 hover:bg-emerald-700">
-              Adresi Kaydet
+              {language === "en" ? "Save Address" : "Adresi Kaydet"}
             </Button>
           </div>
         </form>
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={!!deleteConfirmId} onClose={() => setDeleteConfirmId(null)} title="Adres Silme Onayı">
+      <Modal
+        isOpen={!!deleteConfirmId}
+        onClose={() => setDeleteConfirmId(null)}
+        title={language === "en" ? "Confirm Delete Address" : "Adres Silme Onayı"}
+      >
         <div className="flex flex-col gap-4 text-xs p-1">
           <div className="flex items-center gap-3 text-rose-600 bg-rose-50 p-3 rounded-lg border border-rose-100 font-medium">
             <AlertTriangle className="w-5 h-5 shrink-0" />
-            <span>Bu adresi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</span>
+            <span>
+              {language === "en"
+                ? "Are you sure you want to delete this address? This action cannot be undone."
+                : "Bu adresi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."}
+            </span>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
             <Button variant="outline" size="sm" onClick={() => setDeleteConfirmId(null)}>
-              Vazgeç
+              {language === "en" ? "Cancel" : "Vazgeç"}
             </Button>
             <Button variant="primary" size="sm" onClick={handleConfirmDelete} className="bg-rose-600 hover:bg-rose-700 font-bold">
-              Evet, Sil
+              {language === "en" ? "Yes, Delete" : "Evet, Sil"}
             </Button>
           </div>
         </div>

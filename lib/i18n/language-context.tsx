@@ -24,17 +24,55 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     setIsMounted(true);
-    const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY) as Language;
-    if (savedLang === "tr" || savedLang === "en") {
-      setLanguageState(savedLang);
-      document.documentElement.lang = savedLang;
-    } else {
-      document.documentElement.lang = DEFAULT_LANGUAGE;
-    }
+    let initialLang: Language = DEFAULT_LANGUAGE;
 
-    const savedCurr = localStorage.getItem(CURRENCY_STORAGE_KEY) as Currency;
-    if (savedCurr === "TRY" || savedCurr === "USD") {
-      setCurrencyState(savedCurr);
+    // Check localStorage first
+    if (typeof window !== "undefined") {
+      const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY) as Language;
+      if (savedLang === "tr" || savedLang === "en") {
+        initialLang = savedLang;
+      } else {
+        // Check cookie
+        const match = document.cookie.match(/(^|;)\s*cadde_lang\s*=\s*([^;]+)/);
+        if (match && (match[2] === "tr" || match[2] === "en")) {
+          initialLang = match[2] as Language;
+        }
+      }
+
+      setLanguageState(initialLang);
+      document.documentElement.lang = initialLang;
+
+      const savedCurr = localStorage.getItem(CURRENCY_STORAGE_KEY) as Currency;
+      if (savedCurr === "TRY" || savedCurr === "USD") {
+        setCurrencyState(savedCurr);
+      }
+
+      // Listen to cross-tab storage changes
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === LANGUAGE_STORAGE_KEY && (e.newValue === "tr" || e.newValue === "en")) {
+          setLanguageState(e.newValue as Language);
+          document.documentElement.lang = e.newValue;
+        }
+        if (e.key === CURRENCY_STORAGE_KEY && (e.newValue === "TRY" || e.newValue === "USD")) {
+          setCurrencyState(e.newValue as Currency);
+        }
+      };
+
+      // Custom window event listener for in-app instant sync
+      const handleCustomEvent = (e: any) => {
+        if (e.detail === "tr" || e.detail === "en") {
+          setLanguageState(e.detail);
+          document.documentElement.lang = e.detail;
+        }
+      };
+
+      window.addEventListener("storage", handleStorageChange);
+      window.addEventListener("cadde_language_changed", handleCustomEvent);
+
+      return () => {
+        window.removeEventListener("storage", handleStorageChange);
+        window.removeEventListener("cadde_language_changed", handleCustomEvent);
+      };
     }
   }, []);
 
@@ -42,7 +80,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLanguageState(lang);
     if (typeof window !== "undefined") {
       localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+      document.cookie = `cadde_lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.lang = lang;
+      window.dispatchEvent(new CustomEvent("cadde_language_changed", { detail: lang }));
     }
   };
 
@@ -50,6 +90,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setCurrencyState(curr);
     if (typeof window !== "undefined") {
       localStorage.setItem(CURRENCY_STORAGE_KEY, curr);
+      document.cookie = `cadde_curr=${curr}; path=/; max-age=31536000; SameSite=Lax`;
     }
   };
 

@@ -31,7 +31,8 @@ const DEFAULT_SETTINGS: AdminPlatformSettings = {
 };
 
 export default function AdminSettingsPage() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const isEn = language === "en";
   const [settings, setSettings] = useState<AdminPlatformSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -123,7 +124,7 @@ export default function AdminSettingsPage() {
             {loading ? (
               <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 text-xs">
                 <div className="animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto mb-3" />
-                <span>Ayarlar yükleniyor...</span>
+                <span>{isEn ? "Loading settings..." : "Ayarlar yükleniyor..."}</span>
               </div>
             ) : (
               <form onSubmit={handleSave} className="flex flex-col gap-6 max-w-3xl">
@@ -248,7 +249,7 @@ export default function AdminSettingsPage() {
                     className="font-bold px-8 bg-indigo-600 hover:bg-indigo-700 shadow-md text-white"
                   >
                     <Save className="w-4 h-4 mr-1.5" />
-                    <span>{isSaving ? "Kaydediliyor..." : t("admin.settings.saveSettings")}</span>
+                    <span>{isSaving ? (isEn ? "Saving..." : "Kaydediliyor...") : t("admin.settings.saveSettings")}</span>
                   </Button>
                 </div>
               </form>

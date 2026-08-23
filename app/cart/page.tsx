@@ -47,7 +47,7 @@ export default function CartPage() {
       {/* Toast Notification */}
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200">
-          <Toast type="success" title="Favoriler" message={toastMsg} onClose={() => setToastMsg(null)} />
+          <Toast type="success" title={language === "en" ? "Wishlist" : "Favoriler"} message={toastMsg} onClose={() => setToastMsg(null)} />
         </div>
       )}
 
@@ -70,11 +70,13 @@ export default function CartPage() {
               <h1 className="text-xl font-black text-text-main flex items-center gap-2">
                 <span>{t("common.cart")}</span>
                 <span className="text-xs bg-primary text-white font-extrabold px-2 py-0.5 rounded-full">
-                  {totalCount} ürün
+                  {totalCount} {language === "en" ? "items" : "ürün"}
                 </span>
               </h1>
               <span className="text-xs text-text-muted">
-                Farklı mağazalardan eklediğiniz ürünler satıcı bazlı gruplanmıştır.
+                {language === "en"
+                  ? "Items from different sellers are grouped by store for transparent fulfillment."
+                  : "Farklı mağazalardan eklediğiniz ürünler satıcı bazlı gruplanmıştır."}
               </span>
             </div>
           </div>

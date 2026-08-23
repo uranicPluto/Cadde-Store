@@ -26,7 +26,8 @@ import {
 } from "lucide-react";
 
 export default function SellerDashboardOverviewPage() {
-  const { currency, t } = useLanguage();
+  const { language, currency, t } = useLanguage();
+  const isEn = language === "en";
   const [orders, setOrders] = useState<OrderRecord[]>([]);
 
   useEffect(() => {
@@ -37,13 +38,13 @@ export default function SellerDashboardOverviewPage() {
 
   // Mock daily sales performance trends
   const dailySalesTrends = [
-    { day: "Pzt", val: 34 },
-    { day: "Sal", val: 52 },
-    { day: "Çar", val: 48 },
-    { day: "Per", val: 78 },
-    { day: "Cum", val: 92 },
-    { day: "Cmt", val: 115 },
-    { day: "Paz", val: 84 },
+    { day: isEn ? "Mon" : "Pzt", val: 34 },
+    { day: isEn ? "Tue" : "Sal", val: 52 },
+    { day: isEn ? "Wed" : "Çar", val: 48 },
+    { day: isEn ? "Thu" : "Per", val: 78 },
+    { day: isEn ? "Fri" : "Cum", val: 92 },
+    { day: isEn ? "Sat" : "Cmt", val: 115 },
+    { day: isEn ? "Sun" : "Paz", val: 84 },
   ];
 
   return (
@@ -66,12 +67,14 @@ export default function SellerDashboardOverviewPage() {
                   </span>
                   <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Süper Mağaza Onaylı</span>
+                    <span>{isEn ? "Verified Super Store" : "Süper Mağaza Onaylı"}</span>
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Trend Fashion Mağazası</h1>
                 <p className="text-xs text-slate-300 max-w-xl font-medium leading-relaxed">
-                  Mağazanızın haftalık satış performansını, kritik stok uyarılarını ve müşteri siparişlerini buradan yönetin.
+                  {isEn
+                    ? "Manage your weekly sales performance, critical inventory alerts, and customer fulfillment here."
+                    : "Mağazanızın haftalık satış performansını, kritik stok uyarılarını ve müşteri siparişlerini buradan yönetin."}
                 </p>
               </div>
 
@@ -108,7 +111,7 @@ export default function SellerDashboardOverviewPage() {
               <SellerStatCard
                 title={t("seller.dashboard.statActiveProducts")}
                 value={32}
-                change="+4 Yeni"
+                change={isEn ? "+4 New" : "+4 Yeni"}
                 isPositive={true}
                 icon={Package}
                 iconBgColor="bg-amber-100 text-amber-600"
@@ -129,12 +132,14 @@ export default function SellerDashboardOverviewPage() {
                 <div className="flex flex-col">
                   <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Haftalık Satış İvmesi</span>
+                    <span>{isEn ? "Weekly Sales Momentum" : "Haftalık Satış İvmesi"}</span>
                   </h2>
-                  <span className="text-xs text-slate-500 font-semibold">Son 7 Günlük Mağaza Sipariş Hacmi</span>
+                  <span className="text-xs text-slate-500 font-semibold">
+                    {isEn ? "Past 7-day store order volume" : "Son 7 Günlük Mağaza Sipariş Hacmi"}
+                  </span>
                 </div>
                 <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  %98.4 Başarılı Teslimat
+                  {isEn ? "98.4% Fulfillment Rate" : "%98.4 Başarılı Teslimat"}
                 </span>
               </div>
 
@@ -143,7 +148,7 @@ export default function SellerDashboardOverviewPage() {
                 {dailySalesTrends.map((d, idx) => (
                   <div key={idx} className="flex flex-col items-center gap-2 flex-1 group">
                     <div className="text-[10px] font-black text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      ₺{d.val}k
+                      {currency === "USD" ? `$${d.val}k` : `₺${d.val}k`}
                     </div>
                     <div
                       style={{ height: `${(d.val / 115) * 100}%` }}
@@ -195,7 +200,7 @@ export default function SellerDashboardOverviewPage() {
                 <div className="flex flex-col gap-3 text-xs">
                   <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="font-bold text-amber-900">Siyah Oversize Tişört</span>
+                      <span className="font-bold text-amber-900">{isEn ? "Black Oversize T-Shirt" : "Siyah Oversize Tişört"}</span>
                       <span className="text-[10px] text-amber-700">{t("seller.dashboard.lastItemsLeft")}</span>
                     </div>
                     <Link href="/seller/dashboard/products" className="text-[11px] font-black text-primary underline">

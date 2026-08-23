@@ -40,7 +40,9 @@ export const CouponCard: React.FC<CouponCardProps> = ({ coupon, isUsed = false }
             )}
           </div>
           <span className="text-xs font-bold text-slate-700">{coupon.description[language]}</span>
-          <span className="text-[11px] text-text-subtle font-medium">Son Kullanma: 31 Aralık 2026</span>
+          <span className="text-[11px] text-text-subtle font-medium">
+            {language === "en" ? "Expires: Dec 31, 2026" : "Son Kullanma: 31 Aralık 2026"}
+          </span>
         </div>
       </div>
 
@@ -54,12 +56,12 @@ export const CouponCard: React.FC<CouponCardProps> = ({ coupon, isUsed = false }
           {copied ? (
             <>
               <Check className="w-4 h-4 text-emerald-600" />
-              <span className="text-emerald-600">Kopyalandı</span>
+              <span className="text-emerald-600">{language === "en" ? "Copied" : "Kopyalandı"}</span>
             </>
           ) : (
             <>
               <Copy className="w-4 h-4 text-slate-400" />
-              <span>Kodu Kopyala</span>
+              <span>{language === "en" ? "Copy Code" : "Kodu Kopyala"}</span>
             </>
           )}
         </button>

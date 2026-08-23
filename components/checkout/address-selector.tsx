@@ -105,10 +105,16 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       </div>
 
       {/* Add / Edit Address Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Teslimat Adresi Ekle / Düzenle">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={language === "en" ? "Add / Edit Delivery Address" : "Teslimat Adresi Ekle / Düzenle"}
+      >
         <form onSubmit={handleModalSave} className="flex flex-col gap-3 text-xs p-1">
           <div className="flex flex-col gap-1">
-            <label className="font-bold">Adres Başlığı (örn: Ev, İş):</label>
+            <label className="font-bold">
+              {language === "en" ? "Address Title (e.g. Home, Office):" : "Adres Başlığı (örn: Ev, İş):"}
+            </label>
             <input
               type="text"
               value={editingAddress.title || ""}
@@ -120,7 +126,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="font-bold">İl / City:</label>
+              <label className="font-bold">{language === "en" ? "City:" : "İl / City:"}</label>
               <input
                 type="text"
                 value={editingAddress.city || ""}
@@ -130,7 +136,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="font-bold">İlçe / District:</label>
+              <label className="font-bold">{language === "en" ? "District:" : "İlçe / District:"}</label>
               <input
                 type="text"
                 value={editingAddress.district || ""}
@@ -142,7 +148,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-bold">Açık Adres / Address Line:</label>
+            <label className="font-bold">{language === "en" ? "Street Address:" : "Açık Adres / Address Line:"}</label>
             <textarea
               value={editingAddress.addressLine || ""}
               onChange={(e) => setEditingAddress({ ...editingAddress, addressLine: e.target.value })}
@@ -153,10 +159,10 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
 
           <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
             <Button variant="outline" size="sm" type="button" onClick={() => setIsModalOpen(false)}>
-              İptal
+              {language === "en" ? "Cancel" : "İptal"}
             </Button>
             <Button variant="primary" size="sm" type="submit" className="font-bold">
-              Kaydet
+              {language === "en" ? "Save" : "Kaydet"}
             </Button>
           </div>
         </form>

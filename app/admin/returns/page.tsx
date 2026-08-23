@@ -172,41 +172,43 @@ export default function AdminReturnsPage() {
       .reduce((sum, r) => sum + r.refundAmount, 0),
   };
 
+  const isEn = language === "en";
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Onaylandı
+            {isEn ? "Approved" : "Onaylandı"}
           </span>
         );
       case "REJECTED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">
             <XCircle className="w-3.5 h-3.5" />
-            Reddedildi
+            {isEn ? "Rejected" : "Reddedildi"}
           </span>
         );
       case "CARGO_RECEIVED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">
             <Truck className="w-3.5 h-3.5" />
-            Kargo Ulaştı
+            {isEn ? "Parcel Received" : "Kargo Ulaştı"}
           </span>
         );
       case "REFUNDED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Para İadesi Tamamlandı
+            {isEn ? "Refund Completed" : "Para İadesi Tamamlandı"}
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
             <Clock className="w-3.5 h-3.5" />
-            Yeni Talep (Beklemede)
+            {isEn ? "Pending Review" : "Yeni Talep (Beklemede)"}
           </span>
         );
     }
@@ -231,10 +233,12 @@ export default function AdminReturnsPage() {
                 </div>
                 <div>
                   <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                    <span>Platform İade & Para İadesi Denetim Paneli</span>
+                    <span>{isEn ? "Platform Returns & Refund Moderation" : "Platform İade & Para İadesi Denetim Paneli"}</span>
                   </h1>
                   <span className="text-xs text-slate-500">
-                    Tüm satıcı ve müşterilerin iade taleplerini denetleyin, onaylayın veya para iadesi gerçekleştirin.
+                    {isEn
+                      ? "Review, approve, or execute refunds across all store merchants and customers."
+                      : "Tüm satıcı ve müşterilerin iade taleplerini denetleyin, onaylayın veya para iadesi gerçekleştirin."}
                   </span>
                 </div>
               </div>
@@ -242,7 +246,7 @@ export default function AdminReturnsPage() {
               <Link href="/admin/audit">
                 <Button variant="outline" size="sm" className="font-bold text-xs">
                   <ShieldCheck className="w-3.5 h-3.5 mr-1 text-indigo-600" />
-                  <span>Denetim Günlükleri (Audit)</span>
+                  <span>{isEn ? "Audit Logs" : "Denetim Günlükleri (Audit)"}</span>
                 </Button>
               </Link>
             </div>
@@ -250,19 +254,27 @@ export default function AdminReturnsPage() {
             {/* Metrics Overview Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1">
-                <span className="text-xs font-bold text-slate-500">Toplam İade Talebi</span>
+                <span className="text-xs font-bold text-slate-500">
+                  {isEn ? "Total Return Requests" : "Toplam İade Talebi"}
+                </span>
                 <span className="text-2xl font-black text-slate-900">{stats.total}</span>
               </div>
               <div className="bg-white border border-amber-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1 bg-amber-50/30">
-                <span className="text-xs font-bold text-amber-700">Bekleyen Talepler</span>
+                <span className="text-xs font-bold text-amber-700">
+                  {isEn ? "Pending Requests" : "Bekleyen Talepler"}
+                </span>
                 <span className="text-2xl font-black text-amber-900">{stats.pending}</span>
               </div>
               <div className="bg-white border border-emerald-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1 bg-emerald-50/30">
-                <span className="text-xs font-bold text-emerald-700">Onaylanan / Süreçte</span>
+                <span className="text-xs font-bold text-emerald-700">
+                  {isEn ? "Approved / In Progress" : "Onaylanan / Süreçte"}
+                </span>
                 <span className="text-2xl font-black text-emerald-900">{stats.approved}</span>
               </div>
               <div className="bg-white border border-purple-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1 bg-purple-50/30">
-                <span className="text-xs font-bold text-purple-700">Tamamlanan İadeler</span>
+                <span className="text-xs font-bold text-purple-700">
+                  {isEn ? "Completed Refunds" : "Tamamlanan İadeler"}
+                </span>
                 <span className="text-xl font-black text-purple-900">
                   {formatCurrency(stats.totalRefundAmount, currency)}
                 </span>
@@ -291,12 +303,12 @@ export default function AdminReturnsPage() {
             <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: "ALL", label: "Tümü" },
-                  { id: "PENDING", label: `Bekleyenler (${stats.pending})` },
-                  { id: "APPROVED", label: "Onaylananlar" },
-                  { id: "CARGO_RECEIVED", label: "Kargo Ulaşanlar" },
-                  { id: "REFUNDED", label: "İadesi Tamamlananlar" },
-                  { id: "REJECTED", label: "Reddedilenler" },
+                  { id: "ALL", label: isEn ? "All" : "Tümü" },
+                  { id: "PENDING", label: isEn ? `Pending (${stats.pending})` : `Bekleyenler (${stats.pending})` },
+                  { id: "APPROVED", label: isEn ? "Approved" : "Onaylananlar" },
+                  { id: "CARGO_RECEIVED", label: isEn ? "Parcel Received" : "Kargo Ulaşanlar" },
+                  { id: "REFUNDED", label: isEn ? "Refund Completed" : "İadesi Tamamlananlar" },
+                  { id: "REJECTED", label: isEn ? "Rejected" : "Reddedilenler" },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -318,7 +330,7 @@ export default function AdminReturnsPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Sipariş No, Satıcı veya Müşteri Ara..."
+                  placeholder={isEn ? "Search by Order No, Seller, Customer..." : "Sipariş No, Satıcı veya Müşteri Ara..."}
                   className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-hidden bg-slate-50"
                 />
               </div>
@@ -327,7 +339,7 @@ export default function AdminReturnsPage() {
             {/* Returns Table / Cards */}
             {loading ? (
               <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-xs text-slate-500">
-                Platform iade talepleri yükleniyor...
+                {isEn ? "Loading platform return requests..." : "Platform iade talepleri yükleniyor..."}
               </div>
             ) : filteredReturns.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-xl p-12 text-center flex flex-col items-center justify-center gap-3">

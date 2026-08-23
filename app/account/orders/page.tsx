@@ -193,9 +193,9 @@ export default function OrderHistoryPage() {
                   <Calendar className="w-3.5 h-3.5" />
                   <select className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-bold outline-none">
                     <option>{isEn ? "All dates" : "Tüm Tarihler"}</option>
-                    <option>Son 30 Gün</option>
-                    <option>Son 3 Ay</option>
-                    <option>2026 Sezonu</option>
+                    <option>{isEn ? "Last 30 Days" : "Son 30 Gün"}</option>
+                    <option>{isEn ? "Last 3 Months" : "Son 3 Ay"}</option>
+                    <option>{isEn ? "2026 Season" : "2026 Sezonu"}</option>
                   </select>
                 </div>
               </div>

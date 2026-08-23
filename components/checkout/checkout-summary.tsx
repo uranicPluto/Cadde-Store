@@ -23,14 +23,15 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
   isSubmitting = false,
   onPlaceOrder,
 }) => {
-  const { currency, t } = useLanguage();
+  const { language, currency, t } = useLanguage();
+  const isEn = language === "en";
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4 sticky top-24">
       <h2 className="text-base font-extrabold text-text-main pb-3 border-b border-slate-100 flex items-center justify-between">
-        <span>Sipariş Özeti</span>
+        <span>{isEn ? "Order Summary" : "Sipariş Özeti"}</span>
         <span className="text-xs text-text-subtle font-semibold">
-          {calculation.sellerGroups.reduce((sum, g) => sum + g.items.length, 0)} Ürün
+          {calculation.sellerGroups.reduce((sum, g) => sum + g.items.length, 0)} {isEn ? "Items" : "Ürün"}
         </span>
       </h2>
 
@@ -47,7 +48,7 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
                 <img src={item.product.imageUrl} alt="" className="w-9 h-9 object-cover rounded border border-slate-200 shrink-0" />
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="font-bold text-text-main truncate">{item.product.name}</span>
-                  <span className="text-[10px] text-text-muted">{item.quantity} Adet</span>
+                  <span className="text-[10px] text-text-muted">{item.quantity} {isEn ? "Qty" : "Adet"}</span>
                 </div>
                 <span className="font-bold text-text-main text-xs">{formatCurrency(item.product.price * item.quantity, currency)}</span>
               </div>
@@ -59,26 +60,26 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
       {/* Financial Totals */}
       <div className="flex flex-col gap-2 text-xs pt-3 border-t border-slate-100">
         <div className="flex items-center justify-between text-text-muted">
-          <span>Ara Toplam:</span>
+          <span>{isEn ? "Subtotal:" : "Ara Toplam:"}</span>
           <span className="font-bold text-text-main">{formatCurrency(calculation.subtotal, currency)}</span>
         </div>
 
         {calculation.productDiscount > 0 && (
           <div className="flex items-center justify-between text-emerald-700 font-semibold">
-            <span>İndirimler:</span>
+            <span>{isEn ? "Discounts:" : "İndirimler:"}</span>
             <span>-{formatCurrency(calculation.productDiscount, currency)}</span>
           </div>
         )}
 
         {calculation.couponDiscount > 0 && (
           <div className="flex items-center justify-between text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
-            <span>Kupon ({appliedCoupon?.code}):</span>
+            <span>{isEn ? `Coupon (${appliedCoupon?.code}):` : `Kupon (${appliedCoupon?.code}):`}</span>
             <span>-{formatCurrency(calculation.couponDiscount, currency)}</span>
           </div>
         )}
 
         <div className="flex items-center justify-between text-text-muted">
-          <span>Kargo Ücreti:</span>
+          <span>{isEn ? "Shipping Fee:" : "Kargo Ücreti:"}</span>
           <span className="font-bold text-text-main">
             {calculation.totalShipping === 0 ? (
               <span className="text-emerald-600 font-extrabold">{t("header.freeShippingBadge")}</span>
@@ -91,7 +92,7 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
 
       {/* Grand Total */}
       <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-        <span className="text-sm font-bold text-text-main">Ödenecek Tutar:</span>
+        <span className="text-sm font-bold text-text-main">{isEn ? "Total Payable:" : "Ödenecek Tutar:"}</span>
         <span className="text-xl font-black text-primary">
           {formatCurrency(calculation.grandTotal, currency)}
         </span>
@@ -108,11 +109,11 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
         {isSubmitting ? (
           <div className="flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Sipariş İşleniyor...</span>
+            <span>{isEn ? "Processing Order..." : "Sipariş İşleniyor..."}</span>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-1.5">
-            <span>Siparişi Tamamla</span>
+            <span>{isEn ? "Complete Order" : "Siparişi Tamamla"}</span>
             <ArrowRight className="w-4 h-4" />
           </div>
         )}
@@ -120,7 +121,9 @@ export const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
 
       {/* Security Terms Disclaimer */}
       <p className="text-[10px] text-text-subtle text-center leading-tight">
-        "Siparişi Tamamla" butonuna basarak Mesafeli Satış Sözleşmesi'ni ve Ön Bilgilendirme Formu'nu kabul etmiş olursunuz.
+        {isEn
+          ? 'By clicking "Complete Order", you agree to the Distance Sales Agreement and Terms of Service.'
+          : '"Siparişi Tamamla" butonuna basarak Mesafeli Satış Sözleşmesi\'ni ve Ön Bilgilendirme Formu\'nu kabul etmiş olursunuz.'}
       </p>
     </div>
   );

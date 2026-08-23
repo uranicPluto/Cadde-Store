@@ -9,6 +9,7 @@ import { HeaderCart } from "@/components/layout/header-cart";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart/cart-context";
 import { useFavorites } from "@/lib/favorites/favorites-context";
+import { useLanguage } from "@/lib/i18n/language-context";
 
 export interface MainHeaderProps {
   isLoggedInMock?: boolean;
@@ -25,6 +26,8 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
   cartCount,
   className,
 }) => {
+  const { language, t } = useLanguage();
+  const isEn = language === "en";
   const { totalCount: liveCartCount } = useCart();
   const { favoriteCount: liveFavCount } = useFavorites();
 
@@ -42,7 +45,7 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
         {/* LEFT: Logo Wordmark - Clicking sends to home page / */}
         <Link
           href="/"
-          aria-label="Cadde Store Anasayfa"
+          aria-label={isEn ? "Cadde Store Homepage" : "Cadde Store Anasayfa"}
           className="flex items-center gap-2 text-text-main group shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded"
         >
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-sm group-hover:bg-primary-hover transition-colors">
@@ -53,14 +56,14 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
               CADDE STORE
             </span>
             <span className="text-[9px] text-text-subtle font-bold uppercase tracking-widest -mt-1">
-              Pazaryeri
+              {isEn ? "Marketplace" : "Pazaryeri"}
             </span>
           </div>
         </Link>
 
         {/* CENTER: Search Bar */}
         <div className="flex-1 max-w-2xl mx-auto hidden lg:block">
-          <SearchComponent placeholder="Aradığınız ürün, marka veya kategoriyi yazınız..." />
+          <SearchComponent placeholder={isEn ? "Search product, brand or category..." : "Aradığınız ürün, marka veya kategoriyi yazınız..."} />
         </div>
 
         {/* RIGHT: User Actions */}

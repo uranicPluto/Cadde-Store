@@ -33,7 +33,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
         {address.isDefault ? (
           <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Varsayılan Adres
+            {language === "en" ? "Default Address" : "Varsayılan Adres"}
           </span>
         ) : (
           <button
@@ -41,7 +41,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
             onClick={() => onSetDefault(address.id)}
             className="text-[11px] font-bold text-primary hover:underline"
           >
-            Varsayılan Yap
+            {language === "en" ? "Set as Default" : "Varsayılan Yap"}
           </button>
         )}
       </div>
@@ -62,7 +62,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
           className="text-slate-600 hover:text-primary font-bold flex items-center gap-1 transition-colors"
         >
           <Edit2 className="w-3.5 h-3.5" />
-          <span>Düzenle</span>
+          <span>{language === "en" ? "Edit" : "Düzenle"}</span>
         </button>
 
         <button
@@ -71,7 +71,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
           className="text-slate-400 hover:text-rose-600 font-bold flex items-center gap-1 transition-colors"
         >
           <Trash2 className="w-3.5 h-3.5" />
-          <span>Sil</span>
+          <span>{language === "en" ? "Delete" : "Sil"}</span>
         </button>
       </div>
     </div>

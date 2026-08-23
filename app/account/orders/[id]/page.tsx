@@ -361,7 +361,7 @@ export default function OrderDetailPage() {
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-text-subtle">{formattedDate}</span>
                   <h1 className="text-xl font-black text-text-main flex items-center gap-2">
-                    <span>Sipariş No: {order.orderNumber}</span>
+                    <span>{language === "en" ? "Order No:" : "Sipariş No:"} {order.orderNumber}</span>
                   </h1>
                 </div>
               </div>
@@ -369,7 +369,7 @@ export default function OrderDetailPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => window.print()} className="font-bold text-xs">
                   <Printer className="w-3.5 h-3.5 mr-1" />
-                  <span>Fatura Görüntüle</span>
+                  <span>{language === "en" ? "View Invoice" : "Fatura Görüntüle"}</span>
                 </Button>
                 {/* Return Request button on order header */}
                 <Button
@@ -379,11 +379,11 @@ export default function OrderDetailPage() {
                   className="font-bold text-xs border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100"
                 >
                   <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                  <span>Kolay İade Talebi</span>
+                  <span>{language === "en" ? "Request Return" : "Kolay İade Talebi"}</span>
                 </Button>
                 <Button variant="primary" size="sm" onClick={handleReorder} className="font-bold text-xs bg-slate-900 hover:bg-slate-800">
                   <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                  <span>Tekrar Sipariş Et</span>
+                  <span>{language === "en" ? "Buy Again" : "Tekrar Sipariş Et"}</span>
                 </Button>
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function OrderDetailPage() {
                 <div className="flex items-center justify-between border-b border-amber-100 pb-2">
                   <span className="font-extrabold text-amber-900 flex items-center gap-2 text-xs">
                     <RotateCcw className="w-4 h-4 text-amber-600" />
-                    Bu Siparişe Ait İade Talepleri ({returnRequests.length})
+                    {language === "en" ? `Return Requests on this Order (${returnRequests.length})` : `Bu Siparişe Ait İade Talepleri (${returnRequests.length})`}
                   </span>
                 </div>
                 <div className="divide-y divide-slate-100 flex flex-col gap-3">
@@ -409,22 +409,22 @@ export default function OrderDetailPage() {
                     <div key={ret.id} className="pt-2 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-800">Gerekçe: {ret.reason}</span>
+                          <span className="font-bold text-slate-800">{language === "en" ? "Reason:" : "Gerekçe:"} {ret.reason}</span>
                           {getReturnStatusBadge(ret.status)}
                         </div>
                         {ret.sellerNote && (
                           <span className="text-slate-600 bg-slate-50 p-1.5 rounded border border-slate-200 mt-1">
-                            <strong>Satıcı Notu:</strong> {ret.sellerNote}
+                            <strong>{language === "en" ? "Seller Note:" : "Satıcı Notu:"}</strong> {ret.sellerNote}
                           </span>
                         )}
                         {ret.adminNote && (
                           <span className="text-purple-700 bg-purple-50 p-1.5 rounded border border-purple-200 mt-1">
-                            <strong>Yönetici Notu:</strong> {ret.adminNote}
+                            <strong>{language === "en" ? "Admin Note:" : "Yönetici Notu:"}</strong> {ret.adminNote}
                           </span>
                         )}
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="font-bold text-slate-500 block text-[10px]">İade Tutarı</span>
+                        <span className="font-bold text-slate-500 block text-[10px]">{language === "en" ? "Refund Amount" : "İade Tutarı"}</span>
                         <span className="font-black text-emerald-700 text-sm">{formatCurrency(ret.refundAmount, currency)}</span>
                       </div>
                     </div>
@@ -438,7 +438,7 @@ export default function OrderDetailPage() {
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-2 text-xs">
                 <span className="font-extrabold text-primary uppercase tracking-wider flex items-center gap-1.5">
                   <MapPin className="w-4 h-4" />
-                  Teslimat Adresi
+                  {language === "en" ? "Delivery Address" : "Teslimat Adresi"}
                 </span>
                 <span className="font-bold text-text-main">{order.shippingAddress.title}</span>
                 <span className="text-text-muted">{order.customerInfo.firstName} {order.customerInfo.lastName} ({order.customerInfo.phone})</span>
@@ -449,18 +449,22 @@ export default function OrderDetailPage() {
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-2 text-xs">
                 <span className="font-extrabold text-primary uppercase tracking-wider flex items-center gap-1.5">
                   <CreditCard className="w-4 h-4" />
-                  Ödeme & Kargo Bilgileri
+                  {language === "en" ? "Payment & Delivery Info" : "Ödeme & Kargo Bilgileri"}
                 </span>
                 <div className="flex items-center justify-between text-text-muted pt-1">
-                  <span>Ödeme Yöntemi:</span>
-                  <span className="font-bold text-text-main">{order.paymentMethod === "credit_card" ? `Kredi Kartı (${order.cardMaskedNumber || "**** 5400"})` : "Kapıda Ödeme"}</span>
+                  <span>{language === "en" ? "Payment Method:" : "Ödeme Yöntemi:"}</span>
+                  <span className="font-bold text-text-main">
+                    {order.paymentMethod === "credit_card"
+                      ? `${language === "en" ? "Credit Card" : "Kredi Kartı"} (${order.cardMaskedNumber || "**** 5400"})`
+                      : language === "en" ? "Cash on Delivery" : "Kapıda Ödeme"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-text-muted">
-                  <span>Kargo Firması:</span>
-                  <span className="font-bold text-emerald-700">{order.shippingMethod?.name?.tr || "Yurtiçi Kargo"}</span>
+                  <span>{language === "en" ? "Carrier:" : "Kargo Firması:"}</span>
+                  <span className="font-bold text-emerald-700">{order.shippingMethod?.name?.[language] || order.shippingMethod?.name?.tr || "Yurtiçi Kargo"}</span>
                 </div>
                 <div className="flex items-center justify-between text-text-muted pt-2 border-t border-slate-100">
-                  <span className="font-bold">Toplam Tutar:</span>
+                  <span className="font-bold">{language === "en" ? "Grand Total:" : "Toplam Tutar:"}</span>
                   <span className="text-base font-black text-primary">{formatCurrency(order.calculation.grandTotal, currency)}</span>
                 </div>
               </div>
@@ -468,10 +472,12 @@ export default function OrderDetailPage() {
 
             {/* Ordered Products Breakdown per Seller Group */}
             <div className="flex flex-col gap-4">
-              <h2 className="text-sm font-extrabold text-text-main uppercase tracking-wider">Sipariş İçeriği & Gönderi Takibi</h2>
+              <h2 className="text-sm font-extrabold text-text-main uppercase tracking-wider">
+                {language === "en" ? "Order Items & Shipment Tracking" : "Sipariş İçeriği & Gönderi Takibi"}
+              </h2>
 
               {order.sellerGroups.map((g: any, gIdx: number) => {
-                const carrierName = g.carrierName || order.shippingMethod?.name?.tr || "Yurtiçi Kargo";
+                const carrierName = g.carrierName || order.shippingMethod?.name?.[language] || order.shippingMethod?.name?.tr || "Yurtiçi Kargo";
                 const trackingNum = g.trackingNumber || order.trackingNumber;
                 const trackingUrl = getCarrierTrackingUrl(carrierName, trackingNum);
 
@@ -480,7 +486,7 @@ export default function OrderDetailPage() {
                     <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-2">
                         <Store className="w-4 h-4 text-primary" />
-                        <span className="font-extrabold text-primary">Satıcı: {g.storeName}</span>
+                        <span className="font-extrabold text-primary">{language === "en" ? "Seller:" : "Satıcı:"} {g.storeName}</span>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 uppercase">
                           {g.status || order.status}
                         </span>
@@ -501,7 +507,7 @@ export default function OrderDetailPage() {
                           </a>
                         ) : (
                           <span className="font-bold text-slate-600">
-                            {g.isFreeShipping ? "Ücretsiz Kargo" : `Kargo: ${formatCurrency(g.shippingFee, currency)}`}
+                            {g.isFreeShipping ? (language === "en" ? "Free Shipping" : "Ücretsiz Kargo") : `${language === "en" ? "Shipping:" : "Kargo:"} ${formatCurrency(g.shippingFee, currency)}`}
                           </span>
                         )}
                       </div>
@@ -532,9 +538,9 @@ export default function OrderDetailPage() {
                                 <span className="font-extrabold text-primary uppercase text-[11px]">{item.product.brand}</span>
                                 <span className="font-bold text-text-main text-sm truncate">{item.product.name}</span>
                                 <div className="flex items-center gap-2 text-text-muted mt-1">
-                                  {item.selectedColor && <span>Renk: {item.selectedColor}</span>}
-                                  {item.selectedSize && <span>Beden: {item.selectedSize}</span>}
-                                  <span>Adet: {item.quantity}</span>
+                                  {item.selectedColor && <span>{language === "en" ? "Color:" : "Renk:"} {item.selectedColor}</span>}
+                                  {item.selectedSize && <span>{language === "en" ? "Size:" : "Beden:"} {item.selectedSize}</span>}
+                                  <span>{language === "en" ? "Qty:" : "Adet:"} {item.quantity}</span>
                                 </div>
                               </div>
                             </div>
@@ -550,7 +556,7 @@ export default function OrderDetailPage() {
                                 className="text-xs font-bold border-slate-300 hover:border-amber-400 hover:bg-amber-50 hover:text-amber-800 text-slate-700"
                               >
                                 <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                                <span>İade Et</span>
+                                <span>{language === "en" ? "Return Item" : "İade Et"}</span>
                               </Button>
                             </div>
                           </div>

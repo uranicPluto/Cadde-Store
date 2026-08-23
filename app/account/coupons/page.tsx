@@ -40,11 +40,13 @@ export default function CouponWalletPage() {
                   <h1 className="text-xl font-black text-text-main flex items-center gap-2">
                     <span>{language === "en" ? "My Coupons" : "Kupon Cüzdanım"}</span>
                     <span className="text-xs bg-amber-600 text-white font-extrabold px-2 py-0.5 rounded-full">
-                      {MOCK_COUPONS.length} Aktif Kupon
+                      {MOCK_COUPONS.length} {language === "en" ? "Active Coupons" : "Aktif Kupon"}
                     </span>
                   </h1>
                   <span className="text-xs text-text-muted">
-                    Sipariş verirken sepetinizde kullanabileceğiniz indirim kuponları.
+                    {language === "en"
+                      ? "Special discount coupons ready to apply at checkout."
+                      : "Sipariş verirken sepetinizde kullanabileceğiniz indirim kuponları."}
                   </span>
                 </div>
               </div>

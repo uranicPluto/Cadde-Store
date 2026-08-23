@@ -38,19 +38,20 @@ export default function AdminDashboardPage() {
     setOrders(getSavedOrders());
   }, []);
 
+  const isEn = language === "en";
   const totalRevenue = orders.reduce((sum, o) => sum + o.calculation.grandTotal, 184500);
   const fullCatalog = getFullCatalog(language);
 
   // Mock monthly revenue trends for chart visualizer
   const monthlyTrends = [
-    { month: "Oca", val: 42 },
-    { month: "Şub", val: 58 },
-    { month: "Mar", val: 65 },
-    { month: "Nis", val: 80 },
-    { month: "May", val: 95 },
-    { month: "Haz", val: 110 },
-    { month: "Tem", val: 145 },
-    { month: "Ağu", val: 184 },
+    { month: isEn ? "Jan" : "Oca", val: 42 },
+    { month: isEn ? "Feb" : "Şub", val: 58 },
+    { month: isEn ? "Mar" : "Mar", val: 65 },
+    { month: isEn ? "Apr" : "Nis", val: 80 },
+    { month: isEn ? "May" : "May", val: 95 },
+    { month: isEn ? "Jun" : "Haz", val: 110 },
+    { month: isEn ? "Jul" : "Tem", val: 145 },
+    { month: isEn ? "Aug" : "Ağu", val: 184 },
   ];
 
   return (
@@ -69,16 +70,18 @@ export default function AdminDashboardPage() {
               <div className="flex flex-col gap-2 relative z-10">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/20 px-2.5 py-0.5 rounded border border-indigo-500/30">
-                    Executive Control Center
+                    {isEn ? "Executive Control Center" : "Yönetici Kontrol Merkezi"}
                   </span>
                   <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>All Systems Operational</span>
+                    <span>{isEn ? "All Systems Operational" : "Tüm Sistemler Aktif"}</span>
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{t("admin.dashboard.title")}</h1>
                 <p className="text-xs text-slate-300 max-w-xl font-medium leading-relaxed">
-                  Platform genelindeki canlı satış verilerini, mağaza onaylarını, aktif siparişleri ve sistem sağlığını buradan yönetin.
+                  {isEn
+                    ? "Monitor live platform GMV sales, merchant approvals, active orders, and system health in real-time."
+                    : "Platform genelindeki canlı satış verilerini, mağaza onaylarını, aktif siparişleri ve sistem sağlığını buradan yönetin."}
                 </p>
               </div>
 
@@ -89,7 +92,7 @@ export default function AdminDashboardPage() {
                   className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl shadow-md transition-colors flex items-center gap-1.5"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  <span>Mağaza Onayla</span>
+                  <span>{isEn ? "Approve Stores" : "Mağaza Onayla"}</span>
                 </Link>
 
                 <Link
@@ -97,7 +100,7 @@ export default function AdminDashboardPage() {
                   className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-black rounded-xl border border-white/20 transition-colors flex items-center gap-1.5"
                 >
                   <Ticket className="w-4 h-4 text-amber-300" />
-                  <span>Kupon Oluştur</span>
+                  <span>{isEn ? "Create Coupon" : "Kupon Oluştur"}</span>
                 </Link>
               </div>
             </div>
@@ -123,7 +126,7 @@ export default function AdminDashboardPage() {
               <AdminStatCard
                 title={t("admin.dashboard.activeSellers")}
                 value={MOCK_SELLERS.length + 12}
-                change="+4 Yeni"
+                change={isEn ? "+4 New" : "+4 Yeni"}
                 isPositive={true}
                 icon={Store}
                 iconBgColor="bg-amber-100 text-amber-600"
@@ -144,12 +147,14 @@ export default function AdminDashboardPage() {
                 <div className="flex flex-col">
                   <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-indigo-600" />
-                    <span>Aylık Platform Ciro Trendi (2026)</span>
+                    <span>{isEn ? "Monthly Platform GMV Revenue (2026)" : "Aylık Platform Ciro Trendi (2026)"}</span>
                   </h2>
-                  <span className="text-xs text-slate-500 font-semibold">Toplam İşlem Hacmi ve Satış Büyümesi</span>
+                  <span className="text-xs text-slate-500 font-semibold">
+                    {isEn ? "Total transaction volume and sales growth" : "Toplam İşlem Hacmi ve Satış Büyümesi"}
+                  </span>
                 </div>
                 <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  +34% Rekor Büyüme
+                  {isEn ? "+34% Record Growth" : "+34% Rekor Büyüme"}
                 </span>
               </div>
 
@@ -158,7 +163,7 @@ export default function AdminDashboardPage() {
                 {monthlyTrends.map((t, idx) => (
                   <div key={idx} className="flex flex-col items-center gap-2 flex-1 group">
                     <div className="text-[10px] font-black text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      ₺{t.val}k
+                      {currency === "USD" ? `$${t.val}k` : `₺${t.val}k`}
                     </div>
                     <div
                       style={{ height: `${(t.val / 184) * 100}%` }}

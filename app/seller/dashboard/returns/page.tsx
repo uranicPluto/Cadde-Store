@@ -166,41 +166,43 @@ export default function SellerReturnsPage() {
       .reduce((sum, r) => sum + r.refundAmount, 0),
   };
 
+  const isEn = language === "en";
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Onaylandı (Kargo Bekleniyor)
+            {isEn ? "Approved (Waiting Courier)" : "Onaylandı (Kargo Bekleniyor)"}
           </span>
         );
       case "REJECTED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
             <XCircle className="w-3.5 h-3.5" />
-            Reddedildi
+            {isEn ? "Rejected" : "Reddedildi"}
           </span>
         );
       case "CARGO_RECEIVED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
             <Truck className="w-3.5 h-3.5" />
-            Kargo Ulaştı (İnceleniyor)
+            {isEn ? "Parcel Received" : "Kargo Teslim Alındı"}
           </span>
         );
       case "REFUNDED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Ücret İade Edildi
+            {isEn ? "Refunded" : "Ücret İade Edildi"}
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
             <Clock className="w-3.5 h-3.5" />
-            Yeni Talep (İnceleniyor)
+            {isEn ? "Pending Review" : "Yeni Talep (İnceleniyor)"}
           </span>
         );
     }
@@ -221,11 +223,11 @@ export default function SellerReturnsPage() {
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="text-xs font-bold text-text-subtle uppercase tracking-wider">
-                  Müşteri Memnuniyeti & Satış Sonrası
+                  {isEn ? "Customer Satisfaction & After-Sales" : "Müşteri Memnuniyeti & Satış Sonrası"}
                 </span>
                 <h1 className="text-xl font-black text-text-main flex items-center gap-2">
                   <RotateCcw className="w-5 h-5 text-primary" />
-                  <span>İade & Değişim Yönetimi</span>
+                  <span>{isEn ? "Returns & Claims Management" : "İade & Değişim Yönetimi"}</span>
                 </h1>
               </div>
 
@@ -233,7 +235,7 @@ export default function SellerReturnsPage() {
                 <Link href="/seller/dashboard/orders">
                   <Button variant="outline" size="sm" className="font-bold text-xs">
                     <Package className="w-3.5 h-3.5 mr-1" />
-                    <span>Siparişlere Git</span>
+                    <span>{isEn ? "Go to Orders" : "Siparişlere Git"}</span>
                   </Button>
                 </Link>
               </div>
@@ -242,19 +244,27 @@ export default function SellerReturnsPage() {
             {/* Metrics Overview Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1">
-                <span className="text-xs font-bold text-slate-500">Toplam İade Talebi</span>
+                <span className="text-xs font-bold text-slate-500">
+                  {isEn ? "Total Return Requests" : "Toplam İade Talebi"}
+                </span>
                 <span className="text-2xl font-black text-slate-900">{stats.total}</span>
               </div>
               <div className="bg-white border border-amber-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1 bg-amber-50/30">
-                <span className="text-xs font-bold text-amber-700">Onay Bekleyenler</span>
+                <span className="text-xs font-bold text-amber-700">
+                  {isEn ? "Pending Approval" : "Onay Bekleyenler"}
+                </span>
                 <span className="text-2xl font-black text-amber-900">{stats.pending}</span>
               </div>
               <div className="bg-white border border-emerald-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1 bg-emerald-50/30">
-                <span className="text-xs font-bold text-emerald-700">Onaylanan İadeler</span>
+                <span className="text-xs font-bold text-emerald-700">
+                  {isEn ? "Approved Returns" : "Onaylanan İadeler"}
+                </span>
                 <span className="text-2xl font-black text-emerald-900">{stats.approved}</span>
               </div>
               <div className="bg-white border border-purple-200 rounded-xl p-4 shadow-2xs flex flex-col gap-1 bg-purple-50/30">
-                <span className="text-xs font-bold text-purple-700">Toplam İade Tutarı</span>
+                <span className="text-xs font-bold text-purple-700">
+                  {isEn ? "Total Refund Amount" : "Toplam İade Tutarı"}
+                </span>
                 <span className="text-xl font-black text-purple-900">
                   {formatCurrency(stats.totalRefundAmount, currency)}
                 </span>
@@ -283,12 +293,12 @@ export default function SellerReturnsPage() {
             <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: "ALL", label: "Tümü" },
-                  { id: "PENDING", label: `Bekleyenler (${stats.pending})` },
-                  { id: "APPROVED", label: "Onaylananlar" },
-                  { id: "CARGO_RECEIVED", label: "Kargo Ulaşanlar" },
-                  { id: "REFUNDED", label: "İadesi Yapılanlar" },
-                  { id: "REJECTED", label: "Reddedilenler" },
+                  { id: "ALL", label: isEn ? "All" : "Tümü" },
+                  { id: "PENDING", label: isEn ? `Pending (${stats.pending})` : `Bekleyenler (${stats.pending})` },
+                  { id: "APPROVED", label: isEn ? "Approved" : "Onaylananlar" },
+                  { id: "CARGO_RECEIVED", label: isEn ? "Parcel Received" : "Kargo Ulaşanlar" },
+                  { id: "REFUNDED", label: isEn ? "Refunded" : "İadesi Yapılanlar" },
+                  { id: "REJECTED", label: isEn ? "Rejected" : "Reddedilenler" },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -310,7 +320,7 @@ export default function SellerReturnsPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Sipariş No, Ürün veya Müşteri Ara..."
+                  placeholder={isEn ? "Search by Order No, Product, Customer..." : "Sipariş No, Ürün veya Müşteri Ara..."}
                   className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-hidden bg-slate-50"
                 />
               </div>
@@ -319,14 +329,18 @@ export default function SellerReturnsPage() {
             {/* Returns List */}
             {loading ? (
               <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-xs text-slate-500">
-                İade talepleri yükleniyor...
+                {isEn ? "Loading return requests..." : "İade talepleri yükleniyor..."}
               </div>
             ) : filteredReturns.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-xl p-12 text-center flex flex-col items-center justify-center gap-3">
                 <RotateCcw className="w-10 h-10 text-slate-300" />
-                <span className="font-bold text-sm text-slate-700">Seçilen kriterde iade talebi bulunamadı.</span>
+                <span className="font-bold text-sm text-slate-700">
+                  {isEn ? "No return requests found." : "Seçilen kriterde iade talebi bulunamadı."}
+                </span>
                 <p className="text-xs text-slate-500 max-w-sm">
-                  Mağazanızın ürünlerine ait yeni bir iade talebi oluşturulduğunda burada listelenecektir.
+                  {isEn
+                    ? "When a customer creates a return request for your store products, it will appear here."
+                    : "Mağazanızın ürünlerine ait yeni bir iade talebi oluşturulduğunda burada listelenecektir."}
                 </p>
               </div>
             ) : (

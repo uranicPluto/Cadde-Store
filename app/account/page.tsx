@@ -59,9 +59,13 @@ export default function AccountDashboardPage() {
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
                     {language === "en" ? "VIP Marketplace Customer" : "VIP Pazaryeri Müşterisi"}
                   </span>
-                  <h1 className="text-2xl font-black tracking-tight">Hoş Geldiniz, Ahmet Yılmaz</h1>
+                  <h1 className="text-2xl font-black tracking-tight">
+                    {language === "en" ? "Welcome back, Ahmet Yılmaz" : "Hoş Geldiniz, Ahmet Yılmaz"}
+                  </h1>
                   <span className="text-xs text-slate-300">
-                    Hesabınız ve siparişlerinizi buradan kolayca yönetebilirsiniz.
+                    {language === "en"
+                      ? "Manage your account, orders, saved addresses, and active coupons here."
+                      : "Hesabınız ve siparişlerinizi buradan kolayca yönetebilirsiniz."}
                   </span>
                 </div>
               </div>
@@ -70,33 +74,33 @@ export default function AccountDashboardPage() {
             {/* Metric Summary Cards Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <AccountSummaryCard
-                title="Siparişler"
+                title={language === "en" ? "Orders" : "Siparişler"}
                 value={orders.length}
-                subtitle="Tüm Siparişleri Gör"
+                subtitle={language === "en" ? "View All Orders" : "Tüm Siparişleri Gör"}
                 icon={Package}
                 href="/account/orders"
                 iconBgColor="bg-indigo-100 text-indigo-600"
               />
               <AccountSummaryCard
-                title="Favoriler"
+                title={language === "en" ? "Favorites" : "Favoriler"}
                 value={favoriteCount}
-                subtitle="Favori Listesine Git"
+                subtitle={language === "en" ? "View Wishlist" : "Favori Listesine Git"}
                 icon={Heart}
                 href="/favorites"
                 iconBgColor="bg-rose-100 text-rose-600"
               />
               <AccountSummaryCard
-                title="Adresler"
+                title={language === "en" ? "Addresses" : "Adresler"}
                 value={addressCount}
-                subtitle="Adreslerimi Yönet"
+                subtitle={language === "en" ? "Manage Addresses" : "Adreslerimi Yönet"}
                 icon={MapPin}
                 href="/account/addresses"
                 iconBgColor="bg-emerald-100 text-emerald-600"
               />
               <AccountSummaryCard
-                title="Kuponlar"
+                title={language === "en" ? "Coupons" : "Kuponlar"}
                 value={MOCK_COUPONS.length}
-                subtitle="Kupon Cüzdanı"
+                subtitle={language === "en" ? "Coupon Wallet" : "Kupon Cüzdanı"}
                 icon={Tag}
                 href="/account/coupons"
                 iconBgColor="bg-amber-100 text-amber-600"
@@ -108,21 +112,21 @@ export default function AccountDashboardPage() {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black text-text-main flex items-center gap-2">
                   <Package className="w-5 h-5 text-primary" />
-                  <span>Son Siparişleriniz</span>
+                  <span>{language === "en" ? "Recent Orders" : "Son Siparişleriniz"}</span>
                 </h2>
 
                 <Link
                   href="/account/orders"
                   className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
                 >
-                  <span>Tümünü Gör</span>
+                  <span>{language === "en" ? "View All" : "Tümünü Gör"}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
 
               {orders.length === 0 ? (
                 <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-text-muted">
-                  Henüz verilmiş siparişiniz bulunmuyor.
+                  {language === "en" ? "You have no placed orders yet." : "Henüz verilmiş siparişiniz bulunmuyor."}
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">

@@ -12,7 +12,7 @@ import { ShoppingCart, ArrowRight } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
 export default function SellerOrdersPage() {
-  const { currency, t } = useLanguage();
+  const { language, currency, t } = useLanguage();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -201,7 +201,7 @@ export default function SellerOrdersPage() {
                             {ord.customerInfo.firstName} {ord.customerInfo.lastName}
                           </td>
                           <td className="p-3 text-text-muted">
-                            {new Date(ord.createdAt).toLocaleDateString("tr-TR")}
+                            {new Date(ord.createdAt).toLocaleDateString(language === "en" ? "en-US" : "tr-TR")}
                           </td>
                           <td className="p-3 font-black text-text-main">
                             {formatCurrency(ord.calculation.grandTotal, currency)}

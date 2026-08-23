@@ -68,7 +68,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             <img src={item.product.imageUrl} alt="" className="w-12 h-14 object-cover rounded border border-slate-200" />
             <div className="flex flex-col text-xs min-w-0 max-w-[140px]">
               <span className="font-bold text-text-main truncate">{item.product.name}</span>
-              <span className="text-[11px] text-text-muted">{item.quantity} Adet</span>
+              <span className="text-[11px] text-text-muted">{item.quantity} {language === "en" ? "Items" : "Adet"}</span>
             </div>
           </div>
         ))}
@@ -77,9 +77,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
       {/* Bottom Summary & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-3 border-t border-slate-100 gap-3 text-xs">
         <div className="flex items-center gap-2 font-semibold text-text-muted">
-          <span>{totalItemsCount} Ürün</span>
+          <span>{totalItemsCount} {language === "en" ? "Items" : "Ürün"}</span>
           <span>•</span>
-          <span>Toplam: <strong className="text-primary text-sm font-extrabold">{formatCurrency(order.calculation.grandTotal, currency)}</strong></span>
+          <span>{language === "en" ? "Total:" : "Toplam:"} <strong className="text-primary text-sm font-extrabold">{formatCurrency(order.calculation.grandTotal, currency)}</strong></span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -89,14 +89,14 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-text-main font-bold text-xs flex items-center gap-1.5 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Tekrar Sipariş Et</span>
+            <span>{language === "en" ? "Buy Again" : "Tekrar Sipariş Et"}</span>
           </button>
 
           <Link
             href={`/account/orders/${order.orderNumber}`}
             className="px-4 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold text-xs flex items-center gap-1 shadow-2xs transition-colors"
           >
-            <span>Sipariş Detayı</span>
+            <span>{language === "en" ? "Order Details" : "Sipariş Detayı"}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

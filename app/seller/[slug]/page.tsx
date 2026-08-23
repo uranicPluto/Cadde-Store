@@ -43,7 +43,7 @@ import {
   Award,
   Layers,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 export default function SellerStorefrontPage() {
   const params = useParams();
@@ -389,9 +389,9 @@ export default function SellerStorefrontPage() {
                   )}
                 >
                   <Gift className="w-4 h-4" />
-                  <span>{isFollowing ? "Takip Ediliyor" : "Follow To Earn!"}</span>
+                  <span>{isFollowing ? (isEn ? "Following" : "Takip Ediliyor") : (isEn ? "Follow To Earn!" : "Kazanmak İçin Takip Et!")}</span>
                 </button>
-                <span className="text-[11px] text-white/80 font-bold">5.6M followers</span>
+                <span className="text-[11px] text-white/80 font-bold">{isEn ? "5.6M followers" : "5.6M Takipçi"}</span>
               </div>
             </div>
           </div>
@@ -471,7 +471,7 @@ export default function SellerStorefrontPage() {
           <div className="flex flex-col gap-6">
             {/* Campaigns Section Header */}
             <div className="flex flex-col gap-3">
-              <h2 className="text-base font-black text-slate-900 tracking-tight">Campaigns</h2>
+              <h2 className="text-base font-black text-slate-900 tracking-tight">{isEn ? "Campaigns" : "Kampanyalar"}</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Campaign Box 1: Cadde Plus Exclusive Price */}
@@ -479,7 +479,7 @@ export default function SellerStorefrontPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 font-black text-xs text-slate-900">
                       <Crown className="w-4 h-4 text-primary" />
-                      <span>Cadde Plus Exclusive Price</span>
+                      <span>{isEn ? "Cadde Plus Exclusive Price" : "Cadde Plus Özel Fiyatı"}</span>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
                     </div>
                   </div>
@@ -500,7 +500,7 @@ export default function SellerStorefrontPage() {
                             ))}
                             <span className="text-[9px] text-slate-400 font-bold ml-1">(241)</span>
                           </div>
-                          <span className="text-xs font-black text-[#f27a1a]">419.99 TL</span>
+                          <span className="text-xs font-black text-[#f27a1a]">{formatCurrency(p.price, currency)}</span>
                         </div>
                       </Link>
                     ))}
@@ -512,7 +512,7 @@ export default function SellerStorefrontPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 font-black text-xs text-slate-900">
                       <Crown className="w-4 h-4 text-primary" />
-                      <span>Cadde Plus Exclusive Price</span>
+                      <span>{isEn ? "Cadde Plus Exclusive Price" : "Cadde Plus Özel Fiyatı"}</span>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
                     </div>
                   </div>

@@ -164,7 +164,7 @@ export default function CheckoutPage() {
       {/* Error Toast */}
       {errorMsg && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200">
-          <Toast type="error" title="Sipariş Hatası" message={errorMsg} onClose={() => setErrorMsg(null)} />
+          <Toast type="error" title={language === "en" ? "Checkout Error" : "Sipariş Hatası"} message={errorMsg} onClose={() => setErrorMsg(null)} />
         </div>
       )}
 

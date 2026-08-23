@@ -16,8 +16,8 @@ export default function AdminCustomerDetailPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const { currency, t } = useLanguage();
-  const isEn = t("admin.customers.title") === "Customers";
+  const { currency, language, t } = useLanguage();
+  const isEn = language === "en";
 
   const [customer, setCustomer] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
