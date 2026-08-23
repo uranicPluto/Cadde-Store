@@ -78,7 +78,9 @@ export interface OrderRecord {
   cardMaskedNumber?: string;
   calculation: OrderCalculationResult;
   status: OrderStatusType;
+  carrier?: string;
   trackingNumber?: string;
   estimatedDelivery?: string;
   statusHistory?: StatusHistoryStep[];
 }
+
