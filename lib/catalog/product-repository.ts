@@ -1482,5 +1482,14 @@ export async function fetchDbProductBySlug(slug: string, lang: Language = "tr"):
   } catch (e) {}
 
   const catalog = getFullCatalog(lang);
-  return catalog.find((p) => p.slug === slug) || null;
+  const normalizedSlug = decodeURIComponent(slug).toLowerCase().trim();
+  return (
+    catalog.find(
+      (p) =>
+        p.slug.toLowerCase() === normalizedSlug ||
+        p.id.toLowerCase() === normalizedSlug ||
+        p.slug.includes(normalizedSlug) ||
+        normalizedSlug.includes(p.slug)
+    ) || null
+  );
 }

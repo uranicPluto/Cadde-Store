@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
@@ -11,6 +11,7 @@ import { useCart } from "@/lib/cart/cart-context";
 import { useFavorites } from "@/lib/favorites/favorites-context";
 import { useRecentlyViewed } from "@/lib/recently-viewed/recently-viewed-context";
 import { formatCurrency } from "@/lib/utils";
+import { createSlug } from "@/lib/catalog/slug-utils";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ProductCard } from "@/components/marketplace/product-card";
 import { Toast } from "@/components/ui/toast";
@@ -81,6 +82,28 @@ interface DeliveryAddress {
   isDefault?: boolean;
 }
 
+// Helper to map color names to hex swatches
+function getColorHex(colorName: string): string {
+  const c = colorName.toLowerCase();
+  if (c.includes("siyah") || c.includes("black") || c.includes("kara")) return "#0f172a";
+  if (c.includes("beyaz") || c.includes("white") || c.includes("ak")) return "#ffffff";
+  if (c.includes("bordo") || c.includes("burgundy") || c.includes("maroon")) return "#881337";
+  if (c.includes("krem") || c.includes("cream") || c.includes("ekru") || c.includes("ecru") || c.includes("bej") || c.includes("beige")) return "#d2b48c";
+  if (c.includes("lacivert") || c.includes("navy")) return "#1e3a8a";
+  if (c.includes("mavi") || c.includes("blue") || c.includes("sky")) return "#3b82f6";
+  if (c.includes("gri") || c.includes("grey") || c.includes("gray") || c.includes("antrasit") || c.includes("füme")) return "#64748b";
+  if (c.includes("kırmızı") || c.includes("red") || c.includes("al")) return "#dc2626";
+  if (c.includes("haki") || c.includes("khaki") || c.includes("olive")) return "#4d7c0f";
+  if (c.includes("yeşil") || c.includes("green") || c.includes("zümrüt")) return "#15803d";
+  if (c.includes("pembe") || c.includes("pink") || c.includes("gül")) return "#ec4899";
+  if (c.includes("sarı") || c.includes("yellow") || c.includes("gold") || c.includes("altın")) return "#d97706";
+  if (c.includes("kahve") || c.includes("brown") || c.includes("taba")) return "#78350f";
+  if (c.includes("mor") || c.includes("purple") || c.includes("lila") || c.includes("violet")) return "#7e22ce";
+  if (c.includes("turuncu") || c.includes("orange")) return "#ea580c";
+  if (c.includes("titanyum") || c.includes("titanium") || c.includes("silver") || c.includes("gümüş")) return "#94a3b8";
+  return "#475569";
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -109,7 +132,7 @@ export default function ProductDetailPage() {
 
   // Selected Options
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("M");
+  const [selectedSize, setSelectedSize] = useState("");
   const [buyMoreQty, setBuyMoreQty] = useState(1); // 1 = 1 piece, 2 = 2 pieces (%10 discount)
 
   // Location & Address Management State
@@ -168,7 +191,7 @@ export default function ProductDetailPage() {
 
   // Payment Options & Installments Modal State
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [selectedBank, setSelectedBank] = useState("garanti");
+  const [selectedBank, setSelectedBank] = useState<"garanti" | "yapikredi" | "isbank" | "akbank" | "ziraat">("garanti");
 
   // Ask Seller Question Modal State
   const [isAskQuestionModalOpen, setIsAskQuestionModalOpen] = useState(false);
@@ -182,188 +205,17 @@ export default function ProductDetailPage() {
   const [onlyPhotosFilter, setOnlyPhotosFilter] = useState(false);
   const [helpfulVoted, setHelpfulVoted] = useState<Record<string, "up" | "down">>({});
 
-  // Dynamic Color Variants with Dedicated Galleries
-  const colorVariants: ColorVariant[] = [
-    {
-      name: "White",
-      nameTR: "Beyaz",
-      hex: "#ffffff",
-      isHot: true,
-      mainImage: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-      gallery: [
-        "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1625910513413-562725e839e1?auto=format&fit=crop&w=800&q=80",
-      ],
-    },
-    {
-      name: "Black",
-      nameTR: "Siyah",
-      hex: "#000000",
-      isHot: true,
-      mainImage: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80",
-      gallery: [
-        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=80",
-      ],
-    },
-    {
-      name: "Navy",
-      nameTR: "Lacivert",
-      hex: "#1e3a8a",
-      mainImage: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80",
-      gallery: [
-        "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-      ],
-    },
-    {
-      name: "Grey",
-      nameTR: "Gri",
-      hex: "#6b7280",
-      mainImage: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
-      gallery: [
-        "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-      ],
-    },
-    {
-      name: "Beige",
-      nameTR: "Bej / Ekru",
-      hex: "#d2b48c",
-      mainImage: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80",
-      gallery: [
-        "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-      ],
-    },
-    {
-      name: "Green",
-      nameTR: "Yeşil",
-      hex: "#15803d",
-      mainImage: "https://images.unsplash.com/photo-1625910513413-562725e839e1?auto=format&fit=crop&w=800&q=80",
-      gallery: [
-        "https://images.unsplash.com/photo-1625910513413-562725e839e1?auto=format&fit=crop&w=800&q=80",
-      ],
-    },
-  ];
-
-  const availableSizes = [
-    { size: "XS", inStock: true },
-    { size: "S", inStock: false }, // Out of stock with slash & notification bell
-    { size: "M", inStock: true },
-    { size: "L", inStock: true },
-    { size: "XL", inStock: true },
-    { size: "2XL", inStock: false },
-    { size: "3XL", inStock: true },
-  ];
-
-  const customerPhotos = [
-    "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1625910513413-562725e839e1?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=300&q=80",
-    "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=300&q=80",
-  ];
-
-  const customerReviewsData = [
-    {
-      id: "cr-1",
-      author: "E*** K.",
-      date: "17 Haziran 2026",
-      rating: 5,
-      size: "Size: M • True to size",
-      comment: "Kumaşı çok kaliteli, yumuşacık ve nefes alıyor. Yaka duruşu mükemmel, yıkamada hiç çekme ve kırışma yapmadı. Kesinlikle tavsiye ederim.",
-      helpfulCount: 42,
-      photos: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80"],
-      verified: true,
-    },
-    {
-      id: "cr-2",
-      author: "Esraa R.",
-      date: "16 Kasım 2025",
-      rating: 5,
-      size: "Size: L • True to size",
-      comment: "Very good quality polo t-shirt! Fits comfortably, delivery was fast within 2 days with nice packaging.",
-      helpfulCount: 19,
-      photos: ["https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=300&q=80"],
-      verified: true,
-    },
-    {
-      id: "cr-3",
-      author: "Mohammed M.",
-      date: "18 Kasım 2025",
-      rating: 5,
-      size: "Size: XL",
-      comment: "Good quality, durable cotton texture and slim fit styling looks very sharp for both office and casual days.",
-      helpfulCount: 11,
-      verified: true,
-    },
-  ];
-
-  // Bank Installment Rates Matrix
-  const bankInstallmentOptions: Record<string, { bankName: string; installments: { count: number; monthly: number; total: number; note?: string }[] }> = {
-    garanti: {
-      bankName: "Garanti BBVA Bonus",
-      installments: [
-        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
-        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
-        { count: 6, monthly: 81.25, total: 487.50, note: "%8.3 Vade Farkı" },
-        { count: 9, monthly: 57.10, total: 513.90, note: "%14.2 Vade Farkı" },
-        { count: 12, monthly: 48.43, total: 581.16, note: "%29.1 Vade Farkı" },
-      ],
-    },
-    yapikredi: {
-      bankName: "Yapı Kredi World",
-      installments: [
-        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
-        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
-        { count: 6, monthly: 81.25, total: 487.50, note: "%8.3 Vade Farkı" },
-        { count: 9, monthly: 57.10, total: 513.90, note: "%14.2 Vade Farkı" },
-        { count: 12, monthly: 48.43, total: 581.16, note: "%29.1 Vade Farkı" },
-      ],
-    },
-    isbank: {
-      bankName: "İş Bankası Maximum",
-      installments: [
-        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
-        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
-        { count: 6, monthly: 82.50, total: 495.00, note: "%10 Vade Farkı" },
-        { count: 9, monthly: 58.00, total: 522.00, note: "%16 Vade Farkı" },
-        { count: 12, monthly: 49.10, total: 589.20, note: "%31 Vade Farkı" },
-      ],
-    },
-    akbank: {
-      bankName: "Akbank Axess",
-      installments: [
-        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
-        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
-        { count: 6, monthly: 81.25, total: 487.50, note: "%8.3 Vade Farkı" },
-        { count: 9, monthly: 57.10, total: 513.90, note: "%14.2 Vade Farkı" },
-        { count: 12, monthly: 48.43, total: 581.16, note: "%29.1 Vade Farkı" },
-      ],
-    },
-    ziraat: {
-      bankName: "Ziraat Bankkart",
-      installments: [
-        { count: 1, monthly: 449.99, total: 449.99, note: "Peşin Fiyatına" },
-        { count: 3, monthly: 149.99, total: 449.99, note: "Peşin Fiyatına (0% Faiz)" },
-        { count: 6, monthly: 79.90, total: 479.40, note: "%6.5 Vade Farkı" },
-        { count: 9, monthly: 55.80, total: 502.20, note: "%11.6 Vade Farkı" },
-        { count: 12, monthly: 46.90, total: 562.80, note: "%25 Vade Farkı" },
-      ],
-    },
-  };
-
   useEffect(() => {
     if (slug) {
       fetchDbProductBySlug(slug, language).then((prod) => {
         if (prod) {
           setProduct(prod);
           addRecentlyViewed(prod);
+          if (prod.attributes?.sizes && prod.attributes.sizes.length > 0) {
+            setSelectedSize(prod.attributes.sizes[0]);
+          } else {
+            setSelectedSize(isEn ? "Standard" : "Standart");
+          }
         }
       });
 
@@ -371,7 +223,107 @@ export default function ProductDetailPage() {
         setRelatedProducts(prods.filter((p) => p.slug !== slug).slice(0, 6));
       });
     }
-  }, [slug, language]);
+  }, [slug, language, isEn]);
+
+  // Derived Dynamic Color Variants
+  const colorVariants: ColorVariant[] = useMemo(() => {
+    if (!product) return [];
+
+    const rawColors = product.attributes?.color || [];
+    const gallery = product.galleryImages && product.galleryImages.length > 0 ? product.galleryImages : [product.imageUrl];
+
+    if (rawColors.length > 0) {
+      return rawColors.map((colName, idx) => ({
+        name: colName,
+        nameTR: colName,
+        hex: getColorHex(colName),
+        mainImage: gallery[idx % gallery.length] || product.imageUrl,
+        gallery: gallery,
+        isHot: idx === 0,
+      }));
+    }
+
+    return [
+      {
+        name: isEn ? "Standard" : "Standart",
+        nameTR: "Standart",
+        hex: "#0f172a",
+        mainImage: product.imageUrl,
+        gallery: gallery,
+        isHot: true,
+      },
+    ];
+  }, [product, isEn]);
+
+  // Derived Dynamic Sizes
+  const availableSizes = useMemo(() => {
+    if (!product) return [];
+    const rawSizes = product.attributes?.sizes || [];
+    if (rawSizes.length > 0) {
+      return rawSizes.map((sz, idx) => ({
+        size: sz,
+        inStock: idx !== 1, 
+      }));
+    }
+    return [{ size: isEn ? "Standard" : "Standart", inStock: true }];
+  }, [product, isEn]);
+
+  // Dynamic Bank Installments
+  const bankInstallmentOptions = useMemo(() => {
+    const p = product ? product.price : 450;
+    return {
+      garanti: {
+        bankName: "Garanti BBVA Bonus",
+        installments: [
+          { count: 1, monthly: p, total: p, note: "Peşin Fiyatına" },
+          { count: 3, monthly: Math.round((p / 3) * 100) / 100, total: p, note: "Peşin Fiyatına (0% Faiz)" },
+          { count: 6, monthly: Math.round(((p * 1.083) / 6) * 100) / 100, total: Math.round(p * 1.083 * 100) / 100, note: "%8.3 Vade Farkı" },
+          { count: 9, monthly: Math.round(((p * 1.142) / 9) * 100) / 100, total: Math.round(p * 1.142 * 100) / 100, note: "%14.2 Vade Farkı" },
+          { count: 12, monthly: Math.round(((p * 1.291) / 12) * 100) / 100, total: Math.round(p * 1.291 * 100) / 100, note: "%29.1 Vade Farkı" },
+        ],
+      },
+      yapikredi: {
+        bankName: "Yapı Kredi World",
+        installments: [
+          { count: 1, monthly: p, total: p, note: "Peşin Fiyatına" },
+          { count: 3, monthly: Math.round((p / 3) * 100) / 100, total: p, note: "Peşin Fiyatına (0% Faiz)" },
+          { count: 6, monthly: Math.round(((p * 1.083) / 6) * 100) / 100, total: Math.round(p * 1.083 * 100) / 100, note: "%8.3 Vade Farkı" },
+          { count: 9, monthly: Math.round(((p * 1.142) / 9) * 100) / 100, total: Math.round(p * 1.142 * 100) / 100, note: "%14.2 Vade Farkı" },
+          { count: 12, monthly: Math.round(((p * 1.291) / 12) * 100) / 100, total: Math.round(p * 1.291 * 100) / 100, note: "%29.1 Vade Farkı" },
+        ],
+      },
+      isbank: {
+        bankName: "İş Bankası Maximum",
+        installments: [
+          { count: 1, monthly: p, total: p, note: "Peşin Fiyatına" },
+          { count: 3, monthly: Math.round((p / 3) * 100) / 100, total: p, note: "Peşin Fiyatına (0% Faiz)" },
+          { count: 6, monthly: Math.round(((p * 1.09) / 6) * 100) / 100, total: Math.round(p * 1.09 * 100) / 100, note: "%9 Vade Farkı" },
+          { count: 9, monthly: Math.round(((p * 1.15) / 9) * 100) / 100, total: Math.round(p * 1.15 * 100) / 100, note: "%15 Vade Farkı" },
+          { count: 12, monthly: Math.round(((p * 1.30) / 12) * 100) / 100, total: Math.round(p * 1.30 * 100) / 100, note: "%30 Vade Farkı" },
+        ],
+      },
+      akbank: {
+        bankName: "Akbank Axess",
+        installments: [
+          { count: 1, monthly: p, total: p, note: "Peşin Fiyatına" },
+          { count: 3, monthly: Math.round((p / 3) * 100) / 100, total: p, note: "Peşin Fiyatına (0% Faiz)" },
+          { count: 6, monthly: Math.round(((p * 1.083) / 6) * 100) / 100, total: Math.round(p * 1.083 * 100) / 100, note: "%8.3 Vade Farkı" },
+          { count: 9, monthly: Math.round(((p * 1.142) / 9) * 100) / 100, total: Math.round(p * 1.142 * 100) / 100, note: "%14.2 Vade Farkı" },
+          { count: 12, monthly: Math.round(((p * 1.291) / 12) * 100) / 100, total: Math.round(p * 1.291 * 100) / 100, note: "%29.1 Vade Farkı" },
+        ],
+      },
+      ziraat: {
+        bankName: "Ziraat Bankkart",
+        installments: [
+          { count: 1, monthly: p, total: p, note: "Peşin Fiyatına" },
+          { count: 3, monthly: Math.round((p / 3) * 100) / 100, total: p, note: "Peşin Fiyatına (0% Faiz)" },
+          { count: 6, monthly: Math.round(((p * 1.065) / 6) * 100) / 100, total: Math.round(p * 1.065 * 100) / 100, note: "%6.5 Vade Farkı" },
+          { count: 9, monthly: Math.round(((p * 1.116) / 9) * 100) / 100, total: Math.round(p * 1.116 * 100) / 100, note: "%11.6 Vade Farkı" },
+          { count: 12, monthly: Math.round(((p * 1.25) / 12) * 100) / 100, total: Math.round(p * 1.25 * 100) / 100, note: "%25 Vade Farkı" },
+        ],
+      },
+    };
+  }, [product]);
 
   if (!product) {
     return (
@@ -391,6 +343,11 @@ export default function ProductDetailPage() {
   const activeImage = activeGallery[selectedImageIndex] || activeGallery[0] || product.imageUrl;
   const favActive = isFavorite(product.id);
   const activeSelectedAddress = addresses.find((a) => a.id === selectedAddressId) || addresses[0];
+
+  const plusPrice = Math.round(product.price * 0.90 * 100) / 100;
+  const buyMoreUnitPrice = Math.round(product.price * 0.90 * 100) / 100;
+  const buyMoreTotalPrice = Math.round(buyMoreUnitPrice * 2 * 100) / 100;
+  const activeColorName = colorVariants[selectedColorIdx]?.nameTR || (isEn ? "Standard" : "Standart");
 
   // Interactive Lens Zoom Handler
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -506,6 +463,9 @@ export default function ProductDetailPage() {
     setIsEditingAddress(false);
   };
 
+  // Dynamic Specifications List
+  const specsList = Object.entries(product.specifications || {});
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-slate-800">
       <MarketplaceHeader />
@@ -522,8 +482,8 @@ export default function ProductDetailPage() {
         <div className="max-w-wide mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs font-bold">
             <span className="text-amber-400 font-extrabold text-sm">+</span>
-            <span className="font-extrabold text-amber-300">404.99 TL</span>
-            <span className="text-slate-200">at checkout with</span>
+            <span className="font-extrabold text-amber-300">{formatCurrency(plusPrice, currency)}</span>
+            <span className="text-slate-200">{isEn ? "at checkout with" : "fiyatıyla"}</span>
             <span className="text-[#f27a1a] font-black uppercase tracking-wider">Cadde Plus</span>
           </div>
 
@@ -543,7 +503,7 @@ export default function ProductDetailPage() {
           items={[
             { label: isEn ? "Home" : "Ana Sayfa", href: "/" },
             { label: product.categoryName, href: `/category/${product.categorySlug}` },
-            { label: product.brand, href: `/search?q=${product.brand}` },
+            { label: product.brand, href: `/search?brand=${encodeURIComponent(product.brand)}` },
             { label: product.name },
           ]}
         />
@@ -561,55 +521,59 @@ export default function ProductDetailPage() {
               className="relative w-full aspect-3/4 bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 shadow-sm cursor-crosshair select-none"
             >
               {/* Carousel Arrow Buttons */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePrevImage();
-                }}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-white hover:scale-105 transition-all"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
+              {activeGallery.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevImage();
+                    }}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-white hover:scale-105 transition-all"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
 
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleNextImage();
-                }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-white hover:scale-105 transition-all"
-                aria-label="Next image"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextImage();
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-white hover:scale-105 transition-all"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
 
               {/* Main Base Image */}
               <img
                 src={activeImage}
                 alt={product.name}
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center transition-all duration-200"
               />
 
               {/* Visual Feature Stamps on Bottom Right */}
               <div className="absolute right-3 bottom-4 z-10 flex flex-col gap-2 pointer-events-none">
-                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/85 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
-                  <Layers className="w-4 h-4 text-slate-800" />
+                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/90 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
                   <span className="text-[7px] font-black text-slate-900 leading-tight uppercase mt-0.5">
-                    Kıvrılmaz Yaka
+                    %100 Orijinal
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/85 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
-                  <Wind className="w-4 h-4 text-slate-800" />
+                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/90 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
+                  <Truck className="w-4 h-4 text-[#f27a1a]" />
                   <span className="text-[7px] font-black text-slate-900 leading-tight uppercase mt-0.5">
-                    Nefes Alabilir
+                    Hızlı Kargo
                   </span>
                 </div>
-                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/85 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
-                  <Sparkles className="w-4 h-4 text-slate-800" />
+                <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full bg-white/90 backdrop-blur-xs border border-slate-300 text-center p-1 shadow-xs">
+                  <RotateCcw className="w-4 h-4 text-sky-600" />
                   <span className="text-[7px] font-black text-slate-900 leading-tight uppercase mt-0.5">
-                    Esnek Hareket
+                    Kolay İade
                   </span>
                 </div>
               </div>
@@ -642,39 +606,46 @@ export default function ProductDetailPage() {
             )}
 
             {/* Thumbnails Underneath Main Image */}
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-              {activeGallery.map((img, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setSelectedImageIndex(idx)}
-                  className={cn(
-                    "w-14 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer",
-                    selectedImageIndex === idx
-                      ? "border-[#f27a1a] shadow-xs scale-105"
-                      : "border-slate-200 opacity-70 hover:opacity-100"
-                  )}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+            {activeGallery.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                {activeGallery.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={cn(
+                      "w-14 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer",
+                      selectedImageIndex === idx
+                        ? "border-[#f27a1a] shadow-xs scale-105"
+                        : "border-slate-200 opacity-70 hover:opacity-100"
+                    )}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* MIDDLE 4 COLS: Product Info, Pricing, Multi-Quantity, Colors, Sizes */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             {/* Category Rank Badge */}
             <div className="flex items-center gap-2 flex-wrap text-xs">
-              <span className="text-slate-500 font-semibold">Men Polo T-Shirts category</span>
+              <span className="text-slate-500 font-semibold">{product.categoryName}</span>
               <span className="bg-amber-100 text-amber-900 font-black text-[10px] px-2 py-0.5 rounded-full">
-                #1 Most favorited &gt;
+                #1 {isEn ? "Most favorited" : "En Çok Favorilenen"} &gt;
               </span>
             </div>
 
             {/* Product Title */}
             <div>
               <h1 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
-                <span className="font-extrabold text-slate-950 mr-1">{product.brand}</span>
+                <Link
+                  href={`/search?brand=${encodeURIComponent(product.brand)}`}
+                  className="font-extrabold text-slate-950 hover:text-primary transition-colors mr-1"
+                >
+                  {product.brand}
+                </Link>
                 <span>{product.name}</span>
               </h1>
 
@@ -689,11 +660,21 @@ export default function ProductDetailPage() {
                   <span className="font-black text-slate-900 text-sm">{product.rating}</span>
                   <div className="flex items-center text-amber-400">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      <Star
+                        key={i}
+                        className={cn(
+                          "w-3.5 h-3.5",
+                          i < Math.round(product.rating)
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-200 fill-slate-200"
+                        )}
+                      />
                     ))}
                   </div>
-                  <span className="text-slate-500 font-bold hover:underline">• 24,247 ratings</span>
-                  <span className="text-slate-400 font-semibold">• 113 Q&amp;A</span>
+                  <span className="text-slate-500 font-bold hover:underline">
+                    • {product.reviewCount || 120} {isEn ? "ratings" : "değerlendirme"}
+                  </span>
+                  <span className="text-slate-400 font-semibold">• 48 Q&amp;A</span>
                 </div>
 
                 {/* Star Rating Breakdown Popover on Mouse Hover */}
@@ -701,37 +682,36 @@ export default function ProductDetailPage() {
                   <div className="absolute top-full left-0 z-50 mt-1 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-150 pointer-events-none">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl font-black text-slate-900">4.6</span>
+                        <span className="text-2xl font-black text-slate-900">{product.rating}</span>
                         <div className="flex flex-col">
                           <div className="flex items-center text-amber-400">
                             {Array.from({ length: 5 }).map((_, i) => (
                               <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                             ))}
                           </div>
-                          <span className="text-[10px] text-slate-500 font-bold">24.247 değerlendirme</span>
+                          <span className="text-[10px] text-slate-500 font-bold">
+                            {product.reviewCount || 120} {isEn ? "reviews" : "değerlendirme"}
+                          </span>
                         </div>
                       </div>
                       <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                        %94 Tavsiye
+                        %96 Tavsiye
                       </span>
                     </div>
 
                     {/* 5 Star to 1 Star Progress Breakdown Bars */}
                     <div className="flex flex-col gap-1.5 text-[11px] font-bold">
                       {[
-                        { stars: 5, pct: 78, count: "18.912" },
-                        { stars: 4, pct: 14, count: "3.394" },
-                        { stars: 3, pct: 5, count: "1.212" },
-                        { stars: 2, pct: 2, count: "485" },
-                        { stars: 1, pct: 1, count: "244" },
+                        { stars: 5, pct: 82, count: `${Math.round((product.reviewCount || 120) * 0.82)}` },
+                        { stars: 4, pct: 12, count: `${Math.round((product.reviewCount || 120) * 0.12)}` },
+                        { stars: 3, pct: 4, count: `${Math.round((product.reviewCount || 120) * 0.04)}` },
+                        { stars: 2, pct: 1, count: `${Math.round((product.reviewCount || 120) * 0.01)}` },
+                        { stars: 1, pct: 1, count: `${Math.round((product.reviewCount || 120) * 0.01)}` },
                       ].map((item) => (
                         <div key={item.stars} className="flex items-center gap-2">
                           <span className="w-5 text-slate-600 font-extrabold">{item.stars} ★</span>
                           <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-amber-400 rounded-full"
-                              style={{ width: `${item.pct}%` }}
-                            />
+                            <div className="h-full bg-amber-400 rounded-full" style={{ width: `${item.pct}%` }} />
                           </div>
                           <span className="text-[10px] text-slate-400 w-12 text-right">{item.count}</span>
                         </div>
@@ -739,7 +719,7 @@ export default function ProductDetailPage() {
                     </div>
 
                     <span className="text-[10px] text-primary font-black text-center pt-1 border-t border-slate-100">
-                      Tüm yorumları okumak için tıklayın ↓
+                      {isEn ? "Click to read all reviews ↓" : "Tüm yorumları okumak için tıklayın ↓"}
                     </span>
                   </div>
                 )}
@@ -753,13 +733,19 @@ export default function ProductDetailPage() {
                   className="flex items-center gap-1.5 text-xs font-bold text-slate-800 text-left hover:text-primary transition-colors cursor-pointer"
                 >
                   <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                  <span>Customers love it!</span>
-                  <span className="text-primary hover:underline font-extrabold">Read reviews &gt;</span>
+                  <span>{isEn ? "Customers love it!" : "Müşterilerin favorisi!"}</span>
+                  <span className="text-primary hover:underline font-extrabold">
+                    {isEn ? "Read reviews >" : "Yorumları oku >"}
+                  </span>
                 </button>
 
                 <div className="flex items-center gap-1 text-[11px] font-bold text-orange-600">
                   <Eye className="w-3.5 h-3.5 text-orange-500" />
-                  <span>Popular item! 1.5K views in the last 24 hours!</span>
+                  <span>
+                    {isEn
+                      ? "Popular item! 1.5K views in the last 24 hours!"
+                      : "Popüler ürün! Son 24 saatte 1.500+ kişi inceledi!"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -767,20 +753,30 @@ export default function ProductDetailPage() {
             {/* Price Block & Plus Exclusive */}
             <div className="flex flex-col gap-0.5 p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl">
               <div className="flex items-center gap-1 text-xs font-extrabold text-rose-600">
-                <span>+ Cadde Plus Exclusive</span>
+                <Crown className="w-3.5 h-3.5" />
+                <span>+ Cadde Plus {isEn ? "Exclusive Price" : "Özel Fiyatı"}</span>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-xs font-bold text-rose-600">At checkout</span>
-                <span className="text-xl font-black text-rose-600">404.99 TL</span>
+                <span className="text-xs font-bold text-rose-600">{isEn ? "At checkout" : "Sepette"}</span>
+                <span className="text-2xl font-black text-rose-600">{formatCurrency(plusPrice, currency)}</span>
               </div>
-              <span className="text-xs text-slate-400 line-through font-semibold mt-0.5">
-                {formatCurrency(product.price, currency)}
-              </span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-xs font-bold text-slate-900">
+                  {isEn ? "Regular Price:" : "Satış Fiyatı:"} {formatCurrency(product.price, currency)}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-xs text-slate-400 line-through font-semibold">
+                    {formatCurrency(product.originalPrice, currency)}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* "Buy More, Pay Less" Volume Tier */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-black text-slate-900">Buy more, pay less</span>
+              <span className="text-xs font-black text-slate-900">
+                {isEn ? "Buy more, pay less" : "Çok Al, Az Öde Fırsatı"}
+              </span>
               <div className="grid grid-cols-2 gap-2">
                 {/* 1 Piece */}
                 <button
@@ -793,7 +789,9 @@ export default function ProductDetailPage() {
                       : "border-slate-200 bg-white hover:border-slate-300"
                   )}
                 >
-                  <span className="text-xs font-black text-slate-900">1 x 449.99 TL</span>
+                  <span className="text-xs font-black text-slate-900">
+                    1 x {formatCurrency(product.price, currency)}
+                  </span>
                 </button>
 
                 {/* 2 Pieces (%10 Discount) */}
@@ -808,57 +806,75 @@ export default function ProductDetailPage() {
                   )}
                 >
                   <span className="absolute -top-2 right-2 bg-[#f27a1a] text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">
-                    %10 discount
+                    %10 {isEn ? "discount" : "indirim"}
                   </span>
                   <div className="flex flex-col">
-                    <span className="text-xs font-black text-slate-900">2 x 404.99 TL</span>
-                    <span className="text-[10px] text-slate-500 font-bold">= 809.98 TL</span>
+                    <span className="text-xs font-black text-slate-900">
+                      2 x {formatCurrency(buyMoreUnitPrice, currency)}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-bold">
+                      = {formatCurrency(buyMoreTotalPrice, currency)}
+                    </span>
                   </div>
                 </button>
               </div>
             </div>
 
             {/* Color Variations with Swatches */}
+            {colorVariants.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-900">
+                    {isEn ? "Color / Model:" : "Renk / Model:"}{" "}
+                    <span className="text-slate-600 font-bold">{activeColorName}</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-semibold">
+                    {colorVariants.length} {isEn ? "options" : "seçenek"}
+                  </span>
+                </div>
+
+                {/* Color Swatch Thumbnails */}
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                  {colorVariants.map((col, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleColorChange(idx)}
+                      className={cn(
+                        "w-12 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer relative flex flex-col items-center justify-center p-0.5",
+                        selectedColorIdx === idx
+                          ? "border-[#f27a1a] shadow-xs scale-105"
+                          : "border-slate-200 opacity-80 hover:opacity-100"
+                      )}
+                    >
+                      {col.isHot && (
+                        <span className="absolute top-0 inset-x-0 bg-orange-500 text-white text-[7px] font-black uppercase text-center py-0.2">
+                          Hot
+                        </span>
+                      )}
+                      <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-slate-100">
+                        {col.mainImage ? (
+                          <img src={col.mainImage} alt={col.nameTR} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full border border-slate-300" style={{ backgroundColor: col.hex }} />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size / Option Selector */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-900">
-                  Color: <span className="text-slate-600 font-bold">{colorVariants[selectedColorIdx].nameTR}</span>
+                  {isEn ? "Option / Size:" : "Beden / Seçenek:"}{" "}
+                  <span className="text-slate-600 font-bold">{selectedSize}</span>
                 </span>
-                <span className="text-[10px] text-slate-400 font-semibold">{colorVariants.length} renk seçeneği</span>
-              </div>
-
-              {/* Color Swatch Thumbnails */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-                {colorVariants.map((col, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleColorChange(idx)}
-                    className={cn(
-                      "w-12 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer relative",
-                      selectedColorIdx === idx
-                        ? "border-[#f27a1a] shadow-xs scale-105"
-                        : "border-slate-200 opacity-80 hover:opacity-100"
-                    )}
-                  >
-                    {col.isHot && (
-                      <span className="absolute top-0 inset-x-0 bg-orange-500 text-white text-[7px] font-black uppercase text-center py-0.2">
-                        Hot
-                      </span>
-                    )}
-                    <img src={col.mainImage} alt={col.nameTR} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Size Selector with Out-of-Stock Slashes */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-900">
-                  Size: <span className="text-slate-600 font-bold">{selectedSize}</span>
+                <span className="text-[10px] text-primary font-bold hover:underline cursor-pointer">
+                  {isEn ? "Size Guide >" : "Beden Tablosu >"}
                 </span>
-                <span className="text-[10px] text-primary font-bold hover:underline cursor-pointer">Beden Tablosu &gt;</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -897,7 +913,7 @@ export default function ProductDetailPage() {
                 onClick={handleBuyNow}
                 className="flex-1 bg-white hover:bg-slate-50 text-[#f27a1a] border-2 border-[#f27a1a] font-black text-xs py-3 rounded-xl transition-colors cursor-pointer shadow-2xs text-center"
               >
-                Buy now
+                {isEn ? "Buy now" : "Hemen Al"}
               </button>
 
               <button
@@ -906,7 +922,7 @@ export default function ProductDetailPage() {
                 className="flex-1 bg-[#f27a1a] hover:bg-[#d9660d] text-white font-black text-xs py-3 rounded-xl transition-colors cursor-pointer shadow-md text-center flex items-center justify-center gap-1.5"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Add to cart</span>
+                <span>{isEn ? "Add to cart" : "Sepete Ekle"}</span>
               </button>
 
               <button
@@ -931,20 +947,24 @@ export default function ProductDetailPage() {
             >
               <div className="flex items-center gap-2 font-bold text-slate-700">
                 <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Estimated shipping: Ships in 1 day(s)</span>
+                <span>
+                  {isEn
+                    ? "Estimated shipping: Ships in 1 day(s)"
+                    : "Tahmini kargo: 24 saatte kargoda"}
+                </span>
               </div>
 
               <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 flex-wrap gap-1">
                 <div className="flex items-center gap-1.5 text-slate-600 font-medium">
                   <MapPin className="w-4 h-4 text-[#f27a1a] shrink-0" />
-                  <span>Estimated delivery:</span>
+                  <span>{isEn ? "Estimated delivery:" : "Teslimat konumu:"}</span>
                   <span className="font-black text-slate-900">
                     {activeSelectedAddress.city} / {activeSelectedAddress.district} ({activeSelectedAddress.title})
                   </span>
                 </div>
 
                 <span className="text-primary font-black text-xs group-hover:underline flex items-center gap-0.5">
-                  <span>Select location</span>
+                  <span>{isEn ? "Select location" : "Konum Değiştir"}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
@@ -960,23 +980,31 @@ export default function ProductDetailPage() {
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col text-xs">
-                  <span className="font-black text-slate-900">Installments up to 12 months</span>
-                  <span className="text-slate-500 font-medium">Starting at 48.43 TL/month • 0% Interest on 3 installments</span>
+                  <span className="font-black text-slate-900">
+                    {isEn ? "Installments up to 12 months" : "12 Aya Varan Taksit İmkanı"}
+                  </span>
+                  <span className="text-slate-500 font-medium">
+                    {isEn ? "Starting at " : "Aylık "}
+                    <strong>{formatCurrency(Math.round(((product.price * 1.291) / 12) * 100) / 100, currency)}</strong>
+                    {isEn ? "/month • 0% Interest on 3 installments" : " 'den başlayan taksitlerle • 3 Taksit Peşin Fiyatına"}
+                  </span>
                 </div>
               </div>
 
               <span className="text-indigo-600 font-black text-xs group-hover:underline flex items-center gap-0.5 shrink-0">
-                <span>View Options</span>
+                <span>{isEn ? "View Options" : "Taksitleri Gör"}</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
 
             {/* Codes & Coupons Ticket Card */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-black text-slate-900">Codes &amp; Coupons</span>
+              <span className="text-xs font-black text-slate-900">
+                {isEn ? "Codes & Coupons" : "Kuponlar & Kampanyalar"}
+              </span>
               <div className="relative p-4 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-center justify-between gap-3">
                 <span className="absolute -top-2 right-3 bg-purple-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">
-                  Limited availability
+                  {isEn ? "Limited availability" : "Sınırlı Kontenjan"}
                 </span>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-purple-600 text-white font-black text-xs flex flex-col items-center justify-center">
@@ -984,8 +1012,12 @@ export default function ProductDetailPage() {
                     <span className="text-[8px]">TL</span>
                   </div>
                   <div className="flex flex-col text-xs">
-                    <span className="font-black text-slate-900">Min. limit: 900 TL</span>
-                    <span className="text-slate-500 text-[10px]">Expiration date: 31.09.2026</span>
+                    <span className="font-black text-slate-900">
+                      {isEn ? "Min. limit: 900 TL" : "Alt limit: 900 TL"}
+                    </span>
+                    <span className="text-slate-500 text-[10px]">
+                      {isEn ? "Expiration: 31.09.2026" : "Son Kullanım: 31.09.2026"}
+                    </span>
                   </div>
                 </div>
 
@@ -999,7 +1031,7 @@ export default function ProductDetailPage() {
                     className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-black px-3 py-1.5 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1"
                   >
                     {couponCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{couponCopied ? "Copied" : "Copy"}</span>
+                    <span>{couponCopied ? (isEn ? "Copied" : "Kopyalandı") : (isEn ? "Copy" : "Kopyala")}</span>
                   </button>
                 </div>
               </div>
@@ -1007,40 +1039,33 @@ export default function ProductDetailPage() {
 
             {/* Highlighted Features Grid */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-black text-slate-900">Highlighted features:</span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Material</span>
-                  <span className="font-extrabold text-slate-900">Cotton-Polyester</span>
-                </div>
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Mold</span>
-                  <span className="font-extrabold text-slate-900">Slim fit</span>
-                </div>
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Sleeve length</span>
-                  <span className="font-extrabold text-slate-900">Short</span>
-                </div>
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Package contents</span>
-                  <span className="font-extrabold text-slate-900">Single</span>
-                </div>
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Color</span>
-                  <span className="font-extrabold text-slate-900">White</span>
-                </div>
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Pattern</span>
-                  <span className="font-extrabold text-slate-900">Plain</span>
-                </div>
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Collar</span>
-                  <span className="font-extrabold text-slate-900">Polo neck</span>
-                </div>
-                <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-semibold">Sleeve type</span>
-                  <span className="font-extrabold text-slate-900">Standard sleeve</span>
-                </div>
+              <span className="text-xs font-black text-slate-900">
+                {isEn ? "Highlighted features:" : "Öne Çıkan Özellikler:"}
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                {specsList.length > 0 ? (
+                  specsList.map(([k, v]) => (
+                    <div key={k} className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-semibold">{k}</span>
+                      <span className="font-extrabold text-slate-900 line-clamp-1">{v}</span>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-semibold">{isEn ? "Brand" : "Marka"}</span>
+                      <span className="font-extrabold text-slate-900">{product.brand}</span>
+                    </div>
+                    <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-semibold">{isEn ? "Category" : "Kategori"}</span>
+                      <span className="font-extrabold text-slate-900">{product.categoryName}</span>
+                    </div>
+                    <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-semibold">{isEn ? "Condition" : "Durum"}</span>
+                      <span className="font-extrabold text-slate-900">{isEn ? "New / Original" : "Sıfır / Orijinal"}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -1050,7 +1075,7 @@ export default function ProductDetailPage() {
             {/* Available Campaigns Card */}
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                Available Campaigns
+                {isEn ? "Available Campaigns" : "Mevcut Kampanyalar"}
               </span>
 
               <div className="flex flex-col gap-2.5">
@@ -1058,7 +1083,7 @@ export default function ProductDetailPage() {
                   <div className="flex items-center gap-2">
                     <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span className="font-bold text-slate-800 text-[11px] leading-tight">
-                      Free shipping over 1500 TL (Seller pays)
+                      {isEn ? "Free shipping over 200 TL" : "200 TL ve Üzeri Kargo Bedava"}
                     </span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
@@ -1068,7 +1093,7 @@ export default function ProductDetailPage() {
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-[#f27a1a] shrink-0" />
                     <span className="font-bold text-slate-800 text-[11px] leading-tight">
-                      Code: AC100 - 100 TL off over 900 TL
+                      {isEn ? "Code: AC100 - 100 TL off" : "AC100 Koduyla 100 TL İndirim"}
                     </span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
@@ -1078,7 +1103,7 @@ export default function ProductDetailPage() {
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-rose-600 shrink-0" />
                     <span className="font-bold text-rose-900 text-[11px] leading-tight">
-                      + Cadde Plus Exclusive Price
+                      {isEn ? "+ Cadde Plus Special Discount" : "+ Cadde Plus Özel İndirimi"}
                     </span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-rose-400 shrink-0" />
@@ -1091,14 +1116,16 @@ export default function ProductDetailPage() {
               <div className="p-3 bg-sky-50/80 border border-sky-200 rounded-xl flex items-center justify-between">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black text-slate-900">Altınyıldız Classics</span>
+                    <span className="text-xs font-black text-slate-900">{product.storeName}</span>
                     <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 fill-sky-100" />
                   </div>
-                  <span className="text-[10px] text-slate-500 font-semibold">5.6M followers</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">
+                    {isEn ? "Official Verified Seller" : "Resmi Onaylı Mağaza"}
+                  </span>
                 </div>
 
                 <span className="bg-emerald-600 text-white font-black text-xs px-2 py-0.5 rounded-lg shadow-2xs">
-                  9.1
+                  {product.rating >= 4.5 ? product.rating : "4.8"}
                 </span>
               </div>
 
@@ -1114,7 +1141,15 @@ export default function ProductDetailPage() {
                 )}
               >
                 <Gift className="w-4 h-4 text-[#f27a1a]" />
-                <span>{isFollowingStore ? "Following (Coupon Unlocked)" : "Follow to earn"}</span>
+                <span>
+                  {isFollowingStore
+                    ? isEn
+                      ? "Following (Coupon Unlocked)"
+                      : "Takip Ediliyor (Kupon Aktif)"
+                    : isEn
+                    ? "Follow to earn coupons"
+                    : "Takip Et & Kazan"}
+                </span>
               </button>
 
               {/* Ask Seller Question Button */}
@@ -1125,231 +1160,160 @@ export default function ProductDetailPage() {
               >
                 <div className="flex items-center gap-2">
                   <MessageCircleQuestion className="w-4 h-4 text-slate-500" />
-                  <span>Seller questions (113)</span>
+                  <span>{isEn ? "Seller questions (48)" : "Satıcı Soruları (48)"}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400" />
               </button>
 
               {/* Go to Store Button */}
               <Link
-                href="/seller/trend-fashion"
+                href={`/seller/${createSlug(product.storeName)}`}
                 className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl transition-colors text-center shadow-2xs uppercase tracking-wider mt-1"
               >
-                Go to store &gt;
+                {isEn ? "Go to store >" : "Mağazaya Git >"}
               </Link>
             </div>
           </div>
         </div>
 
-        {/* 3. Comprehensive Reviews Section with Height/Weight Fit Metric Selector */}
+        {/* Product Description Section */}
+        {product.description && (
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-4">
+            <h2 className="text-lg font-black text-slate-900">
+              {isEn ? "Product Description & Details" : "Ürün Açıklaması ve Detayları"}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium whitespace-pre-line">
+              {product.description}
+            </p>
+          </div>
+        )}
+
+        {/* 3. Comprehensive Reviews Section */}
         <div id="reviews-section" className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6 scroll-mt-20">
           {/* Header & Rating Overview */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
-              <h2 className="text-xl font-black text-slate-900 tracking-tight">All reviews</h2>
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                {isEn ? "Customer Reviews" : "Müşteri Değerlendirmeleri"}
+              </h2>
               <div className="flex items-center gap-3 mt-1 text-xs">
-                <span className="text-lg font-black text-slate-900">4.6</span>
+                <span className="text-lg font-black text-slate-900">{product.rating}</span>
                 <div className="flex items-center text-amber-400">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <Star
+                      key={i}
+                      className={cn(
+                        "w-4 h-4",
+                        i < Math.round(product.rating)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-slate-200 fill-slate-200"
+                      )}
+                    />
                   ))}
                 </div>
-                <span className="text-slate-500 font-semibold">• 24247 ratings 10134 reviews</span>
+                <span className="text-slate-500 font-semibold">
+                  • {product.reviewCount || 120} {isEn ? "ratings" : "değerlendirme"}
+                </span>
               </div>
             </div>
 
             <span className="text-xs font-bold text-slate-400 hover:text-primary cursor-pointer">
-              Reviews Policy &gt;
+              {isEn ? "Reviews Policy >" : "Değerlendirme Kuralları >"}
             </span>
-          </div>
-
-          {/* Customer Photos Carousel Strip */}
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-slate-900">Reviews with images</span>
-              <span className="text-xs font-bold text-primary hover:underline cursor-pointer">All (2109) &gt;</span>
-            </div>
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
-              {customerPhotos.map((photo, pIdx) => (
-                <div
-                  key={pIdx}
-                  className="w-20 h-24 rounded-2xl overflow-hidden border border-slate-200 shrink-0 hover:opacity-90 transition-opacity cursor-pointer shadow-2xs"
-                >
-                  <img src={photo} alt="" className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Reviews Search & Filter Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search in product reviews..."
-                value={reviewSearchQuery}
-                onChange={(e) => setReviewSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs font-semibold outline-none focus:border-primary"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              <button
-                type="button"
-                onClick={() => setOnlyPhotosFilter(!onlyPhotosFilter)}
-                className={cn(
-                  "px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5",
-                  onlyPhotosFilter
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300"
-                )}
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>Reviews with images (2109)</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Body Fit / Height & Weight Metric Chips */}
-          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-col gap-3">
-            {/* Height Selector */}
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-              <span className="text-xs font-black text-slate-700 shrink-0">Height:</span>
-              {[
-                { label: "<150 cm (81)", val: "150" },
-                { label: "151-160 cm (706)", val: "160" },
-                { label: "161-170 cm (1419)", val: "170" },
-                { label: "171-180 cm (775)", val: "180" },
-              ].map((h) => (
-                <button
-                  key={h.val}
-                  type="button"
-                  onClick={() => setSelectedHeightFilter(selectedHeightFilter === h.val ? null : h.val)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0",
-                    selectedHeightFilter === h.val
-                      ? "bg-[#f27a1a] text-white border-[#f27a1a] shadow-2xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:border-slate-300"
-                  )}
-                >
-                  {h.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Weight Selector */}
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-              <span className="text-xs font-black text-slate-700 shrink-0">Weight:</span>
-              {[
-                { label: "<50 kg (264)", val: "50" },
-                { label: "51-60 kg (864)", val: "60" },
-                { label: "61-70 kg (848)", val: "70" },
-                { label: "71-80 kg (636)", val: "80" },
-              ].map((w) => (
-                <button
-                  key={w.val}
-                  type="button"
-                  onClick={() => setSelectedWeightFilter(selectedWeightFilter === w.val ? null : w.val)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0",
-                    selectedWeightFilter === w.val
-                      ? "bg-[#f27a1a] text-white border-[#f27a1a] shadow-2xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:border-slate-300"
-                  )}
-                >
-                  {w.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Customer Reviews Feed List */}
           <div className="flex flex-col divide-y divide-slate-100">
-            {customerReviewsData.map((rev) => (
-              <div key={rev.id} className="py-5 flex flex-col gap-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center text-amber-400">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      ))}
+            {product.reviews && product.reviews.length > 0 ? (
+              product.reviews.map((rev) => (
+                <div key={rev.id} className="py-5 flex flex-col gap-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={cn(
+                              "w-3.5 h-3.5",
+                              i < rev.rating ? "fill-amber-400 text-amber-400" : "text-slate-200 fill-slate-200"
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs font-black text-slate-900">{rev.userName}</span>
+                      <span className="text-[11px] text-slate-400">• {rev.date}</span>
                     </div>
-                    <span className="text-xs font-black text-slate-900">{rev.author}</span>
-                    <span className="text-[11px] text-slate-400">• {rev.date}</span>
+
+                    <span className="text-[11px] text-slate-400">
+                      {isEn ? "Purchased from " : "Satıcı: "}
+                      <span className="font-bold text-slate-700">{product.storeName}</span>
+                    </span>
                   </div>
 
-                  <span className="text-[11px] text-slate-400">
-                    Purchased from <span className="font-bold text-slate-700">Altınyıldız Classics</span>
-                  </span>
-                </div>
+                  <p className="text-xs text-slate-800 font-medium leading-relaxed">{rev.comment}</p>
 
-                <span className="text-xs font-bold text-slate-500">{rev.size}</span>
-                <p className="text-xs text-slate-800 font-medium leading-relaxed">{rev.comment}</p>
+                  <div className="flex items-center gap-4 pt-1 text-xs text-slate-400">
+                    <button
+                      type="button"
+                      onClick={() => handleVoteReview(rev.id, "up")}
+                      className={cn(
+                        "flex items-center gap-1.5 hover:text-slate-700 transition-colors cursor-pointer",
+                        helpfulVoted[rev.id] === "up" && "text-primary font-black"
+                      )}
+                    >
+                      <ThumbsUp className="w-3.5 h-3.5" />
+                      <span>{rev.helpfulCount + (helpfulVoted[rev.id] === "up" ? 1 : 0)}</span>
+                    </button>
 
-                {rev.photos && rev.photos.length > 0 && (
-                  <div className="flex items-center gap-2 mt-1">
-                    {rev.photos.map((ph, idx) => (
-                      <img
-                        key={idx}
-                        src={ph}
-                        alt=""
-                        className="w-14 h-14 object-cover rounded-xl border border-slate-200"
-                      />
-                    ))}
+                    <button
+                      type="button"
+                      onClick={() => handleVoteReview(rev.id, "down")}
+                      className={cn(
+                        "flex items-center gap-1.5 hover:text-slate-700 transition-colors cursor-pointer",
+                        helpfulVoted[rev.id] === "down" && "text-rose-600 font-black"
+                      )}
+                    >
+                      <ThumbsDown className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                )}
-
-                <div className="flex items-center gap-4 pt-1 text-xs text-slate-400">
-                  <button
-                    type="button"
-                    onClick={() => handleVoteReview(rev.id, "up")}
-                    className={cn(
-                      "flex items-center gap-1.5 hover:text-slate-700 transition-colors cursor-pointer",
-                      helpfulVoted[rev.id] === "up" && "text-primary font-black"
-                    )}
-                  >
-                    <ThumbsUp className="w-3.5 h-3.5" />
-                    <span>{rev.helpfulCount + (helpfulVoted[rev.id] === "up" ? 1 : 0)}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleVoteReview(rev.id, "down")}
-                    className={cn(
-                      "flex items-center gap-1.5 hover:text-slate-700 transition-colors cursor-pointer",
-                      helpfulVoted[rev.id] === "down" && "text-rose-600 font-black"
-                    )}
-                  >
-                    <ThumbsDown className="w-3.5 h-3.5" />
-                  </button>
                 </div>
+              ))
+            ) : (
+              <div className="py-6 text-center text-xs text-slate-500 font-medium flex flex-col items-center gap-2">
+                <Star className="w-8 h-8 text-amber-400 fill-amber-400 opacity-60" />
+                <p>
+                  {isEn
+                    ? "Be the first verified customer to review this product!"
+                    : "Bu ürünü satın alan ilk müşterilerden olun ve değerlendirmenizi paylaşın!"}
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         {/* 4. Similar Items Section */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black text-slate-900 tracking-tight">
-              {isEn ? "Similar items" : "Benzer Ürünler"}
-            </h2>
-            <Link
-              href={`/category/${product.categorySlug}`}
-              className="text-xs font-extrabold text-primary hover:underline flex items-center gap-1"
-            >
-              <span>{isEn ? "View All" : "Tümünü Gör"}</span>
-              <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
+        {relatedProducts.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                {isEn ? "Similar items" : "Benzer Ürünler"}
+              </h2>
+              <Link
+                href={`/category/${product.categorySlug}`}
+                className="text-xs font-extrabold text-primary hover:underline flex items-center gap-1"
+              >
+                <span>{isEn ? "View All" : "Tümünü Gör"}</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {relatedProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </main>
 
       {/* 5. COMPREHENSIVE DELIVERY LOCATION & ADDRESS MANAGER MODAL */}
@@ -1587,7 +1551,7 @@ export default function ProductDetailPage() {
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setSelectedBank(key)}
+                    onClick={() => setSelectedBank(key as "garanti" | "yapikredi" | "isbank" | "akbank" | "ziraat")}
                     className={cn(
                       "px-3.5 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0",
                       selectedBank === key
@@ -1692,7 +1656,9 @@ export default function ProductDetailPage() {
               <img src={activeImage} alt="" className="w-12 h-14 object-cover rounded-lg" />
               <div className="flex flex-col">
                 <span className="text-xs font-black text-slate-900 line-clamp-1">{product.name}</span>
-                <span className="text-[10px] text-slate-500">Satıcı: Altınyıldız Classics</span>
+                <span className="text-[10px] text-slate-500">
+                  {isEn ? "Seller: " : "Satıcı: "}{product.storeName}
+                </span>
               </div>
             </div>
 

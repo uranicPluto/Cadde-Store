@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const statusParam = searchParams.get("status");
 
     if (slug) {
-      const product = await prisma.product.findUnique({
+      let product = await prisma.product.findUnique({
         where: { slug },
         include: {
           category: true,
@@ -28,6 +28,19 @@ export async function GET(request: Request) {
           reviews: { include: { user: true }, orderBy: { createdAt: "desc" } },
         },
       });
+
+      if (!product) {
+        product = await prisma.product.findUnique({
+          where: { id: slug },
+          include: {
+            category: true,
+            seller: true,
+            brandRef: true,
+            reviews: { include: { user: true }, orderBy: { createdAt: "desc" } },
+          },
+        });
+      }
+
       if (!product) {
         return NextResponse.json({ error: "Ürün bulunamadı." }, { status: 404 });
       }
