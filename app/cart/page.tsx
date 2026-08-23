@@ -20,11 +20,10 @@ import { CartItem } from "@/lib/cart/cart-types";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeFromCart, totalCount, subtotal } = useCart();
+  const { items, updateQuantity, removeFromCart, totalCount, subtotal, appliedCoupon, setAppliedCoupon } = useCart();
   const { toggleFavorite } = useFavorites();
   const { language, t } = useLanguage();
 
-  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const sellerGroups = groupCartBySeller(items);

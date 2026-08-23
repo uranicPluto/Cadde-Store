@@ -1,0 +1,1426 @@
+{
+  "timestamp": "2026-08-23T02:51:16.115Z",
+  "summary": {
+    "total": 174,
+    "passed": 174,
+    "failed": 0,
+    "passRate": "100.0%",
+    "totalDurationMs": 15708
+  },
+  "tierSummary": {
+    "tier1": {
+      "total": 75,
+      "passed": 75,
+      "failed": 0
+    },
+    "tier2": {
+      "total": 75,
+      "passed": 75,
+      "failed": 0
+    },
+    "tier3": {
+      "total": 16,
+      "passed": 16,
+      "failed": 0
+    },
+    "tier4": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "T1.1.1",
+      "name": "Fetch active products list with categories and sellers",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 104
+    },
+    {
+      "id": "T1.1.2",
+      "name": "Filter products by category slug",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 119
+    },
+    {
+      "id": "T1.1.3",
+      "name": "Filter products by seller slug",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 113
+    },
+    {
+      "id": "T1.1.4",
+      "name": "Search products by keyword query",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 85
+    },
+    {
+      "id": "T1.1.5",
+      "name": "Verify product catalog schema and active status enforcement",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 102
+    },
+    {
+      "id": "T1.2.1",
+      "name": "Fetch single product details by slug",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 96
+    },
+    {
+      "id": "T1.2.2",
+      "name": "Verify variant attributes (colors, sizes, images JSON)",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 71
+    },
+    {
+      "id": "T1.2.3",
+      "name": "Verify reviews attachment with reviewer names on product detail",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 69
+    },
+    {
+      "id": "T1.2.4",
+      "name": "Verify stock count and pricing attributes",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 164
+    },
+    {
+      "id": "T1.2.5",
+      "name": "Return 404 for non-existent product slug",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 65
+    },
+    {
+      "id": "T1.3.1",
+      "name": "Sync guest favorites to authenticated user account",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 244
+    },
+    {
+      "id": "T1.3.2",
+      "name": "Sync guest addresses to authenticated user account",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 64
+    },
+    {
+      "id": "T1.3.3",
+      "name": "Fetch customer favorites list via /api/favorites",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 151
+    },
+    {
+      "id": "T1.3.4",
+      "name": "Toggle product favorite status via POST /api/favorites",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 75
+    },
+    {
+      "id": "T1.3.5",
+      "name": "Fetch customer saved addresses via /api/addresses",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 136
+    },
+    {
+      "id": "T1.4.1",
+      "name": "Validate percentage coupon (CADDE10)",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 141
+    },
+    {
+      "id": "T1.4.2",
+      "name": "Validate fixed discount coupon (WELCOME150)",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 57
+    },
+    {
+      "id": "T1.4.3",
+      "name": "Reject coupon when subtotal is below minimum order requirement",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T1.4.4",
+      "name": "Reject invalid or non-existent coupon code",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T1.4.5",
+      "name": "Calculate discount respecting maximumDiscount cap",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 72
+    },
+    {
+      "id": "T1.5.1",
+      "name": "Create single-vendor order with valid item and shipping address",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 259
+    },
+    {
+      "id": "T1.5.2",
+      "name": "Create multi-vendor order with products from multiple sellers",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 86
+    },
+    {
+      "id": "T1.5.3",
+      "name": "Verify atomic stock decrement upon order placement",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 87
+    },
+    {
+      "id": "T1.5.4",
+      "name": "Apply coupon code during checkout and verify couponDiscount recorded",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 97
+    },
+    {
+      "id": "T1.5.5",
+      "name": "Verify shipping fee calculation against free shipping threshold",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 86
+    },
+    {
+      "id": "T1.6.1",
+      "name": "Verify root Order model fields and JSON address snapshot",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 6
+    },
+    {
+      "id": "T1.6.2",
+      "name": "Verify Order creates separate OrderGroup per seller with subtotal and status",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T1.6.3",
+      "name": "Verify OrderItem records reference both Order and OrderGroup",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T1.6.4",
+      "name": "Verify initial order status history step created with CONFIRMED status",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T1.6.5",
+      "name": "Verify carrier names support Turkish carriers (Yurtiçi, Aras, MNG, Sürat, PTT, HepsiJet)",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T1.7.1",
+      "name": "Retrieve seller order groups via GET /api/orders/seller",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 203
+    },
+    {
+      "id": "T1.7.2",
+      "name": "Seller transitions order group status from CONFIRMED to PROCESSING",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 84
+    },
+    {
+      "id": "T1.7.3",
+      "name": "Seller transitions order group status to SHIPPED with tracking code",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 88
+    },
+    {
+      "id": "T1.7.4",
+      "name": "Verify order status history recorded for transitions",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 3
+    },
+    {
+      "id": "T1.7.5",
+      "name": "Retrieve customer in-app notifications list and unread count",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 156
+    },
+    {
+      "id": "T1.8.1",
+      "name": "Customer submits return request via POST /api/returns",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 154
+    },
+    {
+      "id": "T1.8.2",
+      "name": "Verify return request records exact refund amount calculation",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T1.8.3",
+      "name": "Verify return request stores reason and evidenceImages JSON",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 0
+    },
+    {
+      "id": "T1.8.4",
+      "name": "Verify return request validation rejects missing required fields",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 54
+    },
+    {
+      "id": "T1.8.5",
+      "name": "Verify notification dispatched to seller upon return request creation",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 3
+    },
+    {
+      "id": "T1.9.1",
+      "name": "Seller retrieves return requests for their store via GET /api/returns",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 76
+    },
+    {
+      "id": "T1.9.2",
+      "name": "Seller approves return request with sellerNote via PUT /api/returns/[id]",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 518
+    },
+    {
+      "id": "T1.9.3",
+      "name": "Admin retrieves all platform returns via GET /api/returns",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 68
+    },
+    {
+      "id": "T1.9.4",
+      "name": "Admin moderates return request to REFUNDED with adminNote",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 89
+    },
+    {
+      "id": "T1.9.5",
+      "name": "Verify customer receives in-app notification when return status updates",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T1.10.1",
+      "name": "Fetch active homepage sections and banners via GET /api/cms/sections",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 234
+    },
+    {
+      "id": "T1.10.2",
+      "name": "Admin creates new homepage CMS section via POST /api/cms/sections",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 74
+    },
+    {
+      "id": "T1.10.3",
+      "name": "Admin creates new banner under section via POST /api/cms/banners",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 173
+    },
+    {
+      "id": "T1.10.4",
+      "name": "Admin updates section sort order and active status via PUT /api/cms/sections",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 75
+    },
+    {
+      "id": "T1.10.5",
+      "name": "Admin deletes banner via DELETE /api/cms/banners",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 75
+    },
+    {
+      "id": "T1.11.1",
+      "name": "Fetch public brands directory with product counts via GET /api/brands",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 150
+    },
+    {
+      "id": "T1.11.2",
+      "name": "Filter featured brands via GET /api/brands?featured=true",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T1.11.3",
+      "name": "Admin creates new brand via POST /api/brands",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 66
+    },
+    {
+      "id": "T1.11.4",
+      "name": "Fetch brand details by ID via GET /api/brands/[id]",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 458
+    },
+    {
+      "id": "T1.11.5",
+      "name": "Admin updates and deletes brand via PUT & DELETE /api/brands/[id]",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 146
+    },
+    {
+      "id": "T1.12.1",
+      "name": "Seller creates multi-variant product via POST /api/products",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 90
+    },
+    {
+      "id": "T1.12.2",
+      "name": "Verify created product unique slug and active status",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T1.12.3",
+      "name": "Admin views full product catalog via GET /api/admin/products",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 186
+    },
+    {
+      "id": "T1.12.4",
+      "name": "Admin moderates product status via PUT /api/admin/products",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 82
+    },
+    {
+      "id": "T1.12.5",
+      "name": "Verify inactive product excluded from public catalog",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 125
+    },
+    {
+      "id": "T1.13.1",
+      "name": "Fetch public seller storefront profile by slug via GET /api/sellers?slug=...",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 155
+    },
+    {
+      "id": "T1.13.2",
+      "name": "Customer submits product review via POST /api/reviews",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 158
+    },
+    {
+      "id": "T1.13.3",
+      "name": "Verify product average rating and reviewCount recalculated",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T1.13.4",
+      "name": "Seller replies to customer review via PUT /api/reviews",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 72
+    },
+    {
+      "id": "T1.13.5",
+      "name": "Fetch product reviews list displaying seller replies",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 58
+    },
+    {
+      "id": "T1.14.1",
+      "name": "Admin retrieves immutable security audit trail via GET /api/admin/audit",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 168
+    },
+    {
+      "id": "T1.14.2",
+      "name": "Admin retrieves sellers and toggles verification status via GET & PUT /api/admin/sellers",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 256
+    },
+    {
+      "id": "T1.14.3",
+      "name": "Admin retrieves customers and updates status via GET & PUT /api/admin/customers",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 274
+    },
+    {
+      "id": "T1.14.4",
+      "name": "Admin retrieves and updates platform settings via GET & PUT /api/admin/settings",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 204
+    },
+    {
+      "id": "T1.14.5",
+      "name": "RBAC enforcement: non-admin gets 403 Forbidden on admin endpoints",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 116
+    },
+    {
+      "id": "T1.15.1",
+      "name": "Verify PWA manifest (/manifest.json) contains valid app metadata",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T1.15.2",
+      "name": "Verify PWA manifest shortcuts for Orders, Cart, Seller, Admin",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 0
+    },
+    {
+      "id": "T1.15.3",
+      "name": "Verify Turkish (TR) dictionary translations completeness",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T1.15.4",
+      "name": "Verify English (EN) dictionary translation key parity with Turkish",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T1.15.5",
+      "name": "Verify Categories API returns bilingual nameTR, nameEN, descriptionTR, descriptionEN",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 164
+    },
+    {
+      "id": "T2.1.1",
+      "name": "Empty search query returns active products without crashing",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.1.2",
+      "name": "Search with SQL/HTML meta-characters escapes safely",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 65
+    },
+    {
+      "id": "T2.1.3",
+      "name": "Search with very long string (200+ characters)",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 65
+    },
+    {
+      "id": "T2.1.4",
+      "name": "Filter by non-existent category slug returns empty array",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 45
+    },
+    {
+      "id": "T2.1.5",
+      "name": "Filter by non-existent seller slug returns empty array",
+      "feature": "Product Catalog & Multi-Faceted Filters",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.2.1",
+      "name": "Product lookup with empty slug parameter returns full catalog",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 73
+    },
+    {
+      "id": "T2.2.2",
+      "name": "Product with empty variants JSON arrays parses gracefully",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 72
+    },
+    {
+      "id": "T2.2.3",
+      "name": "Extreme pricing precision and formatting handled",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T2.2.4",
+      "name": "Boundary stock value 0 handled correctly",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 0
+    },
+    {
+      "id": "T2.2.5",
+      "name": "Product slug with Turkish unicode characters encoded properly",
+      "feature": "Product Detail, Variants & Installment Matrix",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.3.1",
+      "name": "Guest sync with empty payload returns synced true",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.3.2",
+      "name": "Guest sync with duplicate favorite IDs is idempotent",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 71
+    },
+    {
+      "id": "T2.3.3",
+      "name": "Guest address sync skips incomplete addresses safely",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 68
+    },
+    {
+      "id": "T2.3.4",
+      "name": "Guest favorites sync with non-existent product IDs handles gracefully",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.3.5",
+      "name": "Guest sync without auth session returns 401 Unauthorized",
+      "feature": "Cart Management & Guest-to-Auth Sync",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.4.1",
+      "name": "Coupon validate with zero subtotal",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 46
+    },
+    {
+      "id": "T2.4.2",
+      "name": "Expired coupon code returns error",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.4.3",
+      "name": "Inactive/disabled coupon returns error",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.4.4",
+      "name": "Coupon code with surrounding whitespace trims cleanly",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.4.5",
+      "name": "Coupon validate missing code or subtotal returns 400",
+      "feature": "Coupon Validation & Calculation Engine",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 60
+    },
+    {
+      "id": "T2.5.1",
+      "name": "Checkout with empty items array returns 400 ORDER_VALIDATION_ERROR",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 71
+    },
+    {
+      "id": "T2.5.2",
+      "name": "Checkout with negative quantity returns 400 INVALID_QUANTITY",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 57
+    },
+    {
+      "id": "T2.5.3",
+      "name": "Checkout with fractional quantity (1.5) returns 400 INVALID_QUANTITY",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 60
+    },
+    {
+      "id": "T2.5.4",
+      "name": "Checkout with extreme quantity (>99) returns 400 INVALID_QUANTITY",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.5.5",
+      "name": "Checkout requesting quantity exceeding stock returns 400 INSUFFICIENT_STOCK",
+      "feature": "Server-Authoritative Multi-Vendor Checkout",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.6.1",
+      "name": "Order creation without shipping address returns 400 validation error",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.6.2",
+      "name": "Order creation with inactive product returns 400 PRODUCT_UNAVAILABLE",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.6.3",
+      "name": "Multiple items from same seller aggregate into single OrderGroup",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 78
+    },
+    {
+      "id": "T2.6.4",
+      "name": "Order tracking number supports arbitrary alphanumeric carrier formats",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 0
+    },
+    {
+      "id": "T2.6.5",
+      "name": "Grand total calculation never yields negative values",
+      "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T2.7.1",
+      "name": "Seller updating non-existent orderGroupId returns 404",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 60
+    },
+    {
+      "id": "T2.7.2",
+      "name": "Seller updating another seller's orderGroup returns 403 Forbidden",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 48
+    },
+    {
+      "id": "T2.7.3",
+      "name": "Update order status without status or orderGroupId returns 400",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 60
+    },
+    {
+      "id": "T2.7.4",
+      "name": "Notification markAllAsRead updates all unread notifications to read",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 67
+    },
+    {
+      "id": "T2.7.5",
+      "name": "Notification update with empty body returns 400",
+      "feature": "Order Status Transitions & Notifications",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 57
+    },
+    {
+      "id": "T2.8.1",
+      "name": "Customer return request on another user's order returns 403 Forbidden",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 23
+    },
+    {
+      "id": "T2.8.2",
+      "name": "Return request on non-existent orderItemId returns 403/400",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 56
+    },
+    {
+      "id": "T2.8.3",
+      "name": "Return request with empty reason string returns 400",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.8.4",
+      "name": "Return request with 10+ evidence image URLs stores valid JSON array",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 73
+    },
+    {
+      "id": "T2.8.5",
+      "name": "Unauthenticated return request returns 401 Unauthorized",
+      "feature": "Customer Return Request & Evidence Upload",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 64
+    },
+    {
+      "id": "T2.9.1",
+      "name": "Customer attempting to approve/reject return request returns 403 Forbidden",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 77
+    },
+    {
+      "id": "T2.9.2",
+      "name": "Moderating non-existent return request returns 404 Not Found",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 68
+    },
+    {
+      "id": "T2.9.3",
+      "name": "Unauthenticated PUT to return moderation returns 401 Unauthorized",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.9.4",
+      "name": "Seller rejects return with detailed sellerNote",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 78
+    },
+    {
+      "id": "T2.9.5",
+      "name": "Status progression to CARGO_RECEIVED and REFUNDED",
+      "feature": "Seller & Admin Return Moderation & Refunds",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 80
+    },
+    {
+      "id": "T2.10.1",
+      "name": "Create CMS section with missing title returns 400 Bad Request",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.10.2",
+      "name": "Create banner with missing imageUrlDesktop or targetValue returns 400",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 60
+    },
+    {
+      "id": "T2.10.3",
+      "name": "Update CMS section without ID returns 400 Bad Request",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.10.4",
+      "name": "Delete banner without id query param returns 400 Bad Request",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.10.5",
+      "name": "Non-admin (customer) attempting CMS section creation returns 403 Forbidden",
+      "feature": "Admin Homepage CMS Sections & Banners",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.11.1",
+      "name": "Create brand with missing name, slug, or logoUrl returns 400",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.11.2",
+      "name": "Create brand with duplicate slug returns 409 Conflict",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 69
+    },
+    {
+      "id": "T2.11.3",
+      "name": "Fetch brand details with non-existent ID returns 404 Not Found",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.11.4",
+      "name": "Non-admin user attempting brand creation returns 403 Forbidden",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 69
+    },
+    {
+      "id": "T2.11.5",
+      "name": "Brand logo URL and banner URL nullability handled cleanly",
+      "feature": "Dedicated Brand Directory & Admin Panel",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T2.12.1",
+      "name": "Seller product creation with missing required fields returns 400",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.12.2",
+      "name": "Non-seller/non-admin (customer) attempting product creation returns 403",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.12.3",
+      "name": "Admin product moderation PUT without productId returns 400",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 64
+    },
+    {
+      "id": "T2.12.4",
+      "name": "Admin product moderation by customer returns 403 Forbidden",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 64
+    },
+    {
+      "id": "T2.12.5",
+      "name": "Product stock levels 0 trigger out of stock behavior in orders",
+      "feature": "Seller Product Management & Stock Alerts",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.13.1",
+      "name": "Fetch reviews without productId query parameter returns 400",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 60
+    },
+    {
+      "id": "T2.13.2",
+      "name": "Submit review with missing rating or comment returns 400",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.13.3",
+      "name": "Seller attempting reply to review of another seller's product returns 403",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T2.13.4",
+      "name": "Review reply with non-existent reviewId returns 404 Not Found",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.13.5",
+      "name": "Fetch seller storefront with non-existent slug returns 404",
+      "feature": "Seller Review Replies & Custom Storefront",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.14.1",
+      "name": "Audit log query with non-matching entityType returns empty logs array",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.14.2",
+      "name": "Update seller status with missing sellerId returns 400 Bad Request",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.14.3",
+      "name": "Update customer status with missing customerId returns 400 Bad Request",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.14.4",
+      "name": "Platform settings handles floating point values cleanly",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 69
+    },
+    {
+      "id": "T2.14.5",
+      "name": "Unauthenticated request to admin settings returns 403 Forbidden",
+      "feature": "Admin Governance, Audit Trail & RBAC",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 53
+    },
+    {
+      "id": "T2.15.1",
+      "name": "PWA manifest icons array contains 192x192 and 512x512 entries",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 0
+    },
+    {
+      "id": "T2.15.2",
+      "name": "Turkish dictionary file exports valid non-empty object with 700+ lines",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T2.15.3",
+      "name": "English dictionary file exports valid non-empty object with 700+ lines",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 0
+    },
+    {
+      "id": "T2.15.4",
+      "name": "Currency storage key and language storage key definitions",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 0
+    },
+    {
+      "id": "T2.15.5",
+      "name": "Turkish special characters preserved across Category names in DB",
+      "feature": "Turkish/English Localization & PWA Manifest",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 2
+    },
+    {
+      "id": "T3.1",
+      "name": "Multi-vendor order with coupon redemption and split OrderGroups",
+      "feature": "Seller Grouping + Coupons + Checkout",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 100
+    },
+    {
+      "id": "T3.2",
+      "name": "Partial seller fulfillment and independent carrier tracking across OrderGroups",
+      "feature": "Multi-Vendor Logistics & Fulfillment",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 89
+    },
+    {
+      "id": "T3.3",
+      "name": "Customer return initiation triggering seller notification and approval workflow",
+      "feature": "Returns & Refunds Lifecycle + Notifications",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 144
+    },
+    {
+      "id": "T3.4",
+      "name": "Return request rejection preserves moderation note and updates audit history",
+      "feature": "Returns & Refunds Lifecycle + Moderation",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 83
+    },
+    {
+      "id": "T3.5",
+      "name": "Admin creates CMS section with banner and verifies live public delivery",
+      "feature": "CMS Merchandising + Homepage API",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 177
+    },
+    {
+      "id": "T3.6",
+      "name": "Brand creation and product association reflects aggregated product count",
+      "feature": "Brand Directory + Product Catalog",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 155
+    },
+    {
+      "id": "T3.7",
+      "name": "Guest address sync directly usable in customer checkout flow",
+      "feature": "Guest-to-Auth Sync + Checkout",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 116
+    },
+    {
+      "id": "T3.8",
+      "name": "Customer review submission updates rating and allows seller direct reply",
+      "feature": "Seller Portal + Customer Reviews",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 130
+    },
+    {
+      "id": "T3.9",
+      "name": "Admin seller status update reflects in seller profile and management panel",
+      "feature": "Admin Governance + Seller Operations",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 66
+    },
+    {
+      "id": "T3.10",
+      "name": "Coupon usage limit exhaustion prevents subsequent order checkouts",
+      "feature": "Coupon Engine + Atomic Checkout",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 147
+    },
+    {
+      "id": "T3.11",
+      "name": "Same customer cannot redeem single-use coupon multiple times",
+      "feature": "Coupon Engine + Customer Redemptions",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 144
+    },
+    {
+      "id": "T3.12",
+      "name": "Platform settings defaultShippingFee update immediately applies to subsequent orders",
+      "feature": "Admin Settings + Checkout Calculation",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 209
+    },
+    {
+      "id": "T3.13",
+      "name": "Combining category filter and search query returns precise subset",
+      "feature": "Product Catalog Search & Filters",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 52
+    },
+    {
+      "id": "T3.14",
+      "name": "Brand and CMS mutations automatically generate persistent AuditLog records",
+      "feature": "Admin Governance & Security Audit Trail",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 68
+    },
+    {
+      "id": "T3.15",
+      "name": "Notification unread counter updates when marking notification as read",
+      "feature": "In-App Notification Engine",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 181
+    },
+    {
+      "id": "T3.16",
+      "name": "Strict RBAC matrix enforced across customer, seller, and admin routes",
+      "feature": "Role-Based Access Control (RBAC)",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 373
+    },
+    {
+      "id": "SCENARIO-1",
+      "name": "Complete Multi-Vendor Purchase Journey with Coupon & Split OrderGroups",
+      "description": "Search → Product Detail → Cart → Coupon Validation → Atomic Checkout → Split OrderGroups → Stock Decrement",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 202
+    },
+    {
+      "id": "SCENARIO-2",
+      "name": "Defective Item Return Lifecycle with Moderation & In-App Alerts",
+      "description": "Customer Return Request → Seller Notification → Moderation Approval → Refund Trigger",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 236
+    },
+    {
+      "id": "SCENARIO-3",
+      "name": "Admin Seasonal Campaign Launch & Dynamic Homepage Merchandising",
+      "description": "Create Campaign Section → Add Banners → Feature Flagship Brand → Verify Dynamic CMS Delivery",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 314
+    },
+    {
+      "id": "SCENARIO-4",
+      "name": "Seller Storefront Operations, Multi-Variant Catalog Listing & Review Replies",
+      "description": "Seller Profile Setup → Multi-Variant Product Listing → Customer Review → Seller Reply",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 260
+    },
+    {
+      "id": "SCENARIO-5",
+      "name": "Turkish Marketplace Localization & PWA Installability Compliance",
+      "description": "Bilingual TR/EN Parity → TRY/USD Support → KVKK Compliance → PWA Manifest",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "SCENARIO-6",
+      "name": "Customer Account Lifecycle & Guest Address Synchronization",
+      "description": "Register / Login → Address Book Sync → Default Address Selection → Favorite Management",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 189
+    },
+    {
+      "id": "SCENARIO-7",
+      "name": "Admin Platform Governance, Moderation & Immutable Security Audit Trail",
+      "description": "Admin Settings Update → Seller Moderation → Security Audit Trail Verification",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 183
+    },
+    {
+      "id": "SCENARIO-8",
+      "name": "Turkish Carrier Logistics & Multi-Carrier Fulfillment Pipeline",
+      "description": "Order Placement → Seller Fulfillment → Carrier Code Assignment (Yurtiçi, Aras, MNG, Sürat, PTT, HepsiJet) → Tracking Progression",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 215
+    }
+  ]
+}

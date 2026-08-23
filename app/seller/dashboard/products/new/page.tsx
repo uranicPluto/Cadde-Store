@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SellerHeader } from "@/components/seller/seller-header";
 import { SellerSidebar } from "@/components/seller/seller-sidebar";
@@ -10,22 +10,74 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import { Footer } from "@/components/layout/footer";
 import { PlusCircle } from "lucide-react";
 
-const SELLER_PRODUCTS_KEY = "cadde-store-seller-products";
-
 export default function AddSellerProductPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const [categories, setCategories] = useState<{ id: string; slug: string }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleCreateProduct = (newProduct: DetailedProductMock) => {
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.categories) {
+            setCategories(data.categories);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load categories", e);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  const handleCreateProduct = async (newProduct: DetailedProductMock) => {
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
     try {
-      const saved = localStorage.getItem(SELLER_PRODUCTS_KEY);
-      const existing: DetailedProductMock[] = saved ? JSON.parse(saved) : [];
-      const updated = [newProduct, ...existing];
-      localStorage.setItem(SELLER_PRODUCTS_KEY, JSON.stringify(updated));
+      // Find matching categoryId or use first available
+      const matchedCat = categories.find((c) => c.slug === newProduct.categorySlug) || categories[0];
+      const categoryId = matchedCat?.id || "cat-kadin";
+      const sku = `SKU-${Date.now().toString().slice(-8)}`;
+
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newProduct.name,
+          brand: newProduct.brand || "Cadde Store",
+          description: newProduct.description,
+          categoryId,
+          price: newProduct.price,
+          originalPrice: newProduct.originalPrice,
+          stock: newProduct.stock,
+          sku,
+          imageUrl: newProduct.imageUrl,
+          images: newProduct.galleryImages || [newProduct.imageUrl],
+          colors: newProduct.attributes?.color || [],
+          sizes: newProduct.attributes?.sizes || [],
+        }),
+      });
+
+      if (res.ok) {
+        router.push("/seller/dashboard/products");
+        return;
+      } else {
+        const errData = await res.json();
+        setErrorMessage(errData.error || "Ürün eklenirken bir hata oluştu.");
+      }
     } catch (e) {
       console.error("Failed to save new product", e);
+      setErrorMessage("Bağlantı hatası oluştu.");
+    } finally {
+      setIsSubmitting(false);
     }
-    router.push("/seller/dashboard/products");
   };
 
   return (
@@ -52,6 +104,12 @@ export default function AddSellerProductPage() {
                 </div>
               </div>
             </div>
+
+            {errorMessage && (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-xs font-bold text-rose-700">
+                {errorMessage}
+              </div>
+            )}
 
             <ProductForm onSubmit={handleCreateProduct} />
           </div>

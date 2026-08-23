@@ -210,7 +210,7 @@ async function main() {
   // 5. Products
   const prod1 = await prisma.product.upsert({
     where: { slug: "oversize-pamuklu-erkek-tisort" },
-    update: { brandId: brandZara.id },
+    update: { brandId: brandZara.id, stock: 50, status: "ACTIVE", price: 299.9 },
     create: {
       sellerId: sellerProfile1.id,
       categoryId: catMen.id,
@@ -234,7 +234,7 @@ async function main() {
 
   const prod2 = await prisma.product.upsert({
     where: { slug: "kablosuz-anc-bluetooth-kulaklik" },
-    update: { brandId: brandApple.id },
+    update: { brandId: brandApple.id, stock: 25, status: "ACTIVE", price: 1499.0 },
     create: {
       sellerId: sellerProfile2.id,
       categoryId: catElectronics.id,
@@ -384,7 +384,11 @@ async function main() {
   // 9. Platform Settings
   await prisma.platformSettings.upsert({
     where: { id: "default" },
-    update: {},
+    update: {
+      defaultShippingFee: 34.9,
+      freeShippingThreshold: 200,
+      defaultCommissionRate: 10,
+    },
     create: {
       id: "default",
       marketplaceName: "Cadde Store Türkiye",

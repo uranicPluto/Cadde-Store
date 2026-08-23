@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await getSession();
@@ -10,7 +12,7 @@ export async function GET() {
     }
 
     const products = await prisma.product.findMany({
-      include: { seller: true, category: true },
+      include: { seller: true, category: true, brandRef: true },
       orderBy: { createdAt: "desc" },
     });
 
@@ -38,6 +40,23 @@ export async function PUT(request: Request) {
     const product = await prisma.product.update({
       where: { id: productId },
       data: { status },
+    });
+
+    // Record AuditLog
+    await prisma.auditLog.create({
+      data: {
+        actorId: session.id,
+        actorEmail: session.email,
+        actorRole: session.role,
+        action: "PRODUCT_MODERATED",
+        entityType: "PRODUCT",
+        entityId: product.id,
+        metadataJson: JSON.stringify({
+          productId: product.id,
+          name: product.name,
+          status: product.status,
+        }),
+      },
     });
 
     return NextResponse.json({ success: true, product });

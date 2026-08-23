@@ -6,7 +6,7 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Award, Plus, Edit2, Trash2, Search, Star, ExternalLink, CheckCircle } from "lucide-react";
+import { Award, Plus, Edit2, Trash2, Search, Star, ExternalLink, CheckCircle, Image as ImageIcon } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
 interface BrandItem {
@@ -32,11 +32,17 @@ export default function AdminBrandsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Partial<BrandItem>>({});
   const [saving, setSaving] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+
+  const showFeedback = (msg: string) => {
+    setFeedbackMessage(msg);
+    setTimeout(() => setFeedbackMessage(null), 3500);
+  };
 
   const fetchBrands = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/brands");
+      const res = await fetch("/api/brands?all=true");
       const data = await res.json();
       if (data.brands) {
         setBrands(data.brands);
@@ -71,8 +77,8 @@ export default function AdminBrandsPage() {
     setIsModalOpen(true);
   };
 
-  const handleNameChange = (name: string) => {
-    const slug = name
+  const generateTurkishSlug = (text: string) => {
+    return text
       .toLowerCase()
       .trim()
       .replace(/ğ/g, "g")
@@ -82,13 +88,58 @@ export default function AdminBrandsPage() {
       .replace(/ö/g, "o")
       .replace(/ç/g, "c")
       .replace(/[^a-z0-9]/g, "-")
-      .replace(/-+/g, "-");
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
 
+  const handleNameChange = (name: string) => {
+    const slug = generateTurkishSlug(name);
     setEditingBrand((prev) => ({
       ...prev,
       name,
       slug: prev?.id ? prev.slug : slug,
     }));
+  };
+
+  const handleToggleFeatured = async (brand: BrandItem) => {
+    try {
+      const res = await fetch(`/api/brands/${brand.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFeatured: !brand.isFeatured }),
+      });
+      if (res.ok) {
+        showFeedback(
+          !brand.isFeatured
+            ? isEn ? "Brand marked as featured" : "Marka öne çıkarıldı"
+            : isEn ? "Brand removed from featured" : "Marka öne çıkanlardan kaldırıldı"
+        );
+        await fetchBrands();
+      }
+    } catch (e) {
+      console.error("Toggle featured error:", e);
+    }
+  };
+
+  const handleToggleStatus = async (brand: BrandItem) => {
+    const newStatus = brand.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    try {
+      const res = await fetch(`/api/brands/${brand.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        showFeedback(
+          newStatus === "ACTIVE"
+            ? isEn ? "Brand activated" : "Marka aktif edildi"
+            : isEn ? "Brand deactivated" : "Marka pasife alındı"
+        );
+        await fetchBrands();
+      }
+    } catch (e) {
+      console.error("Toggle status error:", e);
+    }
   };
 
   const handleSaveBrand = async (e: React.FormEvent) => {
@@ -105,8 +156,12 @@ export default function AdminBrandsPage() {
           body: JSON.stringify(editingBrand),
         });
         if (res.ok) {
+          showFeedback(isEn ? "Brand updated successfully" : "Marka başarıyla güncellendi");
           await fetchBrands();
           setIsModalOpen(false);
+        } else {
+          const err = await res.json();
+          alert(err.error || (isEn ? "Failed to update brand" : "Marka güncellenemedi"));
         }
       } else {
         // Create new brand
@@ -116,8 +171,12 @@ export default function AdminBrandsPage() {
           body: JSON.stringify(editingBrand),
         });
         if (res.ok) {
+          showFeedback(isEn ? "Brand created successfully" : "Marka başarıyla oluşturuldu");
           await fetchBrands();
           setIsModalOpen(false);
+        } else {
+          const err = await res.json();
+          alert(err.error || (isEn ? "Failed to create brand" : "Marka oluşturulamadı"));
         }
       }
     } catch (err) {
@@ -133,7 +192,11 @@ export default function AdminBrandsPage() {
     try {
       const res = await fetch(`/api/brands/${id}`, { method: "DELETE" });
       if (res.ok) {
+        showFeedback(isEn ? "Brand deleted" : "Marka silindi");
         setBrands((prev) => prev.filter((b) => b.id !== id));
+      } else {
+        const err = await res.json();
+        alert(err.error || (isEn ? "Failed to delete brand" : "Marka silinemedi"));
       }
     } catch (e) {
       console.error("Delete error:", e);
@@ -158,6 +221,16 @@ export default function AdminBrandsPage() {
             </div>
 
             <div className="md:col-span-3 space-y-6">
+              {/* Toast Feedback */}
+              {feedbackMessage && (
+                <div className="bg-emerald-600/90 border border-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center justify-between text-xs font-bold animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                    <span>{feedbackMessage}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Header Card */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-md">
                 <div>
@@ -180,7 +253,7 @@ export default function AdminBrandsPage() {
 
                 <Button
                   onClick={handleOpenAdd}
-                  className="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0"
+                  className="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{isEn ? "Add New Brand" : "Yeni Marka Ekle"}</span>
@@ -238,17 +311,35 @@ export default function AdminBrandsPage() {
                           </div>
 
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="text-sm font-extrabold text-white truncate">{brand.name}</h3>
-                              {brand.isFeatured && (
-                                <span className="inline-flex items-center gap-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded-md">
-                                  <Star className="w-3 h-3 fill-amber-400" />
-                                  {isEn ? "Featured" : "Öne Çıkan"}
-                                </span>
-                              )}
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleFeatured(brand)}
+                                className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md cursor-pointer border transition-colors ${
+                                  brand.isFeatured
+                                    ? "bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30"
+                                    : "bg-slate-800 text-slate-500 border-slate-700 hover:bg-slate-700 hover:text-slate-300"
+                                }`}
+                                title={isEn ? "Click to toggle featured" : "Öne çıkarma durumunu değiştir"}
+                              >
+                                <Star className={`w-3 h-3 ${brand.isFeatured ? "fill-amber-400" : ""}`} />
+                                {brand.isFeatured ? (isEn ? "Featured" : "Öne Çıkan") : (isEn ? "Standard" : "Standart")}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStatus(brand)}
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md cursor-pointer border transition-colors ${
+                                  brand.status === "ACTIVE"
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                                    : "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
+                                }`}
+                                title={isEn ? "Click to toggle status" : "Durumu değiştir"}
+                              >
                                 {brand.status}
-                              </span>
+                              </button>
                             </div>
 
                             <p className="text-xs text-slate-400 font-mono mt-0.5">/brand/{brand.slug}</p>
@@ -268,7 +359,8 @@ export default function AdminBrandsPage() {
                           <Button
                             onClick={() => handleOpenEdit(brand)}
                             variant="outline"
-                            className="bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white p-2 rounded-lg"
+                            className="bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white p-2 rounded-lg cursor-pointer"
+                            title={isEn ? "Edit Brand" : "Düzenle"}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </Button>
@@ -276,7 +368,8 @@ export default function AdminBrandsPage() {
                           <Button
                             onClick={() => handleDeleteBrand(brand.id)}
                             variant="outline"
-                            className="bg-slate-900 hover:bg-red-950 border-slate-700 hover:border-red-800 text-slate-400 hover:text-red-400 p-2 rounded-lg"
+                            className="bg-slate-900 hover:bg-red-950 border-slate-700 hover:border-red-800 text-slate-400 hover:text-red-400 p-2 rounded-lg cursor-pointer"
+                            title={isEn ? "Delete Brand" : "Sil"}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
@@ -332,14 +425,28 @@ export default function AdminBrandsPage() {
             <label className="block text-slate-300 font-bold mb-1">
               {isEn ? "Brand Logo URL (Square PNG/SVG Recommended) *" : "Marka Logo URL (Kare PNG/SVG) *"}
             </label>
-            <input
-              type="url"
-              required
-              value={editingBrand.logoUrl || ""}
-              onChange={(e) => setEditingBrand((p) => ({ ...p, logoUrl: e.target.value }))}
-              placeholder="https://..."
-              className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-orange-500"
-            />
+            <div className="flex gap-2 items-center">
+              <input
+                type="url"
+                required
+                value={editingBrand.logoUrl || ""}
+                onChange={(e) => setEditingBrand((p) => ({ ...p, logoUrl: e.target.value }))}
+                placeholder="https://..."
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-orange-500"
+              />
+              {editingBrand.logoUrl && (
+                <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shrink-0 border border-slate-700 overflow-hidden">
+                  <img
+                    src={editingBrand.logoUrl}
+                    alt="preview"
+                    className="max-h-full max-w-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=200&q=80";
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <div>

@@ -20,6 +20,10 @@ import {
   Calendar,
   Sparkles,
   CheckCircle,
+  ToggleLeft,
+  ToggleRight,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
@@ -57,18 +61,27 @@ export default function AdminCmsPage() {
 
   const [sections, setSections] = useState<SectionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+
   const [isSectionModalOpen, setIsSectionModalOpen] = useState(false);
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   const [editingSection, setEditingSection] = useState<Partial<SectionItem>>({});
   const [editingBanner, setEditingBanner] = useState<Partial<BannerItem>>({});
   const [targetSectionId, setTargetSectionId] = useState<string>("");
   const [previewBanner, setPreviewBanner] = useState<BannerItem | null>(null);
 
+  const showFeedback = (msg: string) => {
+    setFeedbackMessage(msg);
+    setTimeout(() => setFeedbackMessage(null), 3500);
+  };
+
   const fetchCmsData = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/cms/sections");
+      const res = await fetch("/api/cms/sections?all=true");
       const data = await res.json();
       if (data.sections) {
         setSections(data.sections);
@@ -96,7 +109,82 @@ export default function AdminCmsPage() {
     setIsSectionModalOpen(true);
   };
 
+  const handleOpenEditSection = (section: SectionItem) => {
+    setEditingSection({ ...section });
+    setIsSectionModalOpen(true);
+  };
+
+  const handleDeleteSection = async (sectionId: string) => {
+    if (!confirm(isEn ? "Delete this section and all its banners?" : "Bu bölümü ve altındaki tüm bannerları silmek istediğinize emin misiniz?")) return;
+    try {
+      setActionLoading(true);
+      const res = await fetch(`/api/cms/sections?id=${sectionId}`, { method: "DELETE" });
+      if (res.ok) {
+        showFeedback(isEn ? "Section deleted successfully" : "Vitrin bölümü başarıyla silindi");
+        await fetchCmsData();
+      }
+    } catch (err) {
+      console.error("Delete section error:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleSectionActive = async (section: SectionItem) => {
+    try {
+      setActionLoading(true);
+      await fetch("/api/cms/sections", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: section.id, active: !section.active }),
+      });
+      showFeedback(
+        !section.active
+          ? isEn ? "Section published live" : "Bölüm yayına alındı"
+          : isEn ? "Section moved to draft" : "Bölüm taslağa alındı"
+      );
+      await fetchCmsData();
+    } catch (err) {
+      console.error("Toggle section active error:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleMoveSection = async (currentIndex: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= sections.length) return;
+
+    const currentSection = sections[currentIndex];
+    const targetSection = sections[targetIndex];
+
+    try {
+      setActionLoading(true);
+      await Promise.all([
+        fetch("/api/cms/sections", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: currentSection.id, orderIndex: targetIndex }),
+        }),
+        fetch("/api/cms/sections", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: targetSection.id, orderIndex: currentIndex }),
+        }),
+      ]);
+      await fetchCmsData();
+      showFeedback(isEn ? "Section order updated" : "Bölüm sıralaması güncellendi");
+    } catch (err) {
+      console.error("Move section error:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleOpenAddBanner = (sectionId: string) => {
+    const targetSection = sections.find((s) => s.id === sectionId);
+    const bannerCount = targetSection?.banners?.length || 0;
+
     setTargetSectionId(sectionId);
     setEditingBanner({
       sectionId,
@@ -110,10 +198,82 @@ export default function AdminCmsPage() {
       targetValue: "/category/women",
       badgeTextTR: "Yeni Fırsat",
       badgeTextEN: "New Deal",
-      orderIndex: 0,
+      orderIndex: bannerCount,
       active: true,
     });
     setIsBannerModalOpen(true);
+  };
+
+  const handleOpenEditBanner = (banner: BannerItem) => {
+    setEditingBanner({ ...banner });
+    setIsBannerModalOpen(true);
+  };
+
+  const handleDeleteBanner = async (bannerId: string) => {
+    if (!confirm(isEn ? "Delete this banner?" : "Bu banner'ı silmek istediğinize emin misiniz?")) return;
+    try {
+      setActionLoading(true);
+      const res = await fetch(`/api/cms/banners?id=${bannerId}`, { method: "DELETE" });
+      if (res.ok) {
+        showFeedback(isEn ? "Banner deleted" : "Banner silindi");
+        await fetchCmsData();
+      }
+    } catch (err) {
+      console.error("Delete banner error:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleBannerActive = async (banner: BannerItem) => {
+    try {
+      setActionLoading(true);
+      await fetch("/api/cms/banners", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: banner.id, active: !banner.active }),
+      });
+      showFeedback(
+        !banner.active
+          ? isEn ? "Banner activated" : "Banner aktif edildi"
+          : isEn ? "Banner deactivated" : "Banner pasife alındı"
+      );
+      await fetchCmsData();
+    } catch (err) {
+      console.error("Toggle banner active error:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleMoveBanner = async (section: SectionItem, currentBannerIndex: number, direction: "up" | "down") => {
+    const targetBannerIndex = direction === "up" ? currentBannerIndex - 1 : currentBannerIndex + 1;
+    if (targetBannerIndex < 0 || targetBannerIndex >= section.banners.length) return;
+
+    const currentBanner = section.banners[currentBannerIndex];
+    const targetBanner = section.banners[targetBannerIndex];
+
+    try {
+      setActionLoading(true);
+      await Promise.all([
+        fetch("/api/cms/banners", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: currentBanner.id, orderIndex: targetBannerIndex }),
+        }),
+        fetch("/api/cms/banners", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: targetBanner.id, orderIndex: currentBannerIndex }),
+        }),
+      ]);
+      await fetchCmsData();
+      showFeedback(isEn ? "Banner order updated" : "Banner sıralaması güncellendi");
+    } catch (err) {
+      console.error("Move banner error:", err);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleSaveSection = async (e: React.FormEvent) => {
@@ -121,23 +281,28 @@ export default function AdminCmsPage() {
     if (!editingSection.titleTR || !editingSection.titleEN) return;
 
     try {
+      setActionLoading(true);
       if (editingSection.id) {
         await fetch("/api/cms/sections", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editingSection),
         });
+        showFeedback(isEn ? "Section updated" : "Bölüm güncellendi");
       } else {
         await fetch("/api/cms/sections", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editingSection),
         });
+        showFeedback(isEn ? "Section created" : "Bölüm oluşturuldu");
       }
       await fetchCmsData();
       setIsSectionModalOpen(false);
     } catch (err) {
       console.error("Save section error:", err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -146,33 +311,28 @@ export default function AdminCmsPage() {
     if (!editingBanner.imageUrlDesktop || !editingBanner.targetValue) return;
 
     try {
+      setActionLoading(true);
       if (editingBanner.id) {
         await fetch("/api/cms/banners", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editingBanner),
         });
+        showFeedback(isEn ? "Banner updated" : "Banner güncellendi");
       } else {
         await fetch("/api/cms/banners", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editingBanner),
         });
+        showFeedback(isEn ? "Banner created" : "Banner oluşturuldu");
       }
       await fetchCmsData();
       setIsBannerModalOpen(false);
     } catch (err) {
       console.error("Save banner error:", err);
-    }
-  };
-
-  const handleDeleteBanner = async (bannerId: string) => {
-    if (!confirm(isEn ? "Delete this banner?" : "Bu banner'ı silmek istediğinize emin misiniz?")) return;
-    try {
-      await fetch(`/api/cms/banners?id=${bannerId}`, { method: "DELETE" });
-      await fetchCmsData();
-    } catch (err) {
-      console.error("Delete banner error:", err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -188,6 +348,16 @@ export default function AdminCmsPage() {
             </div>
 
             <div className="md:col-span-3 space-y-6">
+              {/* Toast Feedback */}
+              {feedbackMessage && (
+                <div className="bg-emerald-600/90 border border-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center justify-between text-xs font-bold animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                    <span>{feedbackMessage}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Header Card */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-md">
                 <div>
@@ -210,7 +380,7 @@ export default function AdminCmsPage() {
 
                 <Button
                   onClick={handleOpenAddSection}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{isEn ? "Add New CMS Section" : "Yeni Vitrin Bölümü Ekle"}</span>
@@ -241,43 +411,88 @@ export default function AdminCmsPage() {
                       className="bg-slate-950 rounded-2xl border border-slate-800 p-6 shadow-md space-y-4"
                     >
                       {/* Section Header */}
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-800">
+                      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-800">
                         <div className="flex items-center gap-3">
-                          <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 text-xs font-black flex items-center justify-center border border-slate-700">
+                          {/* Reorder Buttons for Section */}
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              disabled={idx === 0 || actionLoading}
+                              onClick={() => handleMoveSection(idx, "up")}
+                              className="p-1 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
+                              title={isEn ? "Move Section Up" : "Yukarı Taşı"}
+                            >
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === sections.length - 1 || actionLoading}
+                              onClick={() => handleMoveSection(idx, "down")}
+                              className="p-1 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
+                              title={isEn ? "Move Section Down" : "Aşağı Taşı"}
+                            >
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <span className="w-7 h-7 rounded-full bg-slate-800 text-slate-300 text-xs font-black flex items-center justify-center border border-slate-700">
                             {idx + 1}
                           </span>
+
                           <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="text-sm font-extrabold text-white">
                                 {isEn ? section.titleEN : section.titleTR}
                               </h3>
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase">
                                 {section.type}
                               </span>
-                              {section.active ? (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                  {isEn ? "Live" : "Yayında"}
-                                </span>
-                              ) : (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                  {isEn ? "Draft / Hidden" : "Taslak"}
-                                </span>
-                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleToggleSectionActive(section)}
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md cursor-pointer transition-colors border ${
+                                  section.active
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                                    : "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
+                                }`}
+                              >
+                                {section.active ? (isEn ? "Live ✓" : "Yayında ✓") : (isEn ? "Draft / Hidden" : "Taslak / Gizli")}
+                              </button>
                             </div>
                             <p className="text-xs text-slate-400 font-mono mt-0.5">
-                              Section ID: {section.id}
+                              Sıra: {section.orderIndex} | Section ID: {section.id}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        {/* Section Action Controls */}
+                        <div className="flex items-center gap-2 flex-wrap self-end lg:self-center">
                           <Button
                             onClick={() => handleOpenAddBanner(section.id)}
                             size="sm"
-                            className="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
+                            className="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>{isEn ? "Add Banner" : "Banner Ekle"}</span>
+                          </Button>
+
+                          <Button
+                            onClick={() => handleOpenEditSection(section)}
+                            size="sm"
+                            variant="outline"
+                            className="bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                            <span>{isEn ? "Edit" : "Düzenle"}</span>
+                          </Button>
+
+                          <Button
+                            onClick={() => handleDeleteSection(section.id)}
+                            size="sm"
+                            variant="outline"
+                            className="bg-slate-900 hover:bg-red-950 border-slate-700 hover:border-red-800 text-slate-400 hover:text-red-400 text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
                       </div>
@@ -289,10 +504,10 @@ export default function AdminCmsPage() {
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {section.banners.map((banner) => (
+                          {section.banners.map((banner, bIdx) => (
                             <div
                               key={banner.id}
-                              className="group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between"
+                              className={`group bg-slate-900 border ${banner.active ? "border-slate-800" : "border-rose-900/50 opacity-75"} rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between`}
                             >
                               <div>
                                 {/* Banner Image Preview */}
@@ -307,13 +522,28 @@ export default function AdminCmsPage() {
                                       {isEn ? banner.badgeTextEN || banner.badgeTextTR : banner.badgeTextTR}
                                     </span>
                                   )}
+                                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleBannerActive(banner)}
+                                      className={`text-[9px] font-black px-1.5 py-0.5 rounded backdrop-blur-md shadow-xs ${
+                                        banner.active
+                                          ? "bg-emerald-600/90 text-white"
+                                          : "bg-rose-600/90 text-white"
+                                      }`}
+                                    >
+                                      {banner.active ? (isEn ? "ACTIVE" : "AKTİF") : (isEn ? "INACTIVE" : "PASİF")}
+                                    </button>
+                                  </div>
+
                                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                                     <button
+                                      type="button"
                                       onClick={() => {
                                         setPreviewBanner(banner);
                                         setIsPreviewOpen(true);
                                       }}
-                                      className="text-[11px] font-bold text-white flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md hover:bg-black/80"
+                                      className="text-[11px] font-bold text-white flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md hover:bg-black/80 cursor-pointer"
                                     >
                                       <Eye className="w-3.5 h-3.5" />
                                       <span>{isEn ? "Preview Full" : "Önizle"}</span>
@@ -324,7 +554,7 @@ export default function AdminCmsPage() {
                                 {/* Banner Details */}
                                 <div className="p-3.5 space-y-1.5">
                                   <h4 className="text-xs font-bold text-white truncate">
-                                    {isEn ? banner.titleEN || banner.titleTR : banner.titleTR || banner.titleEN}
+                                    {isEn ? banner.titleEN || banner.titleTR || "Untitled" : banner.titleTR || banner.titleEN || "Başlıksız"}
                                   </h4>
                                   <p className="text-[11px] text-slate-400 line-clamp-1">
                                     {isEn ? banner.subtitleEN || banner.subtitleTR : banner.subtitleTR || banner.subtitleEN}
@@ -336,24 +566,46 @@ export default function AdminCmsPage() {
                                 </div>
                               </div>
 
-                              {/* Actions */}
+                              {/* Actions & Reordering */}
                               <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-slate-400">
-                                  Sıra: {banner.orderIndex}
-                                </span>
+                                <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
+                                  <span>Sıra: {banner.orderIndex}</span>
+                                  <div className="flex items-center ml-1">
+                                    <button
+                                      type="button"
+                                      disabled={bIdx === 0 || actionLoading}
+                                      onClick={() => handleMoveBanner(section, bIdx, "up")}
+                                      className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-20 transition-colors"
+                                      title={isEn ? "Move Up" : "Yukarı Taşı"}
+                                    >
+                                      <ArrowUp className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={bIdx === section.banners.length - 1 || actionLoading}
+                                      onClick={() => handleMoveBanner(section, bIdx, "down")}
+                                      className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-20 transition-colors"
+                                      title={isEn ? "Move Down" : "Aşağı Taşı"}
+                                    >
+                                      <ArrowDown className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </div>
+
                                 <div className="flex items-center gap-1">
                                   <button
-                                    onClick={() => {
-                                      setEditingBanner({ ...banner });
-                                      setIsBannerModalOpen(true);
-                                    }}
-                                    className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                                    type="button"
+                                    onClick={() => handleOpenEditBanner(banner)}
+                                    className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                                    title={isEn ? "Edit Banner" : "Düzenle"}
                                   >
                                     <Edit2 className="w-3.5 h-3.5" />
                                   </button>
                                   <button
+                                    type="button"
                                     onClick={() => handleDeleteBanner(banner.id)}
-                                    className="p-1.5 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors"
+                                    className="p-1.5 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer"
+                                    title={isEn ? "Delete Banner" : "Sil"}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -376,7 +628,7 @@ export default function AdminCmsPage() {
       <Modal
         isOpen={isSectionModalOpen}
         onClose={() => setIsSectionModalOpen(false)}
-        title={isEn ? "Configure Homepage Section" : "Vitrin Bölümü Yapılandır"}
+        title={editingSection?.id ? (isEn ? "Edit Homepage Section" : "Vitrin Bölümünü Düzenle") : (isEn ? "Add New CMS Section" : "Yeni Vitrin Bölümü Ekle")}
       >
         <form onSubmit={handleSaveSection} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -466,6 +718,7 @@ export default function AdminCmsPage() {
             </Button>
             <Button
               type="submit"
+              disabled={actionLoading}
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5"
             >
               {isEn ? "Save Section" : "Bölümü Kaydet"}
@@ -551,6 +804,19 @@ export default function AdminCmsPage() {
             />
           </div>
 
+          <div>
+            <label className="block text-slate-300 font-bold mb-1">
+              {isEn ? "Mobile Image URL (Optional)" : "Mobil Görsel URL (Opsiyonel)"}
+            </label>
+            <input
+              type="url"
+              value={editingBanner.imageUrlMobile || ""}
+              onChange={(e) => setEditingBanner((p) => ({ ...p, imageUrlMobile: e.target.value }))}
+              placeholder="https://images.unsplash.com/..."
+              className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-slate-300 font-bold mb-1">
@@ -562,7 +828,7 @@ export default function AdminCmsPage() {
                 className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
               >
                 <option value="CATEGORY">Kategori Sayfası (Örn: /category/women)</option>
-                <option value="BRAND">Marka Sayfası (Örn: /brand/nike)</option>
+                <option value="BRAND">Marka Sayfası (Örn: /search?brand=Nike)</option>
                 <option value="SELLER">Satıcı Mağazası (Örn: /seller/cadde-store)</option>
                 <option value="PRODUCT">Doğrudan Ürün Sayfası</option>
                 <option value="URL">Özel URL / Kampanya Bağlantısı</option>
@@ -600,6 +866,21 @@ export default function AdminCmsPage() {
 
             <div>
               <label className="block text-slate-300 font-bold mb-1">
+                {isEn ? "Badge Text (EN)" : "Rozet Metni (İngilizce)"}
+              </label>
+              <input
+                type="text"
+                value={editingBanner.badgeTextEN || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, badgeTextEN: e.target.value }))}
+                placeholder="Ex: Limited Time Deal"
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">
                 {isEn ? "Display Order Position" : "Sıralama Pozisyonu"}
               </label>
               <input
@@ -608,6 +889,20 @@ export default function AdminCmsPage() {
                 onChange={(e) => setEditingBanner((p) => ({ ...p, orderIndex: Number(e.target.value) }))}
                 className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
               />
+            </div>
+
+            <div className="flex items-center gap-2 pt-6">
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editingBanner.active ?? true}
+                  onChange={(e) => setEditingBanner((p) => ({ ...p, active: e.target.checked }))}
+                  className="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-indigo-500"
+                />
+                <span className="font-bold text-slate-200">
+                  {isEn ? "Banner Active" : "Banner Aktif"}
+                </span>
+              </label>
             </div>
           </div>
 
@@ -622,6 +917,7 @@ export default function AdminCmsPage() {
             </Button>
             <Button
               type="submit"
+              disabled={actionLoading}
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5"
             >
               {isEn ? "Save Banner" : "Banner'ı Kaydet"}
@@ -665,7 +961,7 @@ export default function AdminCmsPage() {
             </div>
 
             <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
-              <span>Hedef Yönlendirme: <strong className="text-indigo-400">{previewBanner.targetValue}</strong></span>
+              <span>Hedef Yönlendirme: <strong className="text-indigo-400">{previewBanner.targetType}: {previewBanner.targetValue}</strong></span>
               <span className="text-emerald-400 font-bold">✓ Piksel & Renk Standartları Onaylı</span>
             </div>
           </div>

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { Footer } from "@/components/layout/footer";
 import { getCategoryBySlug, isCategorySlugMatch } from "@/lib/catalog/category-repository";
-import { getFullCatalog } from "@/lib/catalog/product-repository";
+import { getFullCatalog, fetchDbProducts, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { filterProducts, FilterCriteria } from "@/lib/catalog/filters";
 import { sortProducts, SortOption } from "@/lib/catalog/sorting";
 import { useLanguage } from "@/lib/i18n/language-context";
@@ -25,10 +25,22 @@ export default function CategoryPage() {
   const { language, t } = useLanguage();
   const categoryInfo = getCategoryBySlug(slug, language);
 
-  const fullCatalog = getFullCatalog(language);
-  
+  const [products, setProducts] = useState<DetailedProductMock[]>(() => getFullCatalog(language));
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchDbProducts(language).then((dbProds) => {
+      if (isMounted && Array.isArray(dbProds) && dbProds.length > 0) {
+        setProducts(dbProds);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [language]);
+
   // STRICT CATEGORY FILTERING: Only include products that match this specific category
-  const categoryProducts = fullCatalog.filter((p) => isCategorySlugMatch(p.categorySlug, slug));
+  const categoryProducts = products.filter((p) => isCategorySlugMatch(p.categorySlug, slug));
 
   const [sortOption, setSortOption] = useState<SortOption>("recommended");
   const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({});

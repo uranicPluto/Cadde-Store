@@ -41,7 +41,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { orderGroupId, status, note } = body;
+    const { orderGroupId, status, carrierName, trackingNumber, note } = body;
 
     if (!orderGroupId || !status) {
       return NextResponse.json({ error: "Sipariş grubu ID ve yeni durum gereklidir." }, { status: 400 });
@@ -64,18 +64,86 @@ export async function PUT(request: Request) {
       }
     }
 
+    // 1. Update OrderGroup
     const updatedGroup = await prisma.orderGroup.update({
       where: { id: orderGroupId },
-      data: { status },
+      data: {
+        status,
+        ...(carrierName ? { carrierName } : {}),
+        ...(trackingNumber ? { trackingNumber } : {}),
+      },
     });
+
+    // 2. Synchronize parent Order status and tracking
+    const allGroups = await prisma.orderGroup.findMany({
+      where: { orderId: group.orderId },
+    });
+
+    let newOrderStatus = group.order.status;
+    const allDelivered = allGroups.every((g) => g.id === orderGroupId ? status === "DELIVERED" : g.status === "DELIVERED");
+    const allShippedOrDelivered = allGroups.every((g) => {
+      const gStatus = g.id === orderGroupId ? status : g.status;
+      return gStatus === "SHIPPED" || gStatus === "DELIVERED";
+    });
+    const anyProcessingOrAbove = allGroups.some((g) => {
+      const gStatus = g.id === orderGroupId ? status : g.status;
+      return ["PROCESSING", "SHIPPED", "DELIVERED"].includes(gStatus);
+    });
+
+    if (allDelivered) {
+      newOrderStatus = "DELIVERED";
+    } else if (allShippedOrDelivered) {
+      newOrderStatus = "SHIPPED";
+    } else if (anyProcessingOrAbove && group.order.status === "CONFIRMED") {
+      newOrderStatus = "PROCESSING";
+    }
+
+    await prisma.order.update({
+      where: { id: group.orderId },
+      data: {
+        status: newOrderStatus,
+        ...(carrierName ? { carrierName } : {}),
+        ...(trackingNumber ? { trackingNumber } : {}),
+      },
+    });
+
+    // 3. Create OrderStatusHistory record
+    const statusNote =
+      note ||
+      (carrierName && trackingNumber
+        ? `Satıcı (${group.seller.storeName}) tarafından kargo bilgisi güncellendi: ${carrierName} (${trackingNumber}) - Durum: ${status}`
+        : `Satıcı (${group.seller.storeName}) tarafından durum "${status}" olarak güncellendi.`);
 
     await prisma.orderStatusHistory.create({
       data: {
         orderId: group.orderId,
         status,
-        note: note || `Satıcı (${group.seller.storeName}) tarafından durum "${status}" olarak güncellendi.`,
+        note: statusNote,
       },
     });
+
+    // 4. Create Notification for customer
+    if (group.order.customerId) {
+      try {
+        await prisma.notification.create({
+          data: {
+            userId: group.order.customerId,
+            titleTR: `Sipariş Durumu: ${status}`,
+            titleEN: `Order Status: ${status}`,
+            messageTR: `#${group.order.orderNumber} numaralı siparişinizin durumu "${status}" olarak güncellendi.${
+              trackingNumber ? ` Kargo Takip No: ${trackingNumber}` : ""
+            }`,
+            messageEN: `Your order #${group.order.orderNumber} status has been updated to "${status}".${
+              trackingNumber ? ` Tracking: ${trackingNumber}` : ""
+            }`,
+            type: "ORDER",
+            linkUrl: `/account/orders/${group.orderId}`,
+          },
+        });
+      } catch (notifErr) {
+        console.warn("Customer notification creation error:", notifErr);
+      }
+    }
 
     return NextResponse.json({ success: true, orderGroup: updatedGroup });
   } catch (error) {

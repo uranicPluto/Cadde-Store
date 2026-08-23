@@ -1,12 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { getMockBrands } from "@/lib/mock-data";
+import { getMockBrands, BrandMock } from "@/lib/mock-data";
 import { BrandCard } from "@/components/marketplace/brand-card";
 import { ArrowRight, Tag } from "lucide-react";
 
 export const FeaturedBrandsSection: React.FC = () => {
   const { language, t } = useLanguage();
-  const brands = getMockBrands(language);
+  const defaultBrands = getMockBrands(language);
+  const [brands, setBrands] = useState<BrandMock[]>(defaultBrands);
+
+  useEffect(() => {
+    async function loadFeaturedBrands() {
+      try {
+        const res = await fetch("/api/brands?featured=true");
+        const data = await res.json();
+        if (data.brands && data.brands.length > 0) {
+          setBrands(
+            data.brands.map((b: any) => ({
+              id: b.id,
+              name: b.name,
+              logoUrl: b.logoUrl,
+              bannerUrl: b.bannerUrl || undefined,
+              discountText: language === "en" ? "Official Store" : "Resmi Mağaza",
+            }))
+          );
+        } else {
+          setBrands(getMockBrands(language));
+        }
+      } catch (e) {
+        setBrands(getMockBrands(language));
+      }
+    }
+
+    loadFeaturedBrands();
+  }, [language]);
 
   return (
     <section className="w-full bg-white py-8 border-b border-slate-200">
@@ -21,14 +49,14 @@ export const FeaturedBrandsSection: React.FC = () => {
               {t("homepage.featuredBrandsSubtitle")}
             </p>
           </div>
-          <a href="#" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+          <Link href="/brands" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
             <span>{t("homepage.viewAll")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-          {brands.map((b) => (
+          {brands.slice(0, 12).map((b) => (
             <BrandCard key={b.id} brand={b} />
           ))}
         </div>

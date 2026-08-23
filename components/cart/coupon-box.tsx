@@ -18,18 +18,56 @@ export const CouponBox: React.FC<CouponBoxProps> = ({
   const { language, t } = useLanguage();
   const [code, setCode] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleApply = (e: React.FormEvent) => {
+  const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-    if (!code.trim()) return;
+    const cleanCode = code.trim().toUpperCase();
+    if (!cleanCode) return;
 
-    const res = validateCoupon(code, subtotal);
-    if (res.valid && res.coupon) {
-      onApplyCoupon(res.coupon);
-      setCode("");
-    } else if (res.errorMsg) {
-      setErrorMsg(language === "en" ? res.errorMsg.en : res.errorMsg.tr);
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: cleanCode, subtotal }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.valid && data.coupon) {
+        const couponObj: Coupon = {
+          code: data.coupon.code,
+          discountType: data.coupon.type === "PERCENTAGE" ? "percentage" : "fixed",
+          value: data.coupon.value,
+          description: {
+            tr: data.coupon.type === "PERCENTAGE"
+              ? `%${data.coupon.value} İndirim Kuponu`
+              : `${data.coupon.value} TL İndirim Kuponu`,
+            en: data.coupon.type === "PERCENTAGE"
+              ? `${data.coupon.value}% Discount Coupon`
+              : `${data.coupon.value} TL Discount Coupon`,
+          },
+        };
+        onApplyCoupon(couponObj);
+        setCode("");
+      } else {
+        setErrorMsg(data.error || (language === "en" ? "Invalid coupon code." : "Geçersiz kupon kodu."));
+      }
+    } catch (err) {
+      // Local fallback in case of connection drop
+      const localRes = validateCoupon(cleanCode, subtotal);
+      if (localRes.valid && localRes.coupon) {
+        onApplyCoupon(localRes.coupon);
+        setCode("");
+      } else if (localRes.errorMsg) {
+        setErrorMsg(language === "en" ? localRes.errorMsg.en : localRes.errorMsg.tr);
+      } else {
+        setErrorMsg(language === "en" ? "Failed to validate coupon." : "Kupon doğrulanırken hata oluştu.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -73,8 +111,8 @@ export const CouponBox: React.FC<CouponBoxProps> = ({
               placeholder="Örn: CADDE10"
               className="flex-1 h-9 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary focus:bg-white uppercase font-bold text-text-main placeholder:normal-case placeholder:font-normal"
             />
-            <Button variant="primary" size="sm" type="submit" className="h-9 font-bold px-4">
-              Uygula
+            <Button variant="primary" size="sm" type="submit" disabled={isLoading} className="h-9 font-bold px-4">
+              {isLoading ? (language === "en" ? "Applying..." : "Uygulanıyor...") : (language === "en" ? "Apply" : "Uygula")}
             </Button>
           </div>
 

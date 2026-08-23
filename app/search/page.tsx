@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { Footer } from "@/components/layout/footer";
-import { getFullCatalog } from "@/lib/catalog/product-repository";
+import { getFullCatalog, fetchDbProducts, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { filterProducts, FilterCriteria } from "@/lib/catalog/filters";
 import { sortProducts, SortOption } from "@/lib/catalog/sorting";
 import { useLanguage } from "@/lib/i18n/language-context";
@@ -21,16 +21,31 @@ function SearchContent() {
   const query = searchParams?.get("q") || "";
 
   const { language, t } = useLanguage();
-  const fullCatalog = getFullCatalog(language);
+  const [products, setProducts] = useState<DetailedProductMock[]>(() => getFullCatalog(language));
 
-  const matched = query.trim()
-    ? fullCatalog.filter(
+  useEffect(() => {
+    let isMounted = true;
+    fetchDbProducts(language).then((dbProds) => {
+      if (isMounted && Array.isArray(dbProds) && dbProds.length > 0) {
+        setProducts(dbProds);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [language]);
+
+  const qLower = query.toLowerCase().trim();
+  const matched = qLower
+    ? products.filter(
         (p) =>
-          p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.brand.toLowerCase().includes(query.toLowerCase()) ||
-          p.categoryName.toLowerCase().includes(query.toLowerCase())
+          p.name.toLowerCase().includes(qLower) ||
+          p.brand.toLowerCase().includes(qLower) ||
+          p.categoryName.toLowerCase().includes(qLower) ||
+          (p.categorySlug && p.categorySlug.toLowerCase().includes(qLower)) ||
+          (p.description && p.description.toLowerCase().includes(qLower))
       )
-    : fullCatalog;
+    : products;
 
   const [sortOption, setSortOption] = useState<SortOption>("recommended");
   const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({});

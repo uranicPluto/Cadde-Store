@@ -45,14 +45,14 @@ export async function PUT(
     const brand = await prisma.brand.update({
       where: { id: params.id },
       data: {
-        ...(name && { name }),
-        ...(slug && { slug: slug.toLowerCase().trim() }),
-        ...(logoUrl && { logoUrl }),
+        ...(name !== undefined && { name }),
+        ...(slug !== undefined && { slug: slug.toLowerCase().trim() }),
+        ...(logoUrl !== undefined && { logoUrl }),
         ...(bannerUrl !== undefined && { bannerUrl }),
         ...(descriptionTR !== undefined && { descriptionTR }),
         ...(descriptionEN !== undefined && { descriptionEN }),
-        ...(isFeatured !== undefined && { isFeatured }),
-        ...(status && { status }),
+        ...(isFeatured !== undefined && { isFeatured: Boolean(isFeatured) }),
+        ...(status !== undefined && { status }),
       },
     });
 
@@ -66,7 +66,12 @@ export async function PUT(
           action: "BRAND_UPDATED",
           entityType: "BRAND",
           entityId: brand.id,
-          metadataJson: JSON.stringify({ brandName: brand.name, updates: body }),
+          metadataJson: JSON.stringify({
+            brandName: brand.name,
+            slug: brand.slug,
+            isFeatured: brand.isFeatured,
+            status: brand.status,
+          }),
         },
       });
     } catch (e) {
@@ -90,7 +95,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Yetkisiz işlem" }, { status: 403 });
     }
 
-    // Soft delete or delete
+    // First safely disconnect products that reference this brand to prevent foreign key errors
+    await prisma.product.updateMany({
+      where: { brandId: params.id },
+      data: { brandId: null },
+    });
+
     const brand = await prisma.brand.delete({
       where: { id: params.id },
     });

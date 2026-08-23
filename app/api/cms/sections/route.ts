@@ -3,21 +3,28 @@ import prisma from "@/lib/db/prisma";
 import { getMockBanners } from "@/lib/mock-data";
 import { getSessionUser } from "@/lib/auth/session";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const includeAll = searchParams.get("all") === "true";
+
     const sections = await prisma.homepageSection.findMany({
-      where: { active: true },
+      where: includeAll ? {} : { active: true },
       orderBy: { orderIndex: "asc" },
       include: {
         banners: {
-          where: { active: true },
+          where: includeAll ? {} : { active: true },
           orderBy: { orderIndex: "asc" },
         },
       },
     });
 
     if (!sections || sections.length === 0) {
-      // Return structured fallback matching default UI
+      if (includeAll) {
+        return NextResponse.json({ sections: [], source: "empty" });
+      }
+
+      // Return structured fallback matching default UI for public view
       const mockBanners = getMockBanners();
       return NextResponse.json({
         sections: [
@@ -128,9 +135,9 @@ export async function PUT(request: Request) {
     const section = await prisma.homepageSection.update({
       where: { id },
       data: {
-        ...(titleTR && { titleTR }),
-        ...(titleEN && { titleEN }),
-        ...(type && { type }),
+        ...(titleTR !== undefined && { titleTR }),
+        ...(titleEN !== undefined && { titleEN }),
+        ...(type !== undefined && { type }),
         ...(orderIndex !== undefined && { orderIndex: Number(orderIndex) }),
         ...(active !== undefined && { active: Boolean(active) }),
         ...(configJson !== undefined && { configJson: typeof configJson === "string" ? configJson : JSON.stringify(configJson) }),
@@ -139,9 +146,80 @@ export async function PUT(request: Request) {
       },
     });
 
+    try {
+      await prisma.auditLog.create({
+        data: {
+          actorId: user.id,
+          actorEmail: user.email,
+          actorRole: user.role,
+          action: "CMS_SECTION_UPDATED",
+          entityType: "CMS",
+          entityId: section.id,
+          metadataJson: JSON.stringify({
+            sectionTitle: section.titleTR,
+            type: section.type,
+            active: section.active,
+            orderIndex: section.orderIndex,
+          }),
+        },
+      });
+    } catch (e) {
+      console.warn("Audit log creation warning:", e);
+    }
+
     return NextResponse.json({ section, success: true });
   } catch (error) {
     console.error("[API CMS Section PUT Error]:", error);
     return NextResponse.json({ error: "Bölüm güncellenemedi." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await getSessionUser();
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Yetkisiz işlem" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    let id = searchParams.get("id");
+
+    if (!id) {
+      try {
+        const body = await request.json();
+        id = body?.id;
+      } catch {
+        // No body
+      }
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: "Bölüm ID gereklidir." }, { status: 400 });
+    }
+
+    const section = await prisma.homepageSection.delete({
+      where: { id },
+    });
+
+    try {
+      await prisma.auditLog.create({
+        data: {
+          actorId: user.id,
+          actorEmail: user.email,
+          actorRole: user.role,
+          action: "CMS_SECTION_DELETED",
+          entityType: "CMS",
+          entityId: id,
+          metadataJson: JSON.stringify({ sectionTitle: section.titleTR, type: section.type }),
+        },
+      });
+    } catch (e) {
+      console.warn("Audit log creation warning:", e);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[API CMS Section DELETE Error]:", error);
+    return NextResponse.json({ error: "Bölüm silinemedi." }, { status: 500 });
   }
 }

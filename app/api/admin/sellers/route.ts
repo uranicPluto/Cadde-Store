@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await getSession();
@@ -24,22 +26,67 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yönetici yetkisi gereklidir." }, { status: 403 });
+    if (!session || (session.role !== "ADMIN" && session.role !== "SELLER")) {
+      return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 403 });
     }
 
     const body = await request.json();
-    const { sellerId, verified, status } = body;
+    const {
+      sellerId,
+      verified,
+      status,
+      storeName,
+      description,
+      logo,
+      banner,
+      shippingPolicy,
+      returnPolicy,
+    } = body;
 
     if (!sellerId) {
       return NextResponse.json({ error: "Satıcı ID gereklidir." }, { status: 400 });
     }
 
+    const existing = await prisma.seller.findUnique({ where: { id: sellerId } });
+    if (!existing) {
+      return NextResponse.json({ error: "Satıcı bulunamadı." }, { status: 404 });
+    }
+
+    // If SELLER, ensure they only edit their own profile
+    if (session.role === "SELLER") {
+      if (existing.userId !== session.id) {
+        return NextResponse.json({ error: "Bu satıcı profilini düzenleme yetkiniz yok." }, { status: 403 });
+      }
+    }
+
     const seller = await prisma.seller.update({
       where: { id: sellerId },
       data: {
-        ...(verified !== undefined ? { verified } : {}),
-        ...(status ? { status } : {}),
+        ...(verified !== undefined && session.role === "ADMIN" ? { verified } : {}),
+        ...(status && session.role === "ADMIN" ? { status } : {}),
+        ...(storeName ? { storeName } : {}),
+        ...(description ? { description } : {}),
+        ...(logo ? { logo } : {}),
+        ...(banner ? { banner } : {}),
+        ...(shippingPolicy !== undefined ? { shippingPolicy } : {}),
+        ...(returnPolicy !== undefined ? { returnPolicy } : {}),
+      },
+    });
+
+    // Record AuditLog
+    await prisma.auditLog.create({
+      data: {
+        actorId: session.id,
+        actorEmail: session.email,
+        actorRole: session.role,
+        action: "SELLER_STATUS_CHANGED",
+        entityType: "SELLER",
+        entityId: seller.id,
+        metadataJson: JSON.stringify({
+          storeName: seller.storeName,
+          verified: seller.verified,
+          status: seller.status,
+        }),
       },
     });
 

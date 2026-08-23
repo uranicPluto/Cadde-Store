@@ -5,12 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { SellerHeader } from "@/components/seller/seller-header";
 import { SellerSidebar } from "@/components/seller/seller-sidebar";
 import { ProductForm } from "@/components/seller/product-form";
-import { getFullCatalog, DetailedProductMock } from "@/lib/catalog/product-repository";
+import { getFullCatalog, DetailedProductMock, mapDbProductToMock } from "@/lib/catalog/product-repository";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { Footer } from "@/components/layout/footer";
 import { Edit2 } from "lucide-react";
-
-const SELLER_PRODUCTS_KEY = "cadde-store-seller-products";
 
 export default function EditSellerProductPage() {
   const params = useParams();
@@ -19,36 +17,77 @@ export default function EditSellerProductPage() {
 
   const { language, t } = useLanguage();
   const [product, setProduct] = useState<DetailedProductMock | null>(null);
+  const [categories, setCategories] = useState<{ id: string; slug: string }[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const catalog = getFullCatalog(language);
-    let custom: DetailedProductMock[] = [];
-    try {
-      const saved = localStorage.getItem(SELLER_PRODUCTS_KEY);
-      if (saved) custom = JSON.parse(saved);
-    } catch (e) {}
+    async function loadData() {
+      try {
+        const catRes = await fetch("/api/categories");
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          if (catData.categories) setCategories(catData.categories);
+        }
 
-    const found = [...custom, ...catalog].find((p) => p.id === id) || catalog[0];
-    if (found) setProduct(found);
+        const prodRes = await fetch(`/api/products/${id}`);
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          if (prodData.product) {
+            setProduct(mapDbProductToMock(prodData.product, language));
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load product from API, using catalog fallback", e);
+      }
+
+      const catalog = getFullCatalog(language);
+      const found = catalog.find((p) => p.id === id) || catalog[0];
+      if (found) setProduct(found);
+    }
+
+    if (id) {
+      loadData();
+    }
   }, [id, language]);
 
-  const handleUpdateProduct = (updated: DetailedProductMock) => {
+  const handleUpdateProduct = async (updated: DetailedProductMock) => {
+    setErrorMessage(null);
     try {
-      const saved = localStorage.getItem(SELLER_PRODUCTS_KEY);
-      const existing: DetailedProductMock[] = saved ? JSON.parse(saved) : [];
-      const index = existing.findIndex((p) => p.id === updated.id);
-      let list: DetailedProductMock[];
+      const matchedCat = categories.find((c) => c.slug === updated.categorySlug);
+      const categoryId = matchedCat?.id;
 
-      if (index > -1) {
-        list = existing.map((p) => (p.id === updated.id ? updated : p));
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: updated.name,
+          brand: updated.brand,
+          description: updated.description,
+          ...(categoryId ? { categoryId } : {}),
+          price: updated.price,
+          originalPrice: updated.originalPrice,
+          stock: updated.stock,
+          imageUrl: updated.imageUrl,
+          images: updated.galleryImages || [updated.imageUrl],
+          colors: updated.attributes?.color || [],
+          sizes: updated.attributes?.sizes || [],
+        }),
+      });
+
+      if (res.ok) {
+        router.push("/seller/dashboard/products");
+        return;
       } else {
-        list = [updated, ...existing];
+        const errData = await res.json();
+        setErrorMessage(errData.error || "Ürün güncellenirken bir hata oluştu.");
       }
-      localStorage.setItem(SELLER_PRODUCTS_KEY, JSON.stringify(list));
     } catch (e) {
       console.error("Failed to update product", e);
+      setErrorMessage("Bağlantı hatası oluştu.");
     }
-    router.push("/seller/dashboard/products");
   };
 
   if (!product) return null;
@@ -79,6 +118,12 @@ export default function EditSellerProductPage() {
                 </div>
               </div>
             </div>
+
+            {errorMessage && (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-xs font-bold text-rose-700">
+                {errorMessage}
+              </div>
+            )}
 
             <ProductForm initialProduct={product} onSubmit={handleUpdateProduct} />
           </div>

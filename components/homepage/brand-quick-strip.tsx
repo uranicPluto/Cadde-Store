@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/language-context";
 import {
@@ -21,20 +21,20 @@ import {
   Truck,
 } from "lucide-react";
 
+interface BrandItem {
+  id?: string;
+  name: string;
+  slug: string;
+  logoUrl?: string;
+  logoText?: string;
+}
+
 export const BrandQuickStrip: React.FC = () => {
   const { language } = useLanguage();
   const isEn = language === "en";
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const scrollLeft = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: -260, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: 260, behavior: "smooth" });
-  };
-
-  const featuredBrands = [
+  const defaultBrands: BrandItem[] = [
     { name: "DeFacto", slug: "defacto", logoText: "DeFacto" },
     { name: "Koton", slug: "koton", logoText: "KOTON" },
     { name: "Karaca", slug: "karaca", logoText: "Karaca" },
@@ -55,6 +55,41 @@ export const BrandQuickStrip: React.FC = () => {
     { name: "Nike", slug: "nike", logoText: "NIKE" },
     { name: "ENGLISH HOME", slug: "english-home", logoText: "ENGLISH HOME" },
   ];
+
+  const [brands, setBrands] = useState<BrandItem[]>(defaultBrands);
+
+  useEffect(() => {
+    async function fetchFeaturedBrands() {
+      try {
+        const res = await fetch("/api/brands?featured=true");
+        const data = await res.json();
+        if (data.brands && data.brands.length > 0) {
+          setBrands(
+            data.brands.map((b: any) => ({
+              id: b.id,
+              name: b.name,
+              slug: b.slug || b.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+              logoUrl: b.logoUrl,
+              logoText: b.name,
+            }))
+          );
+        } else {
+          setBrands(defaultBrands);
+        }
+      } catch (e) {
+        setBrands(defaultBrands);
+      }
+    }
+    fetchFeaturedBrands();
+  }, []);
+
+  const scrollLeft = () => {
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: -260, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: 260, behavior: "smooth" });
+  };
 
   const quickActions = [
     {
@@ -155,7 +190,7 @@ export const BrandQuickStrip: React.FC = () => {
           <button
             type="button"
             onClick={scrollLeft}
-            className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-90 group-hover:opacity-100"
+            className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-90 group-hover:opacity-100 cursor-pointer"
             aria-label="Previous brands"
           >
             <ChevronLeft className="w-5 h-5 text-slate-700" />
@@ -165,15 +200,31 @@ export const BrandQuickStrip: React.FC = () => {
             ref={scrollRef}
             className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 scroll-smooth w-full"
           >
-            {featuredBrands.map((b) => (
+            {brands.map((b, idx) => (
               <Link
-                key={b.slug}
-                href={`/search?q=${encodeURIComponent(b.name)}`}
-                className="w-28 h-20 sm:w-32 sm:h-24 bg-white border border-slate-200/90 hover:border-primary rounded-2xl p-3 flex items-center justify-center shadow-2xs hover:shadow-md transition-all shrink-0 cursor-pointer"
+                key={b.slug || idx}
+                href={`/search?brand=${encodeURIComponent(b.name)}`}
+                className="w-28 h-20 sm:w-32 sm:h-24 bg-white border border-slate-200/90 hover:border-primary rounded-2xl p-3 flex flex-col items-center justify-center shadow-2xs hover:shadow-md transition-all shrink-0 cursor-pointer overflow-hidden"
               >
-                <span className="font-black text-sm sm:text-base text-slate-900 tracking-tight text-center line-clamp-1">
-                  {b.logoText}
-                </span>
+                {b.logoUrl ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <img
+                      src={b.logoUrl}
+                      alt={b.name}
+                      className="max-h-12 max-w-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                    <span className="font-black text-xs sm:text-sm text-slate-900 tracking-tight text-center line-clamp-1 hidden only:block">
+                      {b.logoText || b.name}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="font-black text-sm sm:text-base text-slate-900 tracking-tight text-center line-clamp-1">
+                    {b.logoText || b.name}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -181,7 +232,7 @@ export const BrandQuickStrip: React.FC = () => {
           <button
             type="button"
             onClick={scrollRight}
-            className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-90 group-hover:opacity-100"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-all opacity-90 group-hover:opacity-100 cursor-pointer"
             aria-label="Next brands"
           >
             <ChevronRight className="w-5 h-5 text-slate-700" />

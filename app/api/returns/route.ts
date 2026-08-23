@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
@@ -11,34 +13,69 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
+    const orderId = searchParams.get("orderId");
 
     let whereClause: any = {};
 
     if (user.role === "ADMIN") {
-      if (status) whereClause.status = status;
+      if (status && status !== "ALL") whereClause.status = status;
+      if (orderId) whereClause.orderId = orderId;
     } else if (user.role === "SELLER") {
       const seller = await prisma.seller.findUnique({ where: { userId: user.id } });
       if (!seller) {
         return NextResponse.json({ error: "Satıcı profili bulunamadı." }, { status: 404 });
       }
       whereClause.sellerId = seller.id;
-      if (status) whereClause.status = status;
+      if (status && status !== "ALL") whereClause.status = status;
+      if (orderId) whereClause.orderId = orderId;
     } else {
       whereClause.userId = user.id;
-      if (status) whereClause.status = status;
+      if (status && status !== "ALL") whereClause.status = status;
+      if (orderId) whereClause.orderId = orderId;
     }
 
     const returns = await prisma.returnRequest.findMany({
       where: whereClause,
       include: {
-        order: { select: { orderNumber: true, createdAt: true } },
-        orderItem: {
-          include: {
-            product: { select: { name: true, imageUrl: true, price: true } },
+        order: {
+          select: {
+            id: true,
+            orderNumber: true,
+            createdAt: true,
+            grandTotal: true,
+            status: true,
           },
         },
-        user: { select: { firstName: true, lastName: true, email: true } },
-        seller: { select: { storeName: true } },
+        orderItem: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+                price: true,
+                brand: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+          },
+        },
+        seller: {
+          select: {
+            id: true,
+            storeName: true,
+            slug: true,
+            logo: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -60,8 +97,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { orderId, orderItemId, reason, evidenceImages } = body;
 
-    if (!orderId || !orderItemId || !reason) {
-      return NextResponse.json({ error: "Sipariş, ürün ve iade gerekçesi zorunludur." }, { status: 400 });
+    if (!orderId || !orderItemId || !reason || typeof reason !== "string" || !reason.trim()) {
+      return NextResponse.json({ error: "Sipariş, ürün ve geçerli bir iade gerekçesi zorunludur." }, { status: 400 });
     }
 
     // Verify order item ownership
@@ -77,16 +114,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Bu sipariş ürünü için iade talebi oluşturamazsınız." }, { status: 403 });
     }
 
+    if (orderItem.orderId !== orderId) {
+      return NextResponse.json({ error: "Ürün ve sipariş eşleşmiyor." }, { status: 400 });
+    }
+
+    const refundAmount = orderItem.price * orderItem.quantity;
+    const formattedImages = Array.isArray(evidenceImages) ? evidenceImages : [];
+
     const returnRequest = await prisma.returnRequest.create({
       data: {
         orderId,
         orderItemId,
         userId: user.id,
         sellerId: orderItem.product.sellerId,
-        reason,
+        reason: reason.trim(),
         status: "PENDING",
-        refundAmount: orderItem.price * orderItem.quantity,
-        evidenceImages: JSON.stringify(evidenceImages || []),
+        refundAmount,
+        evidenceImages: JSON.stringify(formattedImages),
       },
     });
 
@@ -102,12 +146,12 @@ export async function POST(request: Request) {
             messageTR: `#${orderItem.order.orderNumber} numaralı siparişteki ürün için iade talebi oluşturuldu.`,
             messageEN: `A return request was submitted for order #${orderItem.order.orderNumber}.`,
             type: "SELLER",
-            linkUrl: `/seller/dashboard/orders`,
+            linkUrl: `/seller/dashboard/returns`,
           },
         });
       }
     } catch (e) {
-      console.warn("Notification error:", e);
+      console.warn("Notification error for seller:", e);
     }
 
     return NextResponse.json({ returnRequest, success: true }, { status: 201 });

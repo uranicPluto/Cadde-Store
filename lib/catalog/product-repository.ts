@@ -51,12 +51,33 @@ export function mapDbProductToMock(dbProd: any, lang: Language = "tr"): Detailed
   let sizes: string[] = [];
   let images: string[] = [dbProd.imageUrl];
 
-  try {
-    if (typeof dbProd.colors === "string") colors = JSON.parse(dbProd.colors);
-    if (typeof dbProd.sizes === "string") sizes = JSON.parse(dbProd.sizes);
-    if (typeof dbProd.images === "string") images = JSON.parse(dbProd.images);
-    if (images.length === 0) images = [dbProd.imageUrl];
-  } catch (e) {}
+  if (Array.isArray(dbProd.colors)) {
+    colors = dbProd.colors;
+  } else if (typeof dbProd.colors === "string") {
+    try {
+      const parsed = JSON.parse(dbProd.colors);
+      if (Array.isArray(parsed)) colors = parsed;
+    } catch (e) {}
+  }
+
+  if (Array.isArray(dbProd.sizes)) {
+    sizes = dbProd.sizes;
+  } else if (typeof dbProd.sizes === "string") {
+    try {
+      const parsed = JSON.parse(dbProd.sizes);
+      if (Array.isArray(parsed)) sizes = parsed;
+    } catch (e) {}
+  }
+
+  if (Array.isArray(dbProd.images)) {
+    images = dbProd.images;
+  } else if (typeof dbProd.images === "string") {
+    try {
+      const parsed = JSON.parse(dbProd.images);
+      if (Array.isArray(parsed)) images = parsed;
+    } catch (e) {}
+  }
+  if (!images || images.length === 0) images = [dbProd.imageUrl];
 
   return {
     id: dbProd.id,

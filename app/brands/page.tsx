@@ -46,15 +46,48 @@ export default function BrandsCatalogPage() {
     loadBrands();
   }, []);
 
-  const alphabet = ["ALL", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+  const alphabet = [
+    "ALL",
+    "A",
+    "B",
+    "C",
+    "Ç",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "İ",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "Ö",
+    "P",
+    "R",
+    "S",
+    "Ş",
+    "T",
+    "U",
+    "Ü",
+    "V",
+    "Y",
+    "Z",
+  ];
 
   const filteredBrands = brands.filter((brand) => {
+    const q = searchQuery.trim().toLocaleLowerCase("tr-TR");
     const matchesSearch =
-      brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      brand.slug.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLetter =
-      selectedLetter === "ALL" ||
-      brand.name.toUpperCase().startsWith(selectedLetter);
+      !q ||
+      brand.name.toLocaleLowerCase("tr-TR").includes(q) ||
+      brand.slug.toLocaleLowerCase("tr-TR").includes(q);
+
+    const firstChar = brand.name.trim().charAt(0).toLocaleUpperCase("tr-TR");
+    const matchesLetter = selectedLetter === "ALL" || firstChar === selectedLetter;
+
     return matchesSearch && matchesLetter;
   });
 
@@ -99,9 +132,9 @@ export default function BrandsCatalogPage() {
                   <Link
                     key={brand.id}
                     href={`/search?brand=${encodeURIComponent(brand.name)}`}
-                    className="group bg-white p-5 rounded-2xl border border-slate-200 hover:border-orange-500 hover:shadow-lg transition-all flex flex-col items-center text-center justify-between gap-3"
+                    className="group bg-white p-5 rounded-2xl border border-slate-200 hover:border-orange-500 hover:shadow-lg transition-all flex flex-col items-center text-center justify-between gap-3 cursor-pointer"
                   >
-                    <div className="w-20 h-20 rounded-xl bg-slate-50 p-2 flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform">
+                    <div className="w-20 h-20 rounded-xl bg-slate-50 p-2 flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform overflow-hidden">
                       <img
                         src={brand.logoUrl}
                         alt={brand.name}
@@ -144,13 +177,14 @@ export default function BrandsCatalogPage() {
               </div>
             </div>
 
-            {/* A-Z Letter Buttons */}
+            {/* A-Z Letter Buttons with Turkish Alphabet Support */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-thin">
               {alphabet.map((letter) => (
                 <button
+                  type="button"
                   key={letter}
                   onClick={() => setSelectedLetter(letter)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 cursor-pointer ${
                     selectedLetter === letter
                       ? "bg-orange-600 text-white shadow-sm"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -180,9 +214,9 @@ export default function BrandsCatalogPage() {
                 <Link
                   key={brand.id}
                   href={`/search?brand=${encodeURIComponent(brand.name)}`}
-                  className="group bg-white p-4 rounded-xl border border-slate-200 hover:border-orange-500 hover:shadow-md transition-all flex flex-col items-center text-center justify-center gap-2.5 min-h-[140px]"
+                  className="group bg-white p-4 rounded-xl border border-slate-200 hover:border-orange-500 hover:shadow-md transition-all flex flex-col items-center text-center justify-between gap-2.5 min-h-[150px] cursor-pointer"
                 >
-                  <div className="w-14 h-14 rounded-lg bg-slate-50 p-2 flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform">
+                  <div className="w-16 h-16 rounded-lg bg-slate-50 p-2 flex items-center justify-center border border-slate-100 group-hover:scale-105 transition-transform overflow-hidden">
                     <img
                       src={brand.logoUrl}
                       alt={brand.name}
@@ -192,9 +226,14 @@ export default function BrandsCatalogPage() {
                       }}
                     />
                   </div>
-                  <span className="text-xs font-bold text-slate-800 group-hover:text-orange-600 transition-colors line-clamp-1">
-                    {brand.name}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-orange-600 transition-colors line-clamp-1">
+                      {brand.name}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-semibold">
+                      {brand._count?.products || 0} {isEn ? "products" : "ürün"}
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>

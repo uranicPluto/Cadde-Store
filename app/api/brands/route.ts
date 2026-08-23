@@ -6,11 +6,22 @@ import { getSessionUser } from "@/lib/auth/session";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const includeAll = searchParams.get("all") === "true";
     const featuredOnly = searchParams.get("featured") === "true";
+    const search = searchParams.get("search")?.trim();
 
-    const where: { status?: string; isFeatured?: boolean } = { status: "ACTIVE" };
+    const where: any = {};
+    if (!includeAll) {
+      where.status = "ACTIVE";
+    }
     if (featuredOnly) {
       where.isFeatured = true;
+    }
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { slug: { contains: search.toLowerCase() } },
+      ];
     }
 
     const brands = await prisma.brand.findMany({
@@ -24,6 +35,10 @@ export async function GET(request: Request) {
     });
 
     if (!brands || brands.length === 0) {
+      if (includeAll || search) {
+        return NextResponse.json({ brands: [], source: "empty" });
+      }
+
       const mockBrands = getMockBrands();
       return NextResponse.json({
         brands: mockBrands.map((b) => ({
@@ -68,7 +83,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, slug, logoUrl, bannerUrl, descriptionTR, descriptionEN, isFeatured } = body;
+    const { name, slug, logoUrl, bannerUrl, descriptionTR, descriptionEN, isFeatured, status } = body;
 
     if (!name || !slug || !logoUrl) {
       return NextResponse.json({ error: "Marka adı, slug ve logo zorunludur." }, { status: 400 });
@@ -83,7 +98,7 @@ export async function POST(request: Request) {
         descriptionTR: descriptionTR || null,
         descriptionEN: descriptionEN || null,
         isFeatured: Boolean(isFeatured),
-        status: "ACTIVE",
+        status: status || "ACTIVE",
       },
     });
 
@@ -97,7 +112,7 @@ export async function POST(request: Request) {
           action: "BRAND_CREATED",
           entityType: "BRAND",
           entityId: brand.id,
-          metadataJson: JSON.stringify({ brandName: brand.name, slug: brand.slug }),
+          metadataJson: JSON.stringify({ brandName: brand.name, slug: brand.slug, isFeatured: brand.isFeatured }),
         },
       });
     } catch (e) {

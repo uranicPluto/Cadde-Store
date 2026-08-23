@@ -24,7 +24,7 @@ import { EmptyState } from "@/components/marketplace/empty-state";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, clearCart } = useCart();
+  const { items, clearCart, appliedCoupon } = useCart();
   const { language, currency, t } = useLanguage();
 
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("delivery");
@@ -66,7 +66,7 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  const calculation = calculateOrderTotals(items, null, selectedShipping);
+  const calculation = calculateOrderTotals(items, appliedCoupon, selectedShipping);
 
   const handleSaveAddress = (newAddr: Address) => {
     const updated = saveAddress(newAddr);
@@ -105,6 +105,7 @@ export default function CheckoutPage() {
           })),
           shippingAddress: activeAddress,
           customerInfo: customerData,
+          couponCode: appliedCoupon?.code,
         }),
       });
 
@@ -139,7 +140,7 @@ export default function CheckoutPage() {
         shippingAddress: activeAddress,
         shippingMethod: selectedShipping,
         sellerGroups: calculation.sellerGroups,
-        appliedCoupon: null,
+        appliedCoupon: appliedCoupon,
         paymentMethod: paymentType,
         cardMaskedNumber: paymentType === "credit_card" ? `**** **** **** ${cardDetails.cardNumber.slice(-4)}` : undefined,
         calculation,
@@ -222,7 +223,7 @@ export default function CheckoutPage() {
             <div className="lg:col-span-4">
               <CheckoutSummary
                 calculation={calculation}
-                appliedCoupon={null}
+                appliedCoupon={appliedCoupon}
                 selectedAddress={addresses.find((a) => a.id === selectedAddressId)}
                 selectedShippingMethod={selectedShipping}
                 isSubmitting={isSubmitting}

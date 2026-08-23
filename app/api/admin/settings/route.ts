@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     let settings = await prisma.platformSettings.findUnique({ where: { id: "default" } });
@@ -55,6 +57,24 @@ export async function PUT(request: Request) {
         returnWindowDays: Number(returnWindowDays || 14),
         defaultShippingFee: Number(defaultShippingFee || 34.9),
         freeShippingThreshold: Number(freeShippingThreshold || 200),
+      },
+    });
+
+    // Record AuditLog
+    await prisma.auditLog.create({
+      data: {
+        actorId: session.id,
+        actorEmail: session.email,
+        actorRole: session.role,
+        action: "SETTINGS_UPDATED",
+        entityType: "SETTINGS",
+        entityId: "default",
+        metadataJson: JSON.stringify({
+          marketplaceName: settings.marketplaceName,
+          defaultCommissionRate: settings.defaultCommissionRate,
+          defaultShippingFee: settings.defaultShippingFee,
+          freeShippingThreshold: settings.freeShippingThreshold,
+        }),
       },
     });
 

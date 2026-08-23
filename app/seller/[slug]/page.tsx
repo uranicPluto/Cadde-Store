@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { Footer } from "@/components/layout/footer";
 import { getSellerBySlug } from "@/lib/sellers/seller-repository";
-import { getFullCatalog } from "@/lib/catalog/product-repository";
+import { getFullCatalog, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { sortProducts, SortOption } from "@/lib/catalog/sorting";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -50,7 +50,7 @@ export default function SellerStorefrontPage() {
   const slug = params?.slug as string;
 
   const { language, currency, t } = useLanguage();
-  const seller = getSellerBySlug(slug) || {
+  const baseSeller = getSellerBySlug(slug) || {
     id: "seller-1",
     slug: "trend-fashion",
     name: "Altınyıldız Classics",
@@ -77,11 +77,98 @@ export default function SellerStorefrontPage() {
   };
 
   const isEn = language === "en";
-  const fullCatalog = getFullCatalog(language);
-  const sellerProducts = fullCatalog.filter(
-    (p) => p.storeName?.toLowerCase().includes("altınyıldız") || p.storeName?.toLowerCase().includes("trend") || p.brand === "Zara" || p.brand === "Apple"
-  );
-  const displayProducts = sellerProducts.length > 0 ? sellerProducts : fullCatalog.slice(0, 12);
+  const [seller, setSeller] = useState(baseSeller);
+  const [displayProducts, setDisplayProducts] = useState<DetailedProductMock[]>([]);
+
+  useEffect(() => {
+    async function loadStorefront() {
+      try {
+        const selRes = await fetch(`/api/sellers?slug=${slug}`);
+        if (selRes.ok) {
+          const selData = await selRes.json();
+          if (selData.seller) {
+            const s = selData.seller;
+            setSeller({
+              id: s.id,
+              slug: s.slug,
+              name: s.storeName,
+              rating: s.rating || 9.1,
+              reviewCount: s.reviewCount || 46973,
+              followers: s.followers || 5600000,
+              location: "İzmir",
+              verified: s.verified ?? true,
+              logo: s.logo || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=200&q=80",
+              banner: s.banner || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80",
+              description: {
+                tr: s.description || "Kaliteli ve güvenilir alışveriş.",
+                en: s.description || "Quality and trusted shopping.",
+              },
+              shippingPolicy: {
+                tr: s.shippingPolicy || "Saat 16:00'a kadar verilen tüm siparişler aynı gün kargoya teslim edilir.",
+                en: s.shippingPolicy || "All orders placed before 16:00 are shipped same-day.",
+              },
+              returnPolicy: {
+                tr: s.returnPolicy || "14 gün içinde kolay ve ücretsiz iade hakkı.",
+                en: s.returnPolicy || "14-day easy and free return policy.",
+              },
+              reviews: [],
+            });
+          }
+        }
+
+        const prodRes = await fetch(`/api/products?seller=${slug}`);
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          if (prodData.products && Array.isArray(prodData.products) && prodData.products.length > 0) {
+            const mapped = prodData.products.map((p: any) => ({
+              id: p.id,
+              slug: p.slug,
+              name: p.name,
+              brand: p.brand || seller.name,
+              categorySlug: p.category?.slug || "women",
+              categoryName: isEn ? p.category?.nameEN || p.category?.nameTR : p.category?.nameTR || "Kadın Giyim",
+              storeName: seller.name,
+              price: p.price,
+              originalPrice: p.originalPrice || undefined,
+              rating: p.rating || 4.8,
+              reviewCount: p.reviewCount || 50,
+              imageUrl: p.imageUrl,
+              galleryImages: [p.imageUrl],
+              badges: {
+                bestseller: p.rating >= 4.8,
+                fastDelivery: true,
+                freeShipping: p.price >= 200,
+              },
+              attributes: {
+                color: ["Siyah", "Beyaz"],
+                sizes: ["S", "M", "L"],
+              },
+              description: p.description || p.name,
+              specifications: {},
+              stock: p.stock,
+              reviews: [],
+            }));
+            setDisplayProducts(mapped);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load seller storefront from API", e);
+      }
+
+      const fullCatalog = getFullCatalog(language);
+      const sellerProducts = fullCatalog.filter(
+        (p) =>
+          p.storeName?.toLowerCase().includes("altınyıldız") ||
+          p.storeName?.toLowerCase().includes("trend") ||
+          p.brand === "Zara" ||
+          p.brand === "Apple"
+      );
+      setDisplayProducts(sellerProducts.length > 0 ? sellerProducts : fullCatalog.slice(0, 12));
+    }
+
+    loadStorefront();
+  }, [slug, language]);
 
   // Navigation Tabs: "home" | "all_products" | "special_offers"
   const [activeNavTab, setActiveNavTab] = useState<"home" | "all_products" | "special_offers">("home");

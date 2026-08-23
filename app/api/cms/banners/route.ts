@@ -119,6 +119,27 @@ export async function PUT(request: Request) {
       },
     });
 
+    try {
+      await prisma.auditLog.create({
+        data: {
+          actorId: user.id,
+          actorEmail: user.email,
+          actorRole: user.role,
+          action: "BANNER_UPDATED",
+          entityType: "CMS",
+          entityId: banner.id,
+          metadataJson: JSON.stringify({
+            bannerTitle: banner.titleTR,
+            orderIndex: banner.orderIndex,
+            active: banner.active,
+            targetValue: banner.targetValue,
+          }),
+        },
+      });
+    } catch (e) {
+      console.warn("Audit log warning:", e);
+    }
+
     return NextResponse.json({ banner, success: true });
   } catch (error) {
     console.error("[API CMS Banner PUT Error]:", error);
@@ -134,15 +155,40 @@ export async function DELETE(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+    let id = searchParams.get("id");
+
+    if (!id) {
+      try {
+        const body = await request.json();
+        id = body?.id;
+      } catch {
+        // No body
+      }
+    }
 
     if (!id) {
       return NextResponse.json({ error: "Banner ID gereklidir." }, { status: 400 });
     }
 
-    await prisma.banner.delete({
+    const banner = await prisma.banner.delete({
       where: { id },
     });
+
+    try {
+      await prisma.auditLog.create({
+        data: {
+          actorId: user.id,
+          actorEmail: user.email,
+          actorRole: user.role,
+          action: "BANNER_DELETED",
+          entityType: "CMS",
+          entityId: id,
+          metadataJson: JSON.stringify({ bannerTitle: banner.titleTR }),
+        },
+      });
+    } catch (e) {
+      console.warn("Audit log warning:", e);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

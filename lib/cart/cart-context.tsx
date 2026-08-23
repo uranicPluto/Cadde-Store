@@ -3,13 +3,16 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, CartContextType } from "./cart-types";
 import { DetailedProductMock } from "../catalog/product-repository";
+import { Coupon } from "./coupon-utils";
 
 const CART_STORAGE_KEY = "cadde-store-cart";
+const COUPON_STORAGE_KEY = "cadde-store-coupon";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [appliedCoupon, setAppliedCouponState] = useState<Coupon | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -17,6 +20,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const saved = localStorage.getItem(CART_STORAGE_KEY);
       if (saved) {
         setItems(JSON.parse(saved));
+      }
+      const savedCoupon = localStorage.getItem(COUPON_STORAGE_KEY);
+      if (savedCoupon) {
+        setAppliedCouponState(JSON.parse(savedCoupon));
       }
     } catch (e) {
       console.error("Failed to load cart from localStorage", e);
@@ -80,8 +87,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveCart(items.map((item) => (item.id === id ? { ...item, quantity } : item)));
   };
 
+  const setAppliedCoupon = (coupon: Coupon | null) => {
+    setAppliedCouponState(coupon);
+    if (typeof window !== "undefined") {
+      try {
+        if (coupon) {
+          localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify(coupon));
+        } else {
+          localStorage.removeItem(COUPON_STORAGE_KEY);
+        }
+      } catch (e) {
+        console.error("Failed to persist coupon in localStorage", e);
+      }
+    }
+  };
+
   const clearCart = () => {
     saveCart([]);
+    setAppliedCoupon(null);
   };
 
   const totalCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -98,6 +121,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <CartContext.Provider
       value={{
         items,
+        appliedCoupon,
+        setAppliedCoupon,
         addToCart,
         removeFromCart,
         updateQuantity,
