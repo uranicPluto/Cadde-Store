@@ -182,11 +182,13 @@ export const PopularProductsSection: React.FC = () => {
                     <Heart className="w-4 h-4" />
                   </button>
 
-                  <img
-                    src={p.imageUrl}
-                    alt={p.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  <Link href={`/product/${p.slug}`} className="block w-full h-full">
+                    <img
+                      src={p.imageUrl}
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    />
+                  </Link>
 
                   {/* Dark Bottom Shipping Strip */}
                   <div className="absolute bottom-0 left-0 right-0 bg-slate-700 text-white text-[10px] sm:text-[11px] font-bold text-center py-1.5 shadow-2xs">
