@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, Heart, ShoppingCart } from "lucide-react";
@@ -6,6 +8,8 @@ import { MobileCategoryDrawer } from "@/components/layout/mobile-category-drawer
 import { MOCK_NAVIGATION_CATEGORIES } from "@/lib/navigation-data";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { useCart } from "@/lib/cart/cart-context";
+import { useFavorites } from "@/lib/favorites/favorites-context";
 
 export interface MobileHeaderProps {
   isLoggedInMock?: boolean;
@@ -18,12 +22,17 @@ export interface MobileHeaderProps {
 export const MobileHeader: React.FC<MobileHeaderProps> = ({
   isLoggedInMock,
   onLoginToggleMock,
-  favoriteCount = 3,
-  cartCount = 2,
+  favoriteCount,
+  cartCount,
   className,
 }) => {
   const { t } = useLanguage();
+  const { totalCount: liveCartCount } = useCart();
+  const { favoriteCount: liveFavCount } = useFavorites();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const activeCartCount = cartCount !== undefined ? cartCount : liveCartCount;
+  const activeFavCount = favoriteCount !== undefined ? favoriteCount : liveFavCount;
 
   return (
     <div className={cn("w-full bg-white border-b border-slate-200 flex flex-col lg:hidden", className)}>
@@ -35,7 +44,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             type="button"
             onClick={() => setIsDrawerOpen(true)}
             aria-label={t("common.close")}
-            className="p-2 rounded-lg text-text-main hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-lg text-text-main hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -57,9 +66,9 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             className="relative p-2 rounded-lg text-text-main hover:text-rose-500 transition-colors"
           >
             <Heart className="w-5 h-5" />
-            {favoriteCount > 0 && (
+            {activeFavCount > 0 && (
               <span className="absolute top-1 right-1 bg-rose-500 text-white text-[9px] font-bold px-1 py-0.2 rounded-full min-w-[15px] text-center leading-none">
-                {favoriteCount}
+                {activeFavCount}
               </span>
             )}
           </Link>
@@ -70,9 +79,9 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             className="relative p-2 rounded-lg text-text-main hover:text-primary transition-colors"
           >
             <ShoppingCart className="w-5 h-5" />
-            {cartCount > 0 && (
+            {activeCartCount > 0 && (
               <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold px-1 py-0.2 rounded-full min-w-[15px] text-center leading-none">
-                {cartCount}
+                {activeCartCount}
               </span>
             )}
           </Link>

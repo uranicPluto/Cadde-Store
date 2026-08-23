@@ -11,6 +11,8 @@ export interface CategoryData {
   slug: string;
   icon?: string;
   isHot?: boolean;
+  badgeTR?: string;
+  badgeEN?: string;
   subcategories: MegaMenuSubcategory[];
   popularBrands?: string[];
   promotionalBanner?: {
@@ -19,6 +21,7 @@ export interface CategoryData {
     imageUrl: string;
     ctaText: string;
     bgGradient: string;
+    link?: string;
   };
 }
 

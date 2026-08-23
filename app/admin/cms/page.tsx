@@ -24,6 +24,7 @@ import {
   ToggleRight,
   ChevronUp,
   ChevronDown,
+  Clock,
 } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
@@ -42,6 +43,8 @@ interface BannerItem {
   badgeTextEN?: string | null;
   orderIndex: number;
   active: boolean;
+  startDate?: string | null;
+  endDate?: string | null;
 }
 
 interface SectionItem {
@@ -52,6 +55,8 @@ interface SectionItem {
   orderIndex: number;
   active: boolean;
   configJson: string;
+  startDate?: string | null;
+  endDate?: string | null;
   banners: BannerItem[];
 }
 
@@ -97,6 +102,29 @@ export default function AdminCmsPage() {
     fetchCmsData();
   }, []);
 
+  const formatIsoForInput = (isoDate?: string | null) => {
+    if (!isoDate) return "";
+    try {
+      const d = new Date(isoDate);
+      return d.toISOString().slice(0, 16);
+    } catch {
+      return "";
+    }
+  };
+
+  const getScheduleStatus = (startDate?: string | null, endDate?: string | null, active?: boolean) => {
+    if (active === false) return { label: isEn ? "Draft / Hidden" : "Taslak / Gizli", color: "bg-rose-500/10 text-rose-400 border-rose-500/20" };
+
+    const now = new Date();
+    if (startDate && new Date(startDate) > now) {
+      return { label: isEn ? "Scheduled (Future)" : "Zamanlandı (Gelecek)", color: "bg-blue-500/10 text-blue-400 border-blue-500/20" };
+    }
+    if (endDate && new Date(endDate) < now) {
+      return { label: isEn ? "Expired" : "Süresi Doldu", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" };
+    }
+    return { label: isEn ? "Live ✓" : "Yayında ✓", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" };
+  };
+
   const handleOpenAddSection = () => {
     setEditingSection({
       titleTR: "",
@@ -105,12 +133,18 @@ export default function AdminCmsPage() {
       orderIndex: sections.length,
       active: true,
       configJson: "{}",
+      startDate: "",
+      endDate: "",
     });
     setIsSectionModalOpen(true);
   };
 
   const handleOpenEditSection = (section: SectionItem) => {
-    setEditingSection({ ...section });
+    setEditingSection({
+      ...section,
+      startDate: formatIsoForInput(section.startDate),
+      endDate: formatIsoForInput(section.endDate),
+    });
     setIsSectionModalOpen(true);
   };
 
@@ -200,12 +234,18 @@ export default function AdminCmsPage() {
       badgeTextEN: "New Deal",
       orderIndex: bannerCount,
       active: true,
+      startDate: "",
+      endDate: "",
     });
     setIsBannerModalOpen(true);
   };
 
   const handleOpenEditBanner = (banner: BannerItem) => {
-    setEditingBanner({ ...banner });
+    setEditingBanner({
+      ...banner,
+      startDate: formatIsoForInput(banner.startDate),
+      endDate: formatIsoForInput(banner.endDate),
+    });
     setIsBannerModalOpen(true);
   };
 
@@ -282,18 +322,24 @@ export default function AdminCmsPage() {
 
     try {
       setActionLoading(true);
+      const payload = {
+        ...editingSection,
+        startDate: editingSection.startDate ? new Date(editingSection.startDate).toISOString() : null,
+        endDate: editingSection.endDate ? new Date(editingSection.endDate).toISOString() : null,
+      };
+
       if (editingSection.id) {
         await fetch("/api/cms/sections", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editingSection),
+          body: JSON.stringify(payload),
         });
         showFeedback(isEn ? "Section updated" : "Bölüm güncellendi");
       } else {
         await fetch("/api/cms/sections", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editingSection),
+          body: JSON.stringify(payload),
         });
         showFeedback(isEn ? "Section created" : "Bölüm oluşturuldu");
       }
@@ -312,18 +358,24 @@ export default function AdminCmsPage() {
 
     try {
       setActionLoading(true);
+      const payload = {
+        ...editingBanner,
+        startDate: editingBanner.startDate ? new Date(editingBanner.startDate).toISOString() : null,
+        endDate: editingBanner.endDate ? new Date(editingBanner.endDate).toISOString() : null,
+      };
+
       if (editingBanner.id) {
         await fetch("/api/cms/banners", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editingBanner),
+          body: JSON.stringify(payload),
         });
         showFeedback(isEn ? "Banner updated" : "Banner güncellendi");
       } else {
         await fetch("/api/cms/banners", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editingBanner),
+          body: JSON.stringify(payload),
         });
         showFeedback(isEn ? "Banner created" : "Banner oluşturuldu");
       }
@@ -405,218 +457,239 @@ export default function AdminCmsPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {sections.map((section, idx) => (
-                    <div
-                      key={section.id}
-                      className="bg-slate-950 rounded-2xl border border-slate-800 p-6 shadow-md space-y-4"
-                    >
-                      {/* Section Header */}
-                      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-800">
-                        <div className="flex items-center gap-3">
-                          {/* Reorder Buttons for Section */}
-                          <div className="flex flex-col gap-0.5">
-                            <button
-                              type="button"
-                              disabled={idx === 0 || actionLoading}
-                              onClick={() => handleMoveSection(idx, "up")}
-                              className="p-1 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
-                              title={isEn ? "Move Section Up" : "Yukarı Taşı"}
-                            >
-                              <ChevronUp className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              disabled={idx === sections.length - 1 || actionLoading}
-                              onClick={() => handleMoveSection(idx, "down")}
-                              className="p-1 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
-                              title={isEn ? "Move Section Down" : "Aşağı Taşı"}
-                            >
-                              <ChevronDown className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                  {sections.map((section, idx) => {
+                    const sched = getScheduleStatus(section.startDate, section.endDate, section.active);
 
-                          <span className="w-7 h-7 rounded-full bg-slate-800 text-slate-300 text-xs font-black flex items-center justify-center border border-slate-700">
-                            {idx + 1}
-                          </span>
-
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-sm font-extrabold text-white">
-                                {isEn ? section.titleEN : section.titleTR}
-                              </h3>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase">
-                                {section.type}
-                              </span>
+                    return (
+                      <div
+                        key={section.id}
+                        className="bg-slate-950 rounded-2xl border border-slate-800 p-6 shadow-md space-y-4"
+                      >
+                        {/* Section Header */}
+                        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-800">
+                          <div className="flex items-center gap-3">
+                            {/* Reorder Buttons for Section */}
+                            <div className="flex flex-col gap-0.5">
                               <button
                                 type="button"
-                                onClick={() => handleToggleSectionActive(section)}
-                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md cursor-pointer transition-colors border ${
-                                  section.active
-                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
-                                    : "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
-                                }`}
+                                disabled={idx === 0 || actionLoading}
+                                onClick={() => handleMoveSection(idx, "up")}
+                                className="p-1 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
+                                title={isEn ? "Move Section Up" : "Yukarı Taşı"}
                               >
-                                {section.active ? (isEn ? "Live ✓" : "Yayında ✓") : (isEn ? "Draft / Hidden" : "Taslak / Gizli")}
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === sections.length - 1 || actionLoading}
+                                onClick={() => handleMoveSection(idx, "down")}
+                                className="p-1 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
+                                title={isEn ? "Move Section Down" : "Aşağı Taşı"}
+                              >
+                                <ChevronDown className="w-3.5 h-3.5" />
                               </button>
                             </div>
-                            <p className="text-xs text-slate-400 font-mono mt-0.5">
-                              Sıra: {section.orderIndex} | Section ID: {section.id}
-                            </p>
+
+                            <span className="w-7 h-7 rounded-full bg-slate-800 text-slate-300 text-xs font-black flex items-center justify-center border border-slate-700">
+                              {idx + 1}
+                            </span>
+
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="text-sm font-extrabold text-white">
+                                  {isEn ? section.titleEN : section.titleTR}
+                                </h3>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase">
+                                  {section.type}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleSectionActive(section)}
+                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md cursor-pointer transition-colors border ${sched.color}`}
+                                >
+                                  {sched.label}
+                                </button>
+                              </div>
+                              <p className="text-xs text-slate-400 font-mono mt-0.5">
+                                Sıra: {section.orderIndex} | Section ID: {section.id}
+                                {section.startDate && (
+                                  <span className="text-slate-500 ml-2">
+                                    Başlangıç: {new Date(section.startDate).toLocaleDateString("tr-TR")}
+                                  </span>
+                                )}
+                                {section.endDate && (
+                                  <span className="text-slate-500 ml-2">
+                                    Bitiş: {new Date(section.endDate).toLocaleDateString("tr-TR")}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Section Action Controls */}
+                          <div className="flex items-center gap-2 flex-wrap self-end lg:self-center">
+                            <Button
+                              onClick={() => handleOpenAddBanner(section.id)}
+                              size="sm"
+                              className="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>{isEn ? "Add Banner" : "Banner Ekle"}</span>
+                            </Button>
+
+                            <Button
+                              onClick={() => handleOpenEditSection(section)}
+                              size="sm"
+                              variant="outline"
+                              className="bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              <span>{isEn ? "Edit" : "Düzenle"}</span>
+                            </Button>
+
+                            <Button
+                              onClick={() => handleDeleteSection(section.id)}
+                              size="sm"
+                              variant="outline"
+                              className="bg-slate-900 hover:bg-red-950 border-slate-700 hover:border-red-800 text-slate-400 hover:text-red-400 text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
                           </div>
                         </div>
 
-                        {/* Section Action Controls */}
-                        <div className="flex items-center gap-2 flex-wrap self-end lg:self-center">
-                          <Button
-                            onClick={() => handleOpenAddBanner(section.id)}
-                            size="sm"
-                            className="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>{isEn ? "Add Banner" : "Banner Ekle"}</span>
-                          </Button>
+                        {/* Section Banners Carousel / List */}
+                        {section.banners.length === 0 ? (
+                          <div className="p-6 bg-slate-900/50 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-500">
+                            {isEn ? "No banners attached to this section. Click '+ Add Banner'." : "Bu bölüme henüz banner eklenmedi. '+ Banner Ekle'ye tıklayın."}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {section.banners.map((banner, bIdx) => {
+                              const bSched = getScheduleStatus(banner.startDate, banner.endDate, banner.active);
 
-                          <Button
-                            onClick={() => handleOpenEditSection(section)}
-                            size="sm"
-                            variant="outline"
-                            className="bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                            <span>{isEn ? "Edit" : "Düzenle"}</span>
-                          </Button>
+                              return (
+                                <div
+                                  key={banner.id}
+                                  className={`group bg-slate-900 border ${banner.active ? "border-slate-800" : "border-rose-900/50 opacity-75"} rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between`}
+                                >
+                                  <div>
+                                    {/* Banner Image Preview */}
+                                    <div className="relative aspect-16/9 bg-slate-950 overflow-hidden">
+                                      <img
+                                        src={banner.imageUrlDesktop}
+                                        alt={banner.titleTR || "Banner"}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                      />
+                                      {banner.badgeTextTR && (
+                                        <span className="absolute top-2 left-2 bg-amber-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded shadow-md uppercase">
+                                          {isEn ? banner.badgeTextEN || banner.badgeTextTR : banner.badgeTextTR}
+                                        </span>
+                                      )}
+                                      <div className="absolute top-2 right-2 flex items-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleToggleBannerActive(banner)}
+                                          className={`text-[9px] font-black px-1.5 py-0.5 rounded backdrop-blur-md shadow-xs border ${bSched.color}`}
+                                        >
+                                          {bSched.label}
+                                        </button>
+                                      </div>
 
-                          <Button
-                            onClick={() => handleDeleteSection(section.id)}
-                            size="sm"
-                            variant="outline"
-                            className="bg-slate-900 hover:bg-red-950 border-slate-700 hover:border-red-800 text-slate-400 hover:text-red-400 text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
+                                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setPreviewBanner(banner);
+                                            setIsPreviewOpen(true);
+                                          }}
+                                          className="text-[11px] font-bold text-white flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md hover:bg-black/80 cursor-pointer"
+                                        >
+                                          <Eye className="w-3.5 h-3.5" />
+                                          <span>{isEn ? "Preview Full" : "Önizle"}</span>
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* Banner Details */}
+                                    <div className="p-3.5 space-y-1.5">
+                                      <h4 className="text-xs font-bold text-white truncate">
+                                        {isEn ? banner.titleEN || banner.titleTR || "Untitled" : banner.titleTR || banner.titleEN || "Başlıksız"}
+                                      </h4>
+                                      <p className="text-[11px] text-slate-400 line-clamp-1">
+                                        {isEn ? banner.subtitleEN || banner.subtitleTR : banner.subtitleTR || banner.subtitleEN}
+                                      </p>
+                                      <div className="flex items-center gap-1.5 text-[10px] text-indigo-400 font-mono pt-1">
+                                        <Link2 className="w-3 h-3 shrink-0" />
+                                        <span className="truncate">{banner.targetType}: {banner.targetValue}</span>
+                                      </div>
+
+                                      {(banner.startDate || banner.endDate) && (
+                                        <div className="flex items-center gap-1 text-[10px] text-slate-500 pt-1">
+                                          <Clock className="w-3 h-3 text-slate-400" />
+                                          <span>
+                                            {banner.startDate ? new Date(banner.startDate).toLocaleDateString("tr-TR") : "Başlangıç yok"}
+                                            {" - "}
+                                            {banner.endDate ? new Date(banner.endDate).toLocaleDateString("tr-TR") : "Bitiş yok"}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Actions & Reordering */}
+                                  <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between">
+                                    <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
+                                      <span>Sıra: {banner.orderIndex}</span>
+                                      <div className="flex items-center ml-1">
+                                        <button
+                                          type="button"
+                                          disabled={bIdx === 0 || actionLoading}
+                                          onClick={() => handleMoveBanner(section, bIdx, "up")}
+                                          className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-20 transition-colors"
+                                          title={isEn ? "Move Up" : "Yukarı Taşı"}
+                                        >
+                                          <ArrowUp className="w-3 h-3" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={bIdx === section.banners.length - 1 || actionLoading}
+                                          onClick={() => handleMoveBanner(section, bIdx, "down")}
+                                          className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-20 transition-colors"
+                                          title={isEn ? "Move Down" : "Aşağı Taşı"}
+                                        >
+                                          <ArrowDown className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenEditBanner(banner)}
+                                        className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                                        title={isEn ? "Edit Banner" : "Düzenle"}
+                                      >
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteBanner(banner.id)}
+                                        className="p-1.5 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer"
+                                        title={isEn ? "Delete Banner" : "Sil"}
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-
-                      {/* Section Banners Carousel / List */}
-                      {section.banners.length === 0 ? (
-                        <div className="p-6 bg-slate-900/50 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-500">
-                          {isEn ? "No banners attached to this section. Click '+ Add Banner'." : "Bu bölüme henüz banner eklenmedi. '+ Banner Ekle'ye tıklayın."}
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {section.banners.map((banner, bIdx) => (
-                            <div
-                              key={banner.id}
-                              className={`group bg-slate-900 border ${banner.active ? "border-slate-800" : "border-rose-900/50 opacity-75"} rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between`}
-                            >
-                              <div>
-                                {/* Banner Image Preview */}
-                                <div className="relative aspect-16/9 bg-slate-950 overflow-hidden">
-                                  <img
-                                    src={banner.imageUrlDesktop}
-                                    alt={banner.titleTR || "Banner"}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                  />
-                                  {banner.badgeTextTR && (
-                                    <span className="absolute top-2 left-2 bg-amber-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded shadow-md uppercase">
-                                      {isEn ? banner.badgeTextEN || banner.badgeTextTR : banner.badgeTextTR}
-                                    </span>
-                                  )}
-                                  <div className="absolute top-2 right-2 flex items-center gap-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleToggleBannerActive(banner)}
-                                      className={`text-[9px] font-black px-1.5 py-0.5 rounded backdrop-blur-md shadow-xs ${
-                                        banner.active
-                                          ? "bg-emerald-600/90 text-white"
-                                          : "bg-rose-600/90 text-white"
-                                      }`}
-                                    >
-                                      {banner.active ? (isEn ? "ACTIVE" : "AKTİF") : (isEn ? "INACTIVE" : "PASİF")}
-                                    </button>
-                                  </div>
-
-                                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setPreviewBanner(banner);
-                                        setIsPreviewOpen(true);
-                                      }}
-                                      className="text-[11px] font-bold text-white flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md hover:bg-black/80 cursor-pointer"
-                                    >
-                                      <Eye className="w-3.5 h-3.5" />
-                                      <span>{isEn ? "Preview Full" : "Önizle"}</span>
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* Banner Details */}
-                                <div className="p-3.5 space-y-1.5">
-                                  <h4 className="text-xs font-bold text-white truncate">
-                                    {isEn ? banner.titleEN || banner.titleTR || "Untitled" : banner.titleTR || banner.titleEN || "Başlıksız"}
-                                  </h4>
-                                  <p className="text-[11px] text-slate-400 line-clamp-1">
-                                    {isEn ? banner.subtitleEN || banner.subtitleTR : banner.subtitleTR || banner.subtitleEN}
-                                  </p>
-                                  <div className="flex items-center gap-1.5 text-[10px] text-indigo-400 font-mono pt-1">
-                                    <Link2 className="w-3 h-3 shrink-0" />
-                                    <span className="truncate">{banner.targetType}: {banner.targetValue}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Actions & Reordering */}
-                              <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between">
-                                <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
-                                  <span>Sıra: {banner.orderIndex}</span>
-                                  <div className="flex items-center ml-1">
-                                    <button
-                                      type="button"
-                                      disabled={bIdx === 0 || actionLoading}
-                                      onClick={() => handleMoveBanner(section, bIdx, "up")}
-                                      className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-20 transition-colors"
-                                      title={isEn ? "Move Up" : "Yukarı Taşı"}
-                                    >
-                                      <ArrowUp className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      disabled={bIdx === section.banners.length - 1 || actionLoading}
-                                      onClick={() => handleMoveBanner(section, bIdx, "down")}
-                                      className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-20 transition-colors"
-                                      title={isEn ? "Move Down" : "Aşağı Taşı"}
-                                    >
-                                      <ArrowDown className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenEditBanner(banner)}
-                                    className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-                                    title={isEn ? "Edit Banner" : "Düzenle"}
-                                  >
-                                    <Edit2 className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteBanner(banner.id)}
-                                    className="p-1.5 rounded text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer"
-                                    title={isEn ? "Delete Banner" : "Sil"}
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -688,6 +761,35 @@ export default function AdminCmsPage() {
                 type="number"
                 value={editingSection.orderIndex ?? 0}
                 onChange={(e) => setEditingSection((p) => ({ ...p, orderIndex: Number(e.target.value) }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Section Scheduling DateTime Pickers (AC1) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{isEn ? "Schedule Start Date/Time" : "Yayın Başlangıç Tarihi/Saati"}</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={editingSection.startDate || ""}
+                onChange={(e) => setEditingSection((p) => ({ ...p, startDate: e.target.value }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{isEn ? "Schedule End Date/Time" : "Yayın Bitiş Tarihi/Saati"}</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={editingSection.endDate || ""}
+                onChange={(e) => setEditingSection((p) => ({ ...p, endDate: e.target.value }))}
                 className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
               />
             </div>
@@ -846,6 +948,35 @@ export default function AdminCmsPage() {
                 onChange={(e) => setEditingBanner((p) => ({ ...p, targetValue: e.target.value }))}
                 placeholder="Örn: /category/women veya /search?q=ayakkabi"
                 className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-mono focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Banner Scheduling DateTime Pickers (AC1) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{isEn ? "Banner Start Date/Time" : "Banner Başlangıç Tarihi/Saati"}</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={editingBanner.startDate || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, startDate: e.target.value }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{isEn ? "Banner End Date/Time" : "Banner Bitiş Tarihi/Saati"}</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={editingBanner.endDate || ""}
+                onChange={(e) => setEditingBanner((p) => ({ ...p, endDate: e.target.value }))}
+                className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>

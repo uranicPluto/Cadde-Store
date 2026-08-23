@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { getMockNavigationCategories, CategoryData } from "@/lib/navigation-data";
@@ -17,9 +19,34 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
 }) => {
   const { language, t } = useLanguage();
   const isEn = language === "en";
-  const activeCategories = categories || getMockNavigationCategories(language);
+  const [activeCategories, setActiveCategories] = useState<CategoryData[]>(
+    categories || getMockNavigationCategories(language)
+  );
 
-  // MegaMenu is open ONLY when hovering on the main "☰ Categories NEW ∨" button
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      setActiveCategories(categories);
+      return;
+    }
+
+    async function loadNavCategories() {
+      try {
+        const res = await fetch(`/api/navigation?lang=${language}`);
+        const data = await res.json();
+        if (data.categories && Array.isArray(data.categories) && data.categories.length > 0) {
+          setActiveCategories(data.categories);
+        } else {
+          setActiveCategories(getMockNavigationCategories(language));
+        }
+      } catch (err) {
+        setActiveCategories(getMockNavigationCategories(language));
+      }
+    }
+
+    loadNavCategories();
+  }, [categories, language]);
+
+  // MegaMenu is open ONLY when hovering or clicking the main "☰ Categories NEW ∨" button
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +62,7 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
     <div className={cn("relative w-full bg-white border-b border-slate-200 shadow-2xs z-30", className)} ref={containerRef}>
       <div className="max-w-wide mx-auto px-4 sm:px-6">
         <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
-          {/* ONLY THIS BUTTON OPENS THE MEGAMENU (Matches User Request & Image 2) */}
+          {/* ONLY THIS BUTTON OPENS THE MEGAMENU */}
           <div
             onMouseEnter={() => setIsMenuOpen(true)}
             className="relative shrink-0 flex items-center pr-2 border-r border-slate-200"
@@ -43,20 +70,21 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
             <button
               type="button"
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              className="py-2.5 px-3 text-xs font-black text-slate-900 hover:text-primary transition-colors flex items-center gap-1.5 outline-none select-none"
+              className="py-2.5 px-3 text-xs font-black text-slate-900 hover:text-primary transition-colors flex items-center gap-1.5 outline-none select-none cursor-pointer"
             >
               <Menu className="w-4 h-4 text-slate-700" />
               <span>{isEn ? "Categories" : "Tüm Kategoriler"}</span>
               <span className="bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">
-                NEW
+                {isEn ? "NEW" : "YENİ"}
               </span>
               <ChevronDown className={cn("w-3.5 h-3.5 text-slate-500 transition-transform ml-0.5", isMenuOpen && "rotate-180")} />
             </button>
           </div>
 
-          {/* Clean Direct Category Links - NO HOVER DROPDOWN (Matches Image 1) */}
+          {/* Clean Direct Category Links */}
           {activeCategories.map((cat) => {
             const categoryName = t(`categories.${cat.slug}`) || cat.name;
+            const badgeText = isEn ? cat.badgeEN || (cat.isHot ? "HOT" : null) : cat.badgeTR || (cat.isHot ? "YENİ" : null);
 
             return (
               <div
@@ -74,10 +102,9 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
                   {cat.isHot && <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500 shrink-0" />}
                   <span>{categoryName}</span>
 
-                  {/* Red New Pill Badge for Flash & Bestsellers */}
-                  {(cat.slug === "deals" || cat.isHot) && (
+                  {badgeText && (
                     <span className="bg-rose-600 text-white text-[8px] font-black px-1.5 py-0.2 rounded-full uppercase">
-                      NEW
+                      {badgeText}
                     </span>
                   )}
                 </Link>
@@ -88,7 +115,7 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
       </div>
 
       {/* Master 2-Panel MegaMenu Dropdown (Opens ONLY on Categories Button Hover) */}
-      {isMenuOpen && (
+      {isMenuOpen && activeCategories.length > 0 && (
         <MegaMenu
           category={activeCategories[0]}
           allCategories={activeCategories}

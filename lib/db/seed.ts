@@ -38,7 +38,7 @@ async function main() {
 
   const sellerProfile1 = await prisma.seller.upsert({
     where: { slug: "trend-fashion-magazasi" },
-    update: {},
+    update: { commissionRate: 0.10 },
     create: {
       userId: sellerUser1.id,
       storeName: "Trend Fashion Mağazası",
@@ -48,6 +48,7 @@ async function main() {
       rating: 4.8,
       verified: true,
       followers: 1240,
+      commissionRate: 0.10,
       status: "ACTIVE",
     },
   });
@@ -68,7 +69,7 @@ async function main() {
 
   const sellerProfile2 = await prisma.seller.upsert({
     where: { slug: "cadde-teknoloji" },
-    update: {},
+    update: { commissionRate: 0.12 },
     create: {
       userId: sellerUser2.id,
       storeName: "Cadde Teknoloji & Aksesuar",
@@ -78,6 +79,7 @@ async function main() {
       rating: 4.9,
       verified: true,
       followers: 890,
+      commissionRate: 0.12,
       status: "ACTIVE",
     },
   });
@@ -210,7 +212,7 @@ async function main() {
   // 5. Products
   const prod1 = await prisma.product.upsert({
     where: { slug: "oversize-pamuklu-erkek-tisort" },
-    update: { brandId: brandZara.id, stock: 50, status: "ACTIVE", price: 299.9 },
+    update: { brandId: brandZara.id, stock: 50, status: "ACTIVE", price: 299.9, badges: JSON.stringify(["BESTSELLER", "FAST_DELIVERY"]) },
     create: {
       sellerId: sellerProfile1.id,
       categoryId: catMen.id,
@@ -228,13 +230,14 @@ async function main() {
       imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
       colors: JSON.stringify(["Beyaz", "Siyah", "Haki"]),
       sizes: JSON.stringify(["S", "M", "L", "XL"]),
+      badges: JSON.stringify(["BESTSELLER", "FAST_DELIVERY"]),
       status: "ACTIVE",
     },
   });
 
   const prod2 = await prisma.product.upsert({
     where: { slug: "kablosuz-anc-bluetooth-kulaklik" },
-    update: { brandId: brandApple.id, stock: 25, status: "ACTIVE", price: 1499.0 },
+    update: { brandId: brandApple.id, stock: 25, status: "ACTIVE", price: 1499.0, badges: JSON.stringify(["FREE_SHIPPING", "FLASH_SALE"]) },
     create: {
       sellerId: sellerProfile2.id,
       categoryId: catElectronics.id,
@@ -252,6 +255,7 @@ async function main() {
       imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
       colors: JSON.stringify(["Mat Siyah", "Gümüş"]),
       sizes: JSON.stringify(["Standart"]),
+      badges: JSON.stringify(["FREE_SHIPPING", "FLASH_SALE"]),
       status: "ACTIVE",
     },
   });
@@ -398,6 +402,296 @@ async function main() {
       returnWindowDays: 14,
       defaultShippingFee: 34.9,
       freeShippingThreshold: 200,
+    },
+  });
+
+  // 10. Campaigns
+  await prisma.campaign.upsert({
+    where: { id: "campaign-nike-hero" },
+    update: {},
+    create: {
+      id: "campaign-nike-hero",
+      name: "Zara & Moda Özel Vitrin Sponsorluğu",
+      type: "SPONSORED_PRODUCT",
+      targetId: prod1.id,
+      placement: "HOMEPAGE_HERO",
+      budget: 5000.0,
+      spent: 1450.0,
+      startDate: new Date("2026-08-01"),
+      endDate: new Date("2026-12-31"),
+      priority: 1,
+      status: "ACTIVE",
+      impressions: 48500,
+      clicks: 2150,
+      orders: 142,
+      revenue: 42585.8,
+    },
+  });
+
+  await prisma.campaign.upsert({
+    where: { id: "campaign-apple-search" },
+    update: {},
+    create: {
+      id: "campaign-apple-search",
+      name: "Apple & Premium Teknoloji Arama Sponsorluğu",
+      type: "SPONSORED_BRAND",
+      targetId: brandApple.id,
+      placement: "SEARCH_TOP",
+      budget: 10000.0,
+      spent: 3820.0,
+      startDate: new Date("2026-08-10"),
+      endDate: new Date("2026-11-30"),
+      priority: 2,
+      status: "ACTIVE",
+      impressions: 92300,
+      clicks: 4610,
+      orders: 320,
+      revenue: 479680.0,
+    },
+  });
+
+  await prisma.campaign.upsert({
+    where: { id: "campaign-trend-seller" },
+    update: {},
+    create: {
+      id: "campaign-trend-seller",
+      name: "Trend Fashion Mağaza Öne Çıkarma",
+      type: "SPONSORED_SELLER",
+      targetId: sellerProfile1.id,
+      placement: "CATEGORY_TOP",
+      budget: 3000.0,
+      spent: 3000.0,
+      startDate: new Date("2026-07-01"),
+      endDate: new Date("2026-08-20"),
+      priority: 1,
+      status: "COMPLETED",
+      impressions: 34000,
+      clicks: 1250,
+      orders: 88,
+      revenue: 26391.2,
+    },
+  });
+
+  // 11. Navigation Items
+  const navFashion = await prisma.navigationItem.upsert({
+    where: { id: "nav-cat-fashion" },
+    update: {},
+    create: {
+      id: "nav-cat-fashion",
+      titleTr: "Giyim & Moda",
+      titleEn: "Fashion & Apparel",
+      url: "/category/men",
+      section: "HEADER",
+      sortOrder: 1,
+      badgeTr: "Trend",
+      badgeEn: "Trending",
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-sub-men" },
+    update: {},
+    create: {
+      id: "nav-sub-men",
+      parentId: navFashion.id,
+      titleTr: "Erkek Giyim",
+      titleEn: "Men's Fashion",
+      url: "/category/men",
+      section: "MEGA_MENU",
+      sortOrder: 1,
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-sub-women" },
+    update: {},
+    create: {
+      id: "nav-sub-women",
+      parentId: navFashion.id,
+      titleTr: "Kadın Giyim",
+      titleEn: "Women's Fashion",
+      url: "/category/women",
+      section: "MEGA_MENU",
+      sortOrder: 2,
+      isActive: true,
+    },
+  });
+
+  const navElectronics = await prisma.navigationItem.upsert({
+    where: { id: "nav-cat-electronics" },
+    update: {},
+    create: {
+      id: "nav-cat-electronics",
+      titleTr: "Elektronik",
+      titleEn: "Electronics",
+      url: "/category/electronics",
+      section: "HEADER",
+      sortOrder: 2,
+      badgeTr: "Yeni",
+      badgeEn: "New",
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-sub-headphones" },
+    update: {},
+    create: {
+      id: "nav-sub-headphones",
+      parentId: navElectronics.id,
+      titleTr: "Kulaklıklar & Ses",
+      titleEn: "Headphones & Audio",
+      url: "/category/electronics",
+      section: "MEGA_MENU",
+      sortOrder: 1,
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-brands" },
+    update: {},
+    create: {
+      id: "nav-brands",
+      titleTr: "Markalar",
+      titleEn: "Brands",
+      url: "/brands",
+      section: "HEADER",
+      sortOrder: 3,
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-bestsellers" },
+    update: {},
+    create: {
+      id: "nav-bestsellers",
+      titleTr: "Çok Satanlar",
+      titleEn: "Bestsellers",
+      url: "/products?sort=bestseller",
+      section: "HEADER",
+      sortOrder: 4,
+      badgeTr: "Fırsat",
+      badgeEn: "Hot",
+      isActive: true,
+    },
+  });
+
+  // Footer Navigation
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-footer-about" },
+    update: {},
+    create: {
+      id: "nav-footer-about",
+      titleTr: "Hakkımızda",
+      titleEn: "About Us",
+      url: "/about",
+      section: "FOOTER",
+      sortOrder: 1,
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-footer-contact" },
+    update: {},
+    create: {
+      id: "nav-footer-contact",
+      titleTr: "Müşteri Hizmetleri",
+      titleEn: "Customer Support",
+      url: "/contact",
+      section: "FOOTER",
+      sortOrder: 2,
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-footer-kvkk" },
+    update: {},
+    create: {
+      id: "nav-footer-kvkk",
+      titleTr: "KVKK Aydınlatma Metni",
+      titleEn: "KVKK Policy",
+      url: "/policies/kvkk",
+      section: "FOOTER",
+      sortOrder: 3,
+      isActive: true,
+    },
+  });
+
+  await prisma.navigationItem.upsert({
+    where: { id: "nav-footer-seller" },
+    update: {},
+    create: {
+      id: "nav-footer-seller",
+      titleTr: "Satıcı Ol",
+      titleEn: "Become a Seller",
+      url: "/seller/apply",
+      section: "FOOTER",
+      sortOrder: 4,
+      isActive: true,
+    },
+  });
+
+  // 12. Media Assets
+  await prisma.mediaAsset.upsert({
+    where: { id: "media-autumn-hero" },
+    update: {},
+    create: {
+      id: "media-autumn-hero",
+      filename: "autumn-hero-banner.jpg",
+      url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80",
+      mimeType: "image/jpeg",
+      sizeBytes: 245800,
+      width: 1200,
+      height: 600,
+      altTextTr: "Sonbahar Moda Kampanyası Vitrin Görseli",
+      altTextEn: "Autumn Fashion Campaign Showcase",
+      tags: JSON.stringify(["moda", "banner", "hero", "autumn"]),
+      referenceCount: 3,
+      uploadedBy: admin.id,
+    },
+  });
+
+  await prisma.mediaAsset.upsert({
+    where: { id: "media-tech-headphones" },
+    update: {},
+    create: {
+      id: "media-tech-headphones",
+      filename: "anc-headphones-promo.jpg",
+      url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+      mimeType: "image/jpeg",
+      sizeBytes: 312400,
+      width: 1200,
+      height: 600,
+      altTextTr: "ANC Bluetooth Kulaklık Tanıtım",
+      altTextEn: "ANC Bluetooth Headphones Promo",
+      tags: JSON.stringify(["tech", "electronics", "audio", "banner"]),
+      referenceCount: 2,
+      uploadedBy: admin.id,
+    },
+  });
+
+  await prisma.mediaAsset.upsert({
+    where: { id: "media-brand-nike" },
+    update: {},
+    create: {
+      id: "media-brand-nike",
+      filename: "nike-air-max-product.jpg",
+      url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80",
+      mimeType: "image/jpeg",
+      sizeBytes: 189400,
+      width: 600,
+      height: 600,
+      altTextTr: "Nike Kırmızı Spor Ayakkabı",
+      altTextEn: "Nike Red Running Shoe",
+      tags: JSON.stringify(["nike", "shoes", "sneakers", "product"]),
+      referenceCount: 4,
+      uploadedBy: admin.id,
     },
   });
 

@@ -42,6 +42,7 @@ model Seller {
   verified       Boolean  @default(false)
   followers      Int      @default(0)
   responseRate   String   @default("%99")
+  commissionRate Float    @default(0.10)
   shippingPolicy String?
   returnPolicy   String?
   status         String   @default("PENDING") // PENDING | ACTIVE | SUSPENDED | REJECTED
@@ -107,6 +108,7 @@ model Product {
   colors        String   @default("[]") // JSON string of available colors
   sizes         String   @default("[]") // JSON string of available sizes
   images        String   @default("[]") // JSON string of image URLs
+  badges        String?  // JSON string of badges e.g. ["BESTSELLER", "FAST_DELIVERY"]
   status        String   @default("ACTIVE") // DRAFT | PENDING_REVIEW | ACTIVE | REJECTED | INACTIVE
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -349,10 +351,65 @@ model AuditLog {
   actorEmail   String?
   actorRole    String?
   action       String   // e.g. SELLER_APPROVED, PRODUCT_STATUS_CHANGED, SETTINGS_UPDATED
-  entityType   String   // SELLER | PRODUCT | ORDER | CATEGORY | COUPON | SETTINGS | BRAND | CMS
+  entityType   String   // SELLER | PRODUCT | ORDER | CATEGORY | COUPON | SETTINGS | BRAND | CMS | MARKETING | NAVIGATION | MEDIA
   entityId     String?
   metadataJson String   @default("{}")
   ipAddress    String?
   createdAt    DateTime @default(now())
 }
+
+model Campaign {
+  id          String    @id @default(uuid())
+  name        String
+  type        String    @default("SPONSORED_PRODUCT") // SPONSORED_PRODUCT | SPONSORED_BRAND | SPONSORED_SELLER | FEATURED_SEARCH
+  targetId    String?
+  placement   String?
+  budget      Float
+  spent       Float     @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  priority    Int       @default(1)
+  status      String    @default("ACTIVE") // ACTIVE | PAUSED | COMPLETED
+  impressions Int       @default(0)
+  clicks      Int       @default(0)
+  orders      Int       @default(0)
+  revenue     Float     @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model NavigationItem {
+  id        String           @id @default(uuid())
+  titleTr   String
+  titleEn   String
+  url       String
+  section   String           @default("HEADER") // HEADER | FOOTER | MEGA_MENU
+  parentId  String?
+  parent    NavigationItem?  @relation("NavHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  NavigationItem[] @relation("NavHierarchy")
+  sortOrder Int              @default(0)
+  badgeTr   String?
+  badgeEn   String?
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model MediaAsset {
+  id             String   @id @default(uuid())
+  filename       String
+  url            String
+  mimeType       String
+  sizeBytes      Int
+  width          Int?
+  height         Int?
+  altTextTr      String?
+  altTextEn      String?
+  tags           String?  // JSON string of tags
+  referenceCount Int      @default(0)
+  uploadedBy     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
 

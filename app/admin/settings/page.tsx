@@ -1,37 +1,94 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { DEFAULT_PLATFORM_SETTINGS } from "@/lib/admin/admin-repository";
-import { AdminPlatformSettings } from "@/lib/admin/admin-types";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { Settings, Store, Percent, Truck, Save } from "lucide-react";
+import { Settings, Store, Percent, Truck, Save, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 
-const ADMIN_SETTINGS_KEY = "cadde-store-admin-settings";
+export interface AdminPlatformSettings {
+  id?: string;
+  marketplaceName: string;
+  supportEmail: string;
+  defaultCommissionRate: number;
+  orderCancellationWindowDays: number;
+  returnWindowDays: number;
+  defaultShippingFee: number;
+  freeShippingThreshold: number;
+}
+
+const DEFAULT_SETTINGS: AdminPlatformSettings = {
+  marketplaceName: "Cadde Store Türkiye",
+  supportEmail: "destek@cadde.store",
+  defaultCommissionRate: 10.0,
+  orderCancellationWindowDays: 2,
+  returnWindowDays: 14,
+  defaultShippingFee: 34.9,
+  freeShippingThreshold: 200.0,
+};
 
 export default function AdminSettingsPage() {
   const { t } = useLanguage();
-  const [settings, setSettings] = useState<AdminPlatformSettings>(() => {
-    try {
-      const saved = localStorage.getItem(ADMIN_SETTINGS_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return DEFAULT_PLATFORM_SETTINGS;
-  });
-
+  const [settings, setSettings] = useState<AdminPlatformSettings>(DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  const handleSave = (e: React.FormEvent) => {
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/admin/settings");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.settings) {
+          setSettings(data.settings);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load settings from API:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      localStorage.setItem(ADMIN_SETTINGS_KEY, JSON.stringify(settings));
-    } catch (err) {}
-    setToastMsg(t("admin.settings.successToastMessage"));
-    setTimeout(() => setToastMsg(null), 3000);
+      setIsSaving(true);
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          marketplaceName: settings.marketplaceName,
+          supportEmail: settings.supportEmail,
+          defaultCommissionRate: Number(settings.defaultCommissionRate),
+          orderCancellationWindowDays: Number(settings.orderCancellationWindowDays),
+          returnWindowDays: Number(settings.returnWindowDays),
+          defaultShippingFee: Number(settings.defaultShippingFee),
+          freeShippingThreshold: Number(settings.freeShippingThreshold),
+        }),
+      });
+
+      if (res.ok) {
+        setToastMsg(t("admin.settings.successToastMessage"));
+        setTimeout(() => setToastMsg(null), 3500);
+        await fetchSettings();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Ayarlar kaydedilemedi.");
+      }
+    } catch (err) {
+      console.error("Save settings error:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -63,115 +120,139 @@ export default function AdminSettingsPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSave} className="flex flex-col gap-6 max-w-3xl">
-              {/* Marketplace Details */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
-                <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <Store className="w-4 h-4 text-indigo-600" />
-                  <span>{t("admin.settings.sectionMarketplace")}</span>
-                </h2>
+            {loading ? (
+              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 text-xs">
+                <div className="animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto mb-3" />
+                <span>Ayarlar yükleniyor...</span>
+              </div>
+            ) : (
+              <form onSubmit={handleSave} className="flex flex-col gap-6 max-w-3xl">
+                {/* Marketplace Details */}
+                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
+                  <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
+                    <Store className="w-4 h-4 text-indigo-600" />
+                    <span>{t("admin.settings.sectionMarketplace")}</span>
+                  </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">{t("admin.settings.marketplaceName")}</label>
-                    <input
-                      type="text"
-                      value={settings.marketplaceName}
-                      onChange={(e) => setSettings({ ...settings, marketplaceName: e.target.value })}
-                      className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-text-muted">{t("admin.settings.marketplaceName")}</label>
+                      <input
+                        type="text"
+                        required
+                        value={settings.marketplaceName || ""}
+                        onChange={(e) => setSettings({ ...settings, marketplaceName: e.target.value })}
+                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
+                      />
+                    </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">{t("admin.settings.supportEmail")}</label>
-                    <input
-                      type="email"
-                      value={settings.supportEmail}
-                      onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
-                      className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold"
-                    />
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-text-muted">{t("admin.settings.supportEmail")}</label>
+                      <input
+                        type="email"
+                        required
+                        value={settings.supportEmail || ""}
+                        onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
+                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Commission & Rules */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
-                <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <Percent className="w-4 h-4 text-indigo-600" />
-                  <span>{t("admin.settings.sectionCommission")}</span>
-                </h2>
+                {/* Commission & Rules */}
+                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
+                  <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
+                    <Percent className="w-4 h-4 text-indigo-600" />
+                    <span>{t("admin.settings.sectionCommission")}</span>
+                  </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">{t("admin.settings.defaultCommission")}</label>
-                    <input
-                      type="number"
-                      value={settings.defaultCommissionRate}
-                      onChange={(e) => setSettings({ ...settings, defaultCommissionRate: Number(e.target.value) })}
-                      className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-text-muted">{t("admin.settings.defaultCommission")}</label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        required
+                        value={settings.defaultCommissionRate ?? 10}
+                        onChange={(e) => setSettings({ ...settings, defaultCommissionRate: Number(e.target.value) })}
+                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
+                      />
+                    </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">{t("admin.settings.cancelWindowDays")}</label>
-                    <input
-                      type="number"
-                      value={settings.orderCancellationWindowDays}
-                      onChange={(e) => setSettings({ ...settings, orderCancellationWindowDays: Number(e.target.value) })}
-                      className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold"
-                    />
-                  </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-text-muted">{t("admin.settings.cancelWindowDays")}</label>
+                      <input
+                        type="number"
+                        min="0"
+                        required
+                        value={settings.orderCancellationWindowDays ?? 2}
+                        onChange={(e) => setSettings({ ...settings, orderCancellationWindowDays: Number(e.target.value) })}
+                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
+                      />
+                    </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">{t("admin.settings.returnWindowDays")}</label>
-                    <input
-                      type="number"
-                      value={settings.returnWindowDays}
-                      onChange={(e) => setSettings({ ...settings, returnWindowDays: Number(e.target.value) })}
-                      className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Shipping Rules */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
-                <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <Truck className="w-4 h-4 text-indigo-600" />
-                  <span>{t("admin.settings.sectionShipping")}</span>
-                </h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">{t("admin.settings.defaultShippingFee")}</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={settings.defaultShippingFee}
-                      onChange={(e) => setSettings({ ...settings, defaultShippingFee: Number(e.target.value) })}
-                      className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-text-muted">{t("admin.settings.freeShippingThreshold")}</label>
-                    <input
-                      type="number"
-                      value={settings.freeShippingThreshold}
-                      onChange={(e) => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
-                      className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold"
-                    />
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-text-muted">{t("admin.settings.returnWindowDays")}</label>
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        value={settings.returnWindowDays ?? 14}
+                        onChange={(e) => setSettings({ ...settings, returnWindowDays: Number(e.target.value) })}
+                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex justify-end">
-                <Button variant="primary" size="md" type="submit" className="font-bold px-8 bg-indigo-600 hover:bg-indigo-700 shadow-md">
-                  <Save className="w-4 h-4 mr-1.5" />
-                  <span>{t("admin.settings.saveSettings")}</span>
-                </Button>
-              </div>
-            </form>
+                {/* Shipping Rules */}
+                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
+                  <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
+                    <Truck className="w-4 h-4 text-indigo-600" />
+                    <span>{t("admin.settings.sectionShipping")}</span>
+                  </h2>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-text-muted">{t("admin.settings.defaultShippingFee")}</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        required
+                        value={settings.defaultShippingFee ?? 34.9}
+                        onChange={(e) => setSettings({ ...settings, defaultShippingFee: Number(e.target.value) })}
+                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="font-bold text-text-muted">{t("admin.settings.freeShippingThreshold")}</label>
+                      <input
+                        type="number"
+                        step="1"
+                        required
+                        value={settings.freeShippingThreshold ?? 200}
+                        onChange={(e) => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
+                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    type="submit"
+                    disabled={isSaving}
+                    className="font-bold px-8 bg-indigo-600 hover:bg-indigo-700 shadow-md text-white"
+                  >
+                    <Save className="w-4 h-4 mr-1.5" />
+                    <span>{isSaving ? "Kaydediliyor..." : t("admin.settings.saveSettings")}</span>
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </main>

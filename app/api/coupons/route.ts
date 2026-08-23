@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db/prisma";
+import { prisma } from "@/lib/db/prisma";
+import { getSession } from "@/lib/auth/session";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -7,60 +10,16 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    if (!coupons || coupons.length === 0) {
-      const defaultCoupons = [
-        {
-          id: "c1",
-          code: "CADDE10",
-          type: "PERCENTAGE",
-          value: 10,
-          minimumOrder: 200,
-          maximumDiscount: 150,
-          active: true,
-          usageLimit: 1000,
-          usageCount: 142,
-          expiresAt: null,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "c2",
-          code: "WELCOME150",
-          type: "FIXED",
-          value: 150,
-          minimumOrder: 500,
-          maximumDiscount: null,
-          active: true,
-          usageLimit: 500,
-          usageCount: 89,
-          expiresAt: null,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "c3",
-          code: "FREESHIP",
-          type: "FREE_SHIPPING",
-          value: 49.9,
-          minimumOrder: 100,
-          maximumDiscount: null,
-          active: true,
-          usageLimit: 2000,
-          usageCount: 350,
-          expiresAt: null,
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      return NextResponse.json({ coupons: defaultCoupons, source: "mock" });
-    }
-
     return NextResponse.json({ coupons, source: "database" });
   } catch (error) {
     console.error("[API Coupons GET Error]:", error);
-    return NextResponse.json({ error: "Failed to fetch coupons" }, { status: 500 });
+    return NextResponse.json({ error: "Kuponlar yüklenemedi." }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
     const body = await request.json();
     const { code, type, value, minimumOrder, maximumDiscount, expiresAt, active, usageLimit } = body;
 
@@ -70,107 +29,141 @@ export async function POST(request: Request) {
 
     const cleanCode = code.trim().toUpperCase();
 
-    try {
-      const created = await prisma.coupon.create({
-        data: {
-          code: cleanCode,
-          type: type || "PERCENTAGE",
-          value: Number(value),
-          minimumOrder: minimumOrder ? Number(minimumOrder) : null,
-          maximumDiscount: maximumDiscount ? Number(maximumDiscount) : null,
-          expiresAt: expiresAt ? new Date(expiresAt) : null,
-          active: active !== undefined ? Boolean(active) : true,
-          usageLimit: usageLimit ? Number(usageLimit) : null,
-        },
-      });
-
-      try {
-        await prisma.auditLog.create({
-          data: {
-            action: "COUPON_CREATE",
-            entityType: "COUPON",
-            entityId: created.id,
-            metadataJson: JSON.stringify({ code: cleanCode, type, value }),
-          },
-        });
-      } catch (err) {}
-
-      return NextResponse.json({ success: true, coupon: created });
-    } catch (dbErr: any) {
-      // Return synthesized response if DB isn't connected
-      const mockCreated = {
-        id: `c_${Date.now()}`,
+    const created = await prisma.coupon.create({
+      data: {
         code: cleanCode,
         type: type || "PERCENTAGE",
         value: Number(value),
         minimumOrder: minimumOrder ? Number(minimumOrder) : null,
         maximumDiscount: maximumDiscount ? Number(maximumDiscount) : null,
-        expiresAt: expiresAt || null,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
         active: active !== undefined ? Boolean(active) : true,
         usageLimit: usageLimit ? Number(usageLimit) : null,
-        usageCount: 0,
-        createdAt: new Date().toISOString(),
-      };
-      return NextResponse.json({ success: true, coupon: mockCreated });
+      },
+    });
+
+    try {
+      await prisma.auditLog.create({
+        data: {
+          actorId: session?.id || null,
+          actorEmail: session?.email || null,
+          actorRole: session?.role || "ADMIN",
+          action: "COUPON_CREATED",
+          entityType: "COUPON",
+          entityId: created.id,
+          metadataJson: JSON.stringify({ code: cleanCode, type: created.type, value: created.value }),
+        },
+      });
+    } catch (err) {
+      console.error("Audit log error on coupon create:", err);
     }
+
+    return NextResponse.json({ success: true, coupon: created });
   } catch (error) {
     console.error("[API Coupons POST Error]:", error);
-    return NextResponse.json({ error: "Failed to create coupon" }, { status: 500 });
+    return NextResponse.json({ error: "Kupon oluşturulamadı." }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   try {
+    const session = await getSession();
     const body = await request.json();
-    const { id, code, active, value, minimumOrder, maximumDiscount, expiresAt, usageLimit } = body;
+    const { id, code, active, type, value, minimumOrder, maximumDiscount, expiresAt, usageLimit } = body;
 
     if (!id && !code) {
-      return NextResponse.json({ error: "Coupon ID or code is required" }, { status: 400 });
+      return NextResponse.json({ error: "Kupon ID veya kodu zorunludur." }, { status: 400 });
     }
+
+    const updated = await prisma.coupon.update({
+      where: id ? { id } : { code: (code as string).toUpperCase() },
+      data: {
+        ...(type ? { type } : {}),
+        ...(active !== undefined ? { active: Boolean(active) } : {}),
+        ...(value !== undefined ? { value: Number(value) } : {}),
+        ...(minimumOrder !== undefined ? { minimumOrder: minimumOrder ? Number(minimumOrder) : null } : {}),
+        ...(maximumDiscount !== undefined ? { maximumDiscount: maximumDiscount ? Number(maximumDiscount) : null } : {}),
+        ...(expiresAt !== undefined ? { expiresAt: expiresAt ? new Date(expiresAt) : null } : {}),
+        ...(usageLimit !== undefined ? { usageLimit: usageLimit ? Number(usageLimit) : null } : {}),
+      },
+    });
 
     try {
-      const updated = await prisma.coupon.update({
-        where: id ? { id } : { code: code.toUpperCase() },
+      await prisma.auditLog.create({
         data: {
-          ...(active !== undefined ? { active: Boolean(active) } : {}),
-          ...(value !== undefined ? { value: Number(value) } : {}),
-          ...(minimumOrder !== undefined ? { minimumOrder: minimumOrder ? Number(minimumOrder) : null } : {}),
-          ...(maximumDiscount !== undefined ? { maximumDiscount: maximumDiscount ? Number(maximumDiscount) : null } : {}),
-          ...(expiresAt !== undefined ? { expiresAt: expiresAt ? new Date(expiresAt) : null } : {}),
-          ...(usageLimit !== undefined ? { usageLimit: usageLimit ? Number(usageLimit) : null } : {}),
+          actorId: session?.id || null,
+          actorEmail: session?.email || null,
+          actorRole: session?.role || "ADMIN",
+          action: "COUPON_UPDATED",
+          entityType: "COUPON",
+          entityId: updated.id,
+          metadataJson: JSON.stringify({
+            code: updated.code,
+            active: updated.active,
+            value: updated.value,
+            type: updated.type,
+          }),
         },
       });
-
-      return NextResponse.json({ success: true, coupon: updated });
-    } catch (dbErr) {
-      return NextResponse.json({ success: true, updated: { id, active, value } });
+    } catch (err) {
+      console.error("Audit log error on coupon update:", err);
     }
+
+    return NextResponse.json({ success: true, coupon: updated });
   } catch (error) {
     console.error("[API Coupons PUT Error]:", error);
-    return NextResponse.json({ error: "Failed to update coupon" }, { status: 500 });
+    return NextResponse.json({ error: "Kupon güncellenemedi." }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request) {
   try {
+    const session = await getSession();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    const code = searchParams.get("code");
+    let id = searchParams.get("id");
+    let code = searchParams.get("code");
 
     if (!id && !code) {
-      return NextResponse.json({ error: "Coupon ID or code is required" }, { status: 400 });
+      try {
+        const body = await request.json();
+        id = body.id;
+        code = body.code;
+      } catch (e) {}
     }
 
-    try {
-      await prisma.coupon.delete({
-        where: id ? { id } : { code: (code as string).toUpperCase() },
-      });
-      return NextResponse.json({ success: true });
-    } catch (dbErr) {
-      return NextResponse.json({ success: true });
+    if (!id && !code) {
+      return NextResponse.json({ error: "Kupon ID veya kodu zorunludur." }, { status: 400 });
     }
+
+    const existing = await prisma.coupon.findUnique({
+      where: id ? { id } : { code: (code as string).toUpperCase() },
+    });
+
+    if (existing) {
+      await prisma.coupon.delete({
+        where: { id: existing.id },
+      });
+
+      try {
+        await prisma.auditLog.create({
+          data: {
+            actorId: session?.id || null,
+            actorEmail: session?.email || null,
+            actorRole: session?.role || "ADMIN",
+            action: "COUPON_DELETED",
+            entityType: "COUPON",
+            entityId: existing.id,
+            metadataJson: JSON.stringify({ code: existing.code }),
+          },
+        });
+      } catch (err) {
+        console.error("Audit log error on coupon delete:", err);
+      }
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[API Coupons DELETE Error]:", error);
-    return NextResponse.json({ error: "Failed to delete coupon" }, { status: 500 });
+    return NextResponse.json({ error: "Kupon silinemedi." }, { status: 500 });
   }
 }

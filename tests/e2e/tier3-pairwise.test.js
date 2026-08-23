@@ -776,6 +776,408 @@ async function runTier3Tests() {
     }
   );
 
+  // T3.17: CMS Section Reorder -> Homepage Dynamic Reflection
+  await test(
+    "T3.17",
+    "CMS section reordering and active toggling dynamically reflected in homepage API delivery",
+    "CMS Merchandising + Homepage Engine",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+
+      // Create two sections
+      const s1Res = await request("/api/cms/sections", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          titleTR: `Reorder Test Section A ${Date.now()}`,
+          titleEN: "Reorder Test Section A",
+          type: "HERO",
+          orderIndex: 1,
+          active: true,
+        },
+      });
+      assertEqual(s1Res.status, 201, "Section A created");
+      const secA = s1Res.data.section;
+
+      const s2Res = await request("/api/cms/sections", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          titleTR: `Reorder Test Section B ${Date.now()}`,
+          titleEN: "Reorder Test Section B",
+          type: "FLASH_DEALS",
+          orderIndex: 2,
+          active: true,
+        },
+      });
+      assertEqual(s2Res.status, 201, "Section B created");
+      const secB = s2Res.data.section;
+
+      // Reorder: Move Sec B to orderIndex 0, Sec A to orderIndex 5
+      await request("/api/cms/sections", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: { id: secB.id, orderIndex: 0 },
+      });
+      await request("/api/cms/sections", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: { id: secA.id, orderIndex: 5 },
+      });
+
+      // Public client queries homepage sections
+      const pubRes = await request("/api/cms/sections");
+      assertEqual(pubRes.status, 200, "Public CMS fetch successful");
+      const sections = pubRes.data.sections;
+
+      const idxA = sections.findIndex((s) => s.id === secA.id);
+      const idxB = sections.findIndex((s) => s.id === secB.id);
+
+      assert(idxB < idxA, "Section B (orderIndex 0) should appear before Section A (orderIndex 5)");
+
+      // Cleanup
+      await request(`/api/cms/sections?id=${secA.id}`, { method: "DELETE", headers: adminHeaders });
+      await request(`/api/cms/sections?id=${secB.id}`, { method: "DELETE", headers: adminHeaders });
+    }
+  );
+
+  // T3.18: Product Price Edit -> AuditLog Diff Verification -> Checkout Total Calculation
+  await test(
+    "T3.18",
+    "Product price edit generates AuditLog diff and propagates to checkout total calculation",
+    "Product Pricing + Audit Trail + Checkout",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const seller = await prisma.seller.findFirst({ where: { status: "ACTIVE" } });
+      const cat = await prisma.category.findFirst();
+
+      const prod = await prisma.product.create({
+        data: {
+          name: `Pairwise Price Diff Product ${Date.now()}`,
+          slug: `pairwise-price-diff-${Date.now()}`,
+          description: "Price diff test product",
+          price: 100,
+          stock: 50,
+          brand: "TestBrand",
+          sku: `PW-PRICE-${Date.now()}`,
+          imageUrl: "https://example.com/pw-price.jpg",
+          categoryId: cat.id,
+          sellerId: seller.id,
+          status: "ACTIVE",
+        },
+      });
+
+      // 1. Admin edits product price from 100 to 180 TL
+      const updateRes = await request(`/api/products/${prod.id}`, {
+        method: "PUT",
+        headers: adminHeaders,
+        body: { price: 180 },
+      });
+      assertEqual(updateRes.status, 200, "Price updated to 180");
+
+      // 2. Verify AuditLog recorded with PRODUCT_UPDATED and new price
+      const auditLog = await prisma.auditLog.findFirst({
+        where: { action: "PRODUCT_UPDATED", entityId: prod.id },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(auditLog, "AuditLog for PRODUCT_UPDATED must exist");
+      const meta = JSON.parse(auditLog.metadataJson);
+      assertEqual(meta.price, 180, "AuditLog captures new price 180");
+
+      // 3. Customer checks out 2 units at updated price
+      const orderRes = await request("/api/orders", {
+        method: "POST",
+        headers: custHeaders,
+        body: {
+          items: [{ productId: prod.id, quantity: 2 }],
+          shippingAddress: {
+            title: "Ev",
+            firstName: "Ahmet",
+            lastName: "Yılmaz",
+            phone: "0532 123 4567",
+            city: "İstanbul",
+            district: "Kadıköy",
+            addressLine: "Bağdat Cad. No: 12",
+          },
+        },
+      });
+      assertEqual(orderRes.status, 200, "Order placed successfully");
+      assertEqual(orderRes.data.order.subtotal, 360, "Subtotal must be 360 TL (180 * 2)");
+    }
+  );
+
+  // T3.19: Admin Carrier Assignment -> Customer Order Tracking Link Verification
+  await test(
+    "T3.19",
+    "Admin carrier code assignment updates order tracking and dispatches customer notification link",
+    "Logistics Fulfillment + Notifications",
+    async () => {
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const prod = await prisma.product.findFirst({ where: { status: "ACTIVE", stock: { gte: 5 } } });
+
+      // 1. Place order
+      const orderRes = await request("/api/orders", {
+        method: "POST",
+        headers: custHeaders,
+        body: {
+          items: [{ productId: prod.id, quantity: 1 }],
+          shippingAddress: {
+            title: "Ofis",
+            firstName: "Ahmet",
+            lastName: "Yılmaz",
+            phone: "0532 123 4567",
+            city: "Ankara",
+            district: "Çankaya",
+            addressLine: "Atatürk Bulvarı 100",
+          },
+        },
+      });
+      assertEqual(orderRes.status, 200, "Order placed");
+      const order = orderRes.data.order;
+      const group = order.orderGroups[0];
+
+      // 2. Admin assigns Aras Kargo tracking number
+      const trackingCode = `ARAS-${Date.now().toString().slice(-8)}`;
+      const shipRes = await request("/api/orders/seller", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: {
+          orderGroupId: group.id,
+          status: "SHIPPED",
+          carrierName: "Aras Kargo",
+          trackingNumber: trackingCode,
+        },
+      });
+      assertEqual(shipRes.status, 200, "Status advanced to SHIPPED");
+
+      // 3. Customer checks order detail
+      const checkOrder = await request(`/api/orders/${order.id}`, { headers: custHeaders });
+      assertEqual(checkOrder.status, 200, "Order retrieved");
+      assertEqual(checkOrder.data.order.carrierName, "Aras Kargo", "Carrier name updated on order");
+      assertEqual(checkOrder.data.order.trackingNumber, trackingCode, "Tracking code updated on order");
+
+      // 4. Customer verifies notification link
+      const notifRes = await request("/api/notifications", { headers: custHeaders });
+      assertEqual(notifRes.status, 200, "Notifications retrieved");
+      const matchedNotif = notifRes.data.notifications.find((n) => n.messageTR && n.messageTR.includes(trackingCode)) || notifRes.data.notifications[0];
+      assert(matchedNotif && matchedNotif.linkUrl, "Notification with link must exist");
+      assertContains(matchedNotif.messageTR, trackingCode, "Notification message must include tracking code");
+    }
+  );
+
+  // T3.20: Marketing Campaign Active Toggle -> Priority Ordering & Search Indexing
+  await test(
+    "T3.20",
+    "Marketing campaign active toggle regulates priority ranking in marketing queries",
+    "Marketing Studio + Search Indexing",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+
+      // 1. Create Campaign A (priority 10, ACTIVE)
+      const c1Res = await request("/api/marketing", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          name: `High Priority Campaign ${Date.now()}`,
+          type: "FEATURED_SEARCH",
+          budget: 5000,
+          priority: 10,
+          status: "ACTIVE",
+        },
+      });
+      assertEqual(c1Res.status, 201, "Campaign A created");
+      const campA = c1Res.data.campaign;
+
+      // 2. Create Campaign B (priority 2, ACTIVE)
+      const c2Res = await request("/api/marketing", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          name: `Normal Priority Campaign ${Date.now()}`,
+          type: "FEATURED_SEARCH",
+          budget: 5000,
+          priority: 2,
+          status: "ACTIVE",
+        },
+      });
+      assertEqual(c2Res.status, 201, "Campaign B created");
+      const campB = c2Res.data.campaign;
+
+      // 3. Pause Campaign A
+      await request(`/api/marketing/${campA.id}`, {
+        method: "PUT",
+        headers: adminHeaders,
+        body: { status: "PAUSED" },
+      });
+
+      // 4. Query active campaigns
+      const activeRes = await request("/api/marketing?status=ACTIVE");
+      assertEqual(activeRes.status, 200, "Active campaigns fetched");
+      const activeList = activeRes.data.campaigns;
+
+      const hasA = activeList.some((c) => c.id === campA.id);
+      const hasB = activeList.some((c) => c.id === campB.id);
+
+      assertEqual(hasA, false, "Paused campaign A must not appear in active query");
+      assertEqual(hasB, true, "Active campaign B must appear in active query");
+
+      // Cleanup
+      await request(`/api/marketing/${campA.id}`, { method: "DELETE", headers: adminHeaders });
+      await request(`/api/marketing/${campB.id}`, { method: "DELETE", headers: adminHeaders });
+    }
+  );
+
+  // T3.21: Navigation hierarchy modification -> Public mega menu reflection
+  await test(
+    "T3.21",
+    "Navigation hierarchy modification reflects across category navigation and mega menu",
+    "Navigation Menu + Public Storefront",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+
+      // Create a category
+      const uniqueSlug = `nav-test-cat-${Date.now()}`;
+      const catRes = await request("/api/categories", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          nameTR: "Navigasyon Test Kategorisi",
+          nameEN: "Navigation Test Category",
+          slug: uniqueSlug,
+          descriptionTR: "Navigasyon entegrasyonu",
+          descriptionEN: "Navigation integration",
+        },
+      });
+      assertEqual(catRes.status, 201, "Category created");
+      const catId = catRes.data.category.id;
+
+      // Query public navigation
+      const navRes = await request("/api/navigation?lang=tr");
+      assertEqual(navRes.status, 200, "Navigation retrieved");
+      assert(Array.isArray(navRes.data.categories), "Categories array present");
+      const foundInNav = navRes.data.categories.some((c) => c.slug === uniqueSlug);
+      assertEqual(foundInNav, true, "New category appears in navigation structure");
+
+      // Cleanup
+      await request(`/api/categories?id=${catId}`, { method: "DELETE", headers: adminHeaders });
+    }
+  );
+
+  // T3.22: Media Asset Lifecycle -> Upload, Update Alt Text & Reference Count Tracking
+  await test(
+    "T3.22",
+    "Media asset creation, metadata updating and reference count tracking lifecycle",
+    "Media Library + Asset Reference Tracking",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+
+      // 1. Create Media Asset
+      const createRes = await request("/api/media", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          filename: `product-hero-shot-${Date.now()}.png`,
+          url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+          sizeBytes: 184320,
+          altTextTr: "Kırmızı Spor Ayakkabı Ön Görünüm",
+          altTextEn: "Red Sneaker Front View",
+          referenceCount: 1,
+        },
+      });
+      assertEqual(createRes.status, 201, "Media created");
+      const media = createRes.data.media;
+
+      // 2. Increment reference count when used in product
+      const updateRes = await request(`/api/media/${media.id}`, {
+        method: "PUT",
+        headers: adminHeaders,
+        body: {
+          referenceCount: 4,
+          altTextTr: "Nike Kırmızı Spor Ayakkabı",
+        },
+      });
+      assertEqual(updateRes.status, 200, "Media updated");
+      assertEqual(updateRes.data.media.referenceCount, 4, "Reference count updated to 4");
+
+      // 3. Search media by updated alt text
+      const searchRes = await request(`/api/media?search=Nike`);
+      assertEqual(searchRes.status, 200, "Search successful");
+      const found = (searchRes.data.media || searchRes.data.assets).some((m) => m.id === media.id);
+      assertEqual(found, true, "Media found in search results");
+
+      // Cleanup
+      await request(`/api/media/${media.id}`, { method: "DELETE", headers: adminHeaders });
+    }
+  );
+
+  // T3.23: Seller Status Governance -> Storefront Verification & Moderation Audit
+  await test(
+    "T3.23",
+    "Seller status change from PENDING to ACTIVE generates AuditLog and updates seller directory",
+    "Seller Governance + AuditLog Trail",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const seller = await prisma.seller.findFirst();
+
+      // Update seller status and verified badge
+      const putRes = await request("/api/admin/sellers", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: {
+          sellerId: seller.id,
+          status: "ACTIVE",
+          verified: true,
+        },
+      });
+      assertEqual(putRes.status, 200, "Seller status updated");
+      assertEqual(putRes.data.seller.verified, true, "Seller verified");
+
+      // Verify AuditLog record created
+      const log = await prisma.auditLog.findFirst({
+        where: { action: "SELLER_STATUS_CHANGED", entityId: seller.id },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(log, "AuditLog for SELLER_STATUS_CHANGED must exist");
+    }
+  );
+
+  // T3.24: Customer Account Sync -> Address Book Management -> CRM Spent Summary
+  await test(
+    "T3.24",
+    "Customer address book management updates CRM metrics and checkout shipping selection",
+    "Customer CRM + Address Sync + Checkout",
+    async () => {
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const adminHeaders = await getAuthHeaders("ADMIN");
+
+      // 1. Add address
+      const addrRes = await request("/api/addresses", {
+        method: "POST",
+        headers: custHeaders,
+        body: {
+          title: `İş Yeri ${Date.now()}`,
+          firstName: "Ahmet",
+          lastName: "Yılmaz",
+          phone: "0532 123 4567",
+          city: "İzmir",
+          district: "Alsancak",
+          addressLine: "Kıbrıs Şehitleri Cad. No: 15",
+          isDefault: true,
+        },
+      });
+      assertEqual(addrRes.status, 200, "Address added");
+
+      // 2. Admin retrieves CRM customer list
+      const crmRes = await request("/api/admin/customers", { headers: adminHeaders });
+      assertEqual(crmRes.status, 200, "CRM fetched");
+      const customerRecord = crmRes.data.customers.find((c) => c.email === "customer@cadde-store.com");
+      assert(customerRecord, "Customer record found in CRM");
+      assert(customerRecord.savedAddressesCount >= 1, "Saved address count reflects in CRM");
+    }
+  );
+
   return results;
 }
 

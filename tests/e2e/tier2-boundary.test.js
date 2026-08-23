@@ -1368,6 +1368,659 @@ async function runTier2Tests() {
     }
   );
 
+  // ==========================================
+  // FEATURE 16: Marketing Campaign Budget & Dates Boundary Tests (BVA)
+  // ==========================================
+  await test(
+    "T2.16.1",
+    "Create marketing campaign with zero budget (boundary minimum: 0)",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/marketing", {
+        method: "POST",
+        headers,
+        body: {
+          name: `Zero Budget Campaign ${Date.now()}`,
+          budget: 0,
+          type: "SPONSORED_PRODUCT",
+        },
+      });
+      assertEqual(res.status, 201, "Expected 201 Created for zero budget");
+      assertEqual(res.data.campaign.budget, 0, "Budget should be 0");
+    }
+  );
+
+  await test(
+    "T2.16.2",
+    "Reject campaign creation when budget parameter is missing",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/marketing", {
+        method: "POST",
+        headers,
+        body: {
+          name: "Missing Budget Campaign",
+          type: "SPONSORED_PRODUCT",
+        },
+      });
+      assertEqual(res.status, 400, "Expected 400 Bad Request when budget missing");
+    }
+  );
+
+  await test(
+    "T2.16.3",
+    "Query campaigns with non-existent placement returns empty array",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const res = await request("/api/marketing?placement=NON_EXISTENT_PLACEMENT_XYZ");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.campaigns.length, 0, "Should return 0 matching campaigns");
+    }
+  );
+
+  await test(
+    "T2.16.4",
+    "Update non-existent campaign ID returns 404",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/marketing/non-existent-campaign-id-999", {
+        method: "PUT",
+        headers,
+        body: { budget: 5000 },
+      });
+      assertEqual(res.status, 404, "Expected 404 for missing campaign ID");
+    }
+  );
+
+  await test(
+    "T2.16.5",
+    "Campaign with negative priority (-99) handled and stored correctly",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/marketing", {
+        method: "POST",
+        headers,
+        body: {
+          name: `Negative Priority Campaign ${Date.now()}`,
+          budget: 1000,
+          priority: -99,
+        },
+      });
+      assertEqual(res.status, 201, "Expected 201 Created");
+      assertEqual(res.data.campaign.priority, -99, "Priority should be -99");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 17: Navigation Circular Parents & Hierarchy Boundary Tests (BVA)
+  // ==========================================
+  await test(
+    "T2.17.1",
+    "Navigation item with null parentId treated as top-level root item",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const rootItem = await prisma.navigationItem.create({
+        data: {
+          titleTr: "Ana Kategori Kök",
+          titleEn: "Root Category Main",
+          url: "/category/kok",
+          section: "HEADER",
+          parentId: null,
+          sortOrder: 0,
+        },
+      });
+      assert(rootItem.id, "Root item created");
+      assertEqual(rootItem.parentId, null, "parentId should be null");
+    }
+  );
+
+  await test(
+    "T2.17.2",
+    "Lookup non-existent navigation item ID via GET /api/navigation/[id] returns 404",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const res = await request("/api/navigation/non-existent-nav-id-999");
+      assertEqual(res.status, 404, "Expected 404 for missing navigation item");
+    }
+  );
+
+  await test(
+    "T2.17.3",
+    "Navigation item with very long title (200+ characters) persists safely",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const longTitle = "Nav ".repeat(50);
+      const item = await prisma.navigationItem.create({
+        data: {
+          titleTr: longTitle,
+          titleEn: longTitle,
+          url: "/long-nav",
+          section: "HEADER",
+        },
+      });
+      assert(item.id, "Item with long title created");
+      assertEqual(item.titleTr, longTitle, "Title preserved");
+    }
+  );
+
+  await test(
+    "T2.17.4",
+    "Update non-existent navigation item ID returns 404",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/navigation/non-existent-nav-id-999", {
+        method: "PUT",
+        headers,
+        body: { sortOrder: 5 },
+      });
+      assertEqual(res.status, 404, "Expected 404 for missing navigation ID");
+    }
+  );
+
+  await test(
+    "T2.17.5",
+    "Delete non-existent navigation item ID returns 404",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/navigation/non-existent-nav-id-999", {
+        method: "DELETE",
+        headers,
+      });
+      assertEqual(res.status, 404, "Expected 404 for missing navigation ID");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 18: Media Asset Extreme Sizes & Mime-Types Boundary Tests (BVA)
+  // ==========================================
+  await test(
+    "T2.18.1",
+    "Create media asset with 0 sizeBytes (boundary minimum)",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/media", {
+        method: "POST",
+        headers,
+        body: {
+          filename: `zero-size-${Date.now()}.png`,
+          url: "https://example.com/zero.png",
+          sizeBytes: 0,
+        },
+      });
+      assertEqual(res.status, 201, "Expected 201 Created for 0 sizeBytes");
+      assertEqual(res.data.media.sizeBytes, 0, "sizeBytes should be 0");
+    }
+  );
+
+  await test(
+    "T2.18.2",
+    "Create media asset with extreme sizeBytes (500MB = 524288000 bytes)",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const extremeSize = 524288000;
+      const res = await request("/api/media", {
+        method: "POST",
+        headers,
+        body: {
+          filename: `large-video-${Date.now()}.mp4`,
+          url: "https://example.com/large.mp4",
+          sizeBytes: extremeSize,
+          mimeType: "video/mp4",
+        },
+      });
+      assertEqual(res.status, 201, "Expected 201 Created for extreme size");
+      assertEqual(res.data.media.sizeBytes, extremeSize, "sizeBytes matches");
+    }
+  );
+
+  await test(
+    "T2.18.3",
+    "Reject media asset creation when required filename or URL is missing",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/media", {
+        method: "POST",
+        headers,
+        body: { sizeBytes: 1024 }, // missing filename and url
+      });
+      assertEqual(res.status, 400, "Expected 400 when filename and url missing");
+    }
+  );
+
+  await test(
+    "T2.18.4",
+    "Media asset search with special characters handles query gracefully",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const res = await request("/api/media?search=%27%22%3C%3E");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.media || res.data.assets), "Array returned");
+    }
+  );
+
+  await test(
+    "T2.18.5",
+    "Lookup non-existent media asset ID returns 404",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const res = await request("/api/media/non-existent-media-id-999");
+      assertEqual(res.status, 404, "Expected 404 for missing media asset ID");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 19: AuditLog Entity Filter & Metadata Boundary Tests (BVA)
+  // ==========================================
+  await test(
+    "T2.19.1",
+    "Query audit log with non-existent entityType returns empty logs array",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/audit?entityType=NON_EXISTENT_ENTITY_TYPE_999", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.logs.length, 0, "Should return 0 matching logs");
+    }
+  );
+
+  await test(
+    "T2.19.2",
+    "Query audit log with URL encoded SQL/HTML meta-characters handled safely",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/audit?entityType=%27%20OR%201=1--", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.logs.length, 0, "Should safely return empty list without injection");
+    }
+  );
+
+  await test(
+    "T2.19.3",
+    "AuditLog handles complex serialized JSON metadata with nested structures",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const complexMeta = {
+        diff: {
+          price: { before: 100, after: 150 },
+          stock: { before: 10, after: 20 },
+        },
+        tags: ["promo", "flash_sale"],
+      };
+
+      const log = await prisma.auditLog.create({
+        data: {
+          action: "COMPLEX_TEST_ACTION",
+          entityType: "PRODUCT",
+          metadataJson: JSON.stringify(complexMeta),
+        },
+      });
+
+      assert(log.id, "AuditLog created");
+      const parsed = JSON.parse(log.metadataJson);
+      assertEqual(parsed.diff.price.before, 100, "Nested metadata preserved");
+    }
+  );
+
+  await test(
+    "T2.19.4",
+    "Unauthenticated request to GET /api/admin/audit returns 403 Forbidden",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const res = await request("/api/admin/audit");
+      assertEqual(res.status, 403, "Expected 403 for unauthenticated request");
+    }
+  );
+
+  await test(
+    "T2.19.5",
+    "AuditLog query returns max 100 recent entries by default",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/audit", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(res.data.logs.length <= 100, "Logs count should not exceed 100");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 20: Order Carrier Tracking Formats & Edge Case Logistics (BVA)
+  // ==========================================
+  await test(
+    "T2.20.1",
+    "Update order group with non-existent orderGroupId returns 404",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/orders/seller", {
+        method: "PUT",
+        headers,
+        body: {
+          orderGroupId: "non-existent-order-group-id-999",
+          status: "SHIPPED",
+        },
+      });
+      assertEqual(res.status, 404, "Expected 404 for missing orderGroupId");
+    }
+  );
+
+  await test(
+    "T2.20.2",
+    "Update order group missing status returns 400 Bad Request",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const group = await prisma.orderGroup.findFirst();
+      const res = await request("/api/orders/seller", {
+        method: "PUT",
+        headers,
+        body: {
+          orderGroupId: group.id,
+          // status is missing
+        },
+      });
+      assertEqual(res.status, 400, "Expected 400 when status is missing");
+    }
+  );
+
+  await test(
+    "T2.20.3",
+    "Update order group with custom Turkish carrier name persists safely",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const group = await prisma.orderGroup.findFirst();
+      const res = await request("/api/orders/seller", {
+        method: "PUT",
+        headers,
+        body: {
+          orderGroupId: group.id,
+          status: "PROCESSING",
+          carrierName: "HepsiJet Express",
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.orderGroup.carrierName, "HepsiJet Express", "Carrier name updated");
+    }
+  );
+
+  await test(
+    "T2.20.4",
+    "Update order group with very long tracking code (100+ chars) persists safely",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const group = await prisma.orderGroup.findFirst();
+      const longTracking = "TRK-" + "9".repeat(120);
+      const res = await request("/api/orders/seller", {
+        method: "PUT",
+        headers,
+        body: {
+          orderGroupId: group.id,
+          status: "SHIPPED",
+          trackingNumber: longTracking,
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.orderGroup.trackingNumber, longTracking, "Long tracking code preserved");
+    }
+  );
+
+  await test(
+    "T2.20.5",
+    "Order lookup with non-existent order ID returns 404",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/orders/non-existent-order-id-xyz-999", { headers });
+      assertEqual(res.status, 404, "Expected 404 for missing order ID");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 21: Seller Commission Boundary Values (BVA)
+  // ==========================================
+  await test(
+    "T2.21.1",
+    "Set platform default commission rate to boundary minimum 0%",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/settings", {
+        method: "PUT",
+        headers,
+        body: { defaultCommissionRate: 0.0 },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.settings.defaultCommissionRate, 0.0, "Commission rate should be 0.0%");
+    }
+  );
+
+  await test(
+    "T2.21.2",
+    "Set platform default commission rate to boundary maximum 100%",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/settings", {
+        method: "PUT",
+        headers,
+        body: { defaultCommissionRate: 100.0 },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.settings.defaultCommissionRate, 100.0, "Commission rate should be 100.0%");
+    }
+  );
+
+  await test(
+    "T2.21.3",
+    "Update seller with non-existent sellerId returns 404",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/sellers", {
+        method: "PUT",
+        headers,
+        body: {
+          sellerId: "non-existent-seller-id-999",
+          verified: true,
+        },
+      });
+      assertEqual(res.status, 404, "Expected 404 for missing seller ID");
+    }
+  );
+
+  await test(
+    "T2.21.4",
+    "Update seller missing sellerId returns 400 Bad Request",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/sellers", {
+        method: "PUT",
+        headers,
+        body: { verified: true }, // missing sellerId
+      });
+      assertEqual(res.status, 400, "Expected 400 when sellerId is missing");
+    }
+  );
+
+  await test(
+    "T2.21.5",
+    "Non-admin attempt to toggle seller verification returns 403 Forbidden",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const seller = await prisma.seller.findFirst();
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const res = await request("/api/admin/sellers", {
+        method: "PUT",
+        headers: custHeaders,
+        body: {
+          sellerId: seller.id,
+          verified: false,
+        },
+      });
+      assertEqual(res.status, 403, "Expected 403 Forbidden for non-admin");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 22: Customer CRM Edge Case Aggregations & Status Boundaries (BVA)
+  // ==========================================
+  await test(
+    "T2.22.1",
+    "Customer with 0 orders displays totalSpent 0 and ordersCount 0 in CRM",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const newCustomer = await prisma.user.create({
+        data: {
+          email: `crm-zero-order-${Date.now()}@test.com`,
+          passwordHash: "test-hash",
+          firstName: "Yeni",
+          lastName: "Müşteri",
+          role: "CUSTOMER",
+        },
+      });
+
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/customers", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      const found = res.data.customers.find((c) => c.id === newCustomer.id);
+      assert(found, "Customer should appear in CRM list");
+      assertEqual(found.ordersCount, 0, "ordersCount should be 0");
+      assertEqual(found.totalSpent, 0, "totalSpent should be 0");
+    }
+  );
+
+  await test(
+    "T2.22.2",
+    "Update customer missing customerId returns 400 Bad Request",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/customers", {
+        method: "PUT",
+        headers,
+        body: { status: "blocked" }, // missing customerId
+      });
+      assertEqual(res.status, 400, "Expected 400 when customerId is missing");
+    }
+  );
+
+  await test(
+    "T2.22.3",
+    "Non-admin attempt to retrieve customer CRM returns 403 Forbidden",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const res = await request("/api/admin/customers", { headers: custHeaders });
+      assertEqual(res.status, 403, "Expected 403 Forbidden");
+    }
+  );
+
+  await test(
+    "T2.22.4",
+    "Non-admin attempt to update customer status returns 403 Forbidden",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const res = await request("/api/admin/customers", {
+        method: "PUT",
+        headers: custHeaders,
+        body: { customerId: "some-id", status: "blocked" },
+      });
+      assertEqual(res.status, 403, "Expected 403 Forbidden");
+    }
+  );
+
+  await test(
+    "T2.22.5",
+    "Customer CRM handles special characters in customer names without error",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const specialCust = await prisma.user.create({
+        data: {
+          email: `special-char-${Date.now()}@test.com`,
+          passwordHash: "test-hash",
+          firstName: "Çağdaş & Şükrü",
+          lastName: "Öztürk-İlhan",
+          role: "CUSTOMER",
+        },
+      });
+
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/customers", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      const found = res.data.customers.find((c) => c.id === specialCust.id);
+      assert(found, "Special character customer found");
+      assertContains(found.name, "Çağdaş", "Turkish characters preserved in name");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 23: Cookie Consent & Legal Route Breakpoint Spectrum (BVA)
+  // ==========================================
+  await test(
+    "T2.23.1",
+    "Verify /kvkk page loads under 2500ms with 200 OK",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/kvkk");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(res.duration < 2500, "Response duration should be under 2500ms");
+    }
+  );
+
+  await test(
+    "T2.23.2",
+    "Verify /privacy page contains Privacy Policy headers without exceptions",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/privacy");
+      assertEqual(res.status, 200, "Expected 200 OK");
+    }
+  );
+
+  await test(
+    "T2.23.3",
+    "Verify /terms page renders Distance Sales Agreement headers",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/terms");
+      assertEqual(res.status, 200, "Expected 200 OK");
+    }
+  );
+
+  await test(
+    "T2.23.4",
+    "Verify /help page renders customer support navigation without server exceptions",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/help");
+      assertEqual(res.status, 200, "Expected 200 OK");
+    }
+  );
+
+  await test(
+    "T2.23.5",
+    "Verify /shipping page renders Turkish carrier shipping details",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/shipping");
+      assertEqual(res.status, 200, "Expected 200 OK");
+    }
+  );
+
   return results;
 }
 

@@ -3,6 +3,8 @@ import { LanguageProvider } from "@/lib/i18n/language-context";
 import { CartProvider } from "@/lib/cart/cart-context";
 import { FavoritesProvider } from "@/lib/favorites/favorites-context";
 import { RecentlyViewedProvider } from "@/lib/recently-viewed/recently-viewed-context";
+import { CookieConsent } from "@/components/common/cookie-consent";
+import { ServiceWorkerRegister } from "@/components/common/service-worker-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,7 +25,11 @@ export default function RootLayout({
         <LanguageProvider>
           <CartProvider>
             <FavoritesProvider>
-              <RecentlyViewedProvider>{children}</RecentlyViewedProvider>
+              <RecentlyViewedProvider>
+                {children}
+                <CookieConsent />
+                <ServiceWorkerRegister />
+              </RecentlyViewedProvider>
             </FavoritesProvider>
           </CartProvider>
         </LanguageProvider>

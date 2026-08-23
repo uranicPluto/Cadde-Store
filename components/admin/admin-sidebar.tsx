@@ -18,13 +18,18 @@ import {
   Settings,
   ArrowLeft,
   ShieldCheck,
+  Megaphone,
+  Compass,
+  Image as ImageIcon,
+  TrendingUp,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { cn } from "@/lib/utils";
 
 export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) => {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isEn = language === "en";
 
   const navItems = [
     { href: "/admin", icon: LayoutDashboard, label: t("admin.navigation.overview") },
@@ -35,6 +40,10 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
     { href: "/admin/categories", icon: Grid, label: t("admin.navigation.categories") },
     { href: "/admin/brands", icon: Award, label: t("admin.navigation.brands") },
     { href: "/admin/cms", icon: Sliders, label: t("admin.navigation.cms") },
+    { href: "/admin/marketing", icon: Megaphone, label: isEn ? "Marketing & Ads" : "Pazarlama & Reklam" },
+    { href: "/admin/navigation", icon: Compass, label: isEn ? "Menu & Navigation" : "Menü & Navigasyon" },
+    { href: "/admin/media", icon: ImageIcon, label: isEn ? "Media Assets" : "Görsel Kütüphanesi" },
+    { href: "/admin/research", icon: TrendingUp, label: isEn ? "Market Research" : "Pazar Araştırması" },
     { href: "/admin/coupons", icon: Tag, label: t("admin.navigation.coupons") },
     { href: "/admin/reviews", icon: Star, label: t("admin.navigation.reviews") },
     { href: "/admin/audit", icon: FileText, label: t("admin.navigation.audit") },
@@ -42,7 +51,7 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
   ];
 
   return (
-    <aside className={cn("bg-slate-950 text-slate-100 rounded-xl p-4 shadow-lg flex flex-col gap-5 border border-slate-800", className)}>
+    <aside className={cn("bg-slate-950 text-slate-100 rounded-xl p-4 shadow-lg flex flex-col gap-4 border border-slate-800", className)}>
       {/* Admin Identity Header */}
       <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-xl">
         <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md">
@@ -55,7 +64,7 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
       </div>
 
       {/* Navigation Links List */}
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-0.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -65,26 +74,26 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 p-3 rounded-lg text-xs font-bold transition-all",
+                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all",
                 isActive
-                  ? "bg-slate-800 text-indigo-400 border-l-4 border-indigo-500 pl-2 shadow-xs"
+                  ? "bg-slate-800 text-indigo-400 border-l-3 border-indigo-500 pl-2 shadow-xs"
                   : "text-slate-400 hover:bg-slate-900 hover:text-white"
               )}
             >
-              <Icon className={cn("w-4 h-4", isActive ? "text-indigo-400" : "text-slate-500")} />
-              <span>{item.label}</span>
+              <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-indigo-400" : "text-slate-500")} />
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
 
         {/* Back to Public Marketplace Link */}
-        <div className="pt-3 border-t border-slate-900 mt-2">
+        <div className="pt-2 border-t border-slate-900 mt-2">
           <Link
             href="/"
-            className="flex items-center gap-2.5 p-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-amber-400 transition-colors"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-amber-400 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 text-amber-400" />
-            <span>{t("admin.navigation.viewMarketplace")}</span>
+            <ArrowLeft className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="truncate">{t("admin.navigation.viewMarketplace")}</span>
           </Link>
         </div>
       </nav>

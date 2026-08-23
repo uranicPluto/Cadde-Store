@@ -1503,6 +1503,714 @@ async function runTier1Tests() {
     }
   );
 
+  // ==========================================
+  // FEATURE 16: Marketing Campaigns & Sponsored Advertising Studio (AC3)
+  // ==========================================
+  await test(
+    "T1.16.1",
+    "Fetch marketing campaigns list via GET /api/marketing",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const res = await request("/api/marketing");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.campaigns), "Expected campaigns array");
+    }
+  );
+
+  let createdCampaignId;
+  await test(
+    "T1.16.2",
+    "Admin creates SPONSORED_PRODUCT campaign with budget and tracking via POST /api/marketing",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/marketing", {
+        method: "POST",
+        headers,
+        body: {
+          name: `Sonbahar İndirim Kampanyası ${Date.now()}`,
+          type: "SPONSORED_PRODUCT",
+          placement: "HOMEPAGE_HERO",
+          budget: 12000,
+          spent: 0,
+          priority: 5,
+          status: "ACTIVE",
+          impressions: 1500,
+          clicks: 120,
+          orders: 15,
+          revenue: 4500,
+        },
+      });
+      assertEqual(res.status, 201, "Expected 201 Created");
+      assert(res.data.campaign, "Expected campaign in response");
+      assertEqual(res.data.campaign.budget, 12000, "Budget should match");
+      createdCampaignId = res.data.campaign.id;
+    }
+  );
+
+  await test(
+    "T1.16.3",
+    "Fetch single marketing campaign details by ID via GET /api/marketing/[id]",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const res = await request(`/api/marketing/${createdCampaignId}`);
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(res.data.campaign, "Expected campaign object");
+      assertEqual(res.data.campaign.id, createdCampaignId, "Campaign ID should match");
+      assertEqual(res.data.campaign.status, "ACTIVE", "Status should be ACTIVE");
+    }
+  );
+
+  await test(
+    "T1.16.4",
+    "Admin updates campaign budget, status to PAUSED via PUT /api/marketing/[id]",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request(`/api/marketing/${createdCampaignId}`, {
+        method: "PUT",
+        headers,
+        body: {
+          budget: 18000,
+          status: "PAUSED",
+          spent: 2500,
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.campaign.status, "PAUSED", "Status should be PAUSED");
+      assertEqual(res.data.campaign.budget, 18000, "Budget should be 18000");
+    }
+  );
+
+  await test(
+    "T1.16.5",
+    "Admin deletes marketing campaign via DELETE /api/marketing/[id]",
+    "Marketing Campaigns & Sponsored Advertising Studio",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request(`/api/marketing/${createdCampaignId}`, {
+        method: "DELETE",
+        headers,
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.success, true, "Expected success true");
+
+      const checkRes = await request(`/api/marketing/${createdCampaignId}`);
+      assertEqual(checkRes.status, 404, "Campaign should not be found after deletion");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 17: Navigation Menu Governance & Hierarchies (AC4)
+  // ==========================================
+  await test(
+    "T1.17.1",
+    "Fetch dynamic navigation tree via GET /api/navigation with localized category structures",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const res = await request("/api/navigation?lang=tr");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.categories), "Expected categories array in navigation");
+      assert(res.data.categories.length > 0, "Categories should not be empty");
+    }
+  );
+
+  let createdNavParentId;
+  let createdNavChildId;
+  await test(
+    "T1.17.2",
+    "Create hierarchical navigation items with parent-child relationship in DB",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const parent = await prisma.navigationItem.create({
+        data: {
+          titleTr: "Elektronik & Bilgisayar",
+          titleEn: "Electronics & Computers",
+          url: "/category/elektronik",
+          section: "MEGA_MENU",
+          sortOrder: 1,
+          badgeTr: "YENİ",
+          badgeEn: "NEW",
+          isActive: true,
+        },
+      });
+      createdNavParentId = parent.id;
+
+      const child = await prisma.navigationItem.create({
+        data: {
+          titleTr: "Dizüstü Bilgisayarlar",
+          titleEn: "Laptops & Notebooks",
+          url: "/category/elektronik?sub=laptop",
+          section: "MEGA_MENU",
+          parentId: parent.id,
+          sortOrder: 1,
+          isActive: true,
+        },
+      });
+      createdNavChildId = child.id;
+
+      assert(createdNavParentId && createdNavChildId, "Navigation hierarchy created");
+    }
+  );
+
+  await test(
+    "T1.17.3",
+    "Fetch navigation item detail with nested children via GET /api/navigation/[id]",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const res = await request(`/api/navigation/${createdNavParentId}`);
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(res.data.item, "Expected navigation item");
+      assertEqual(res.data.item.id, createdNavParentId, "ID matches");
+      assert(Array.isArray(res.data.item.children), "Children array present");
+      assertEqual(res.data.item.children.length, 1, "Should have 1 child item");
+    }
+  );
+
+  await test(
+    "T1.17.4",
+    "Admin updates navigation item sort order and active status via PUT /api/navigation/[id]",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request(`/api/navigation/${createdNavParentId}`, {
+        method: "PUT",
+        headers,
+        body: {
+          sortOrder: 99,
+          badgeTr: "FIRSAT",
+          badgeEn: "DEAL",
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.item.sortOrder, 99, "Sort order updated");
+      assertEqual(res.data.item.badgeTr, "FIRSAT", "Badge updated");
+    }
+  );
+
+  await test(
+    "T1.17.5",
+    "Admin deletes navigation item and cascade removes children via DELETE /api/navigation/[id]",
+    "Navigation Menu Governance & Hierarchies",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request(`/api/navigation/${createdNavParentId}`, {
+        method: "DELETE",
+        headers,
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.success, true, "Delete should succeed");
+
+      const checkRes = await request(`/api/navigation/${createdNavParentId}`);
+      assertEqual(checkRes.status, 404, "Parent navigation item should be removed");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 18: Media Asset Library Management & Reference Tracking (AC12)
+  // ==========================================
+  await test(
+    "T1.18.1",
+    "Fetch media assets library via GET /api/media with search filtering",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const res = await request("/api/media");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.media || res.data.assets), "Expected media array");
+    }
+  );
+
+  let createdMediaId;
+  await test(
+    "T1.18.2",
+    "Admin uploads and indexes new media asset via POST /api/media",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/media", {
+        method: "POST",
+        headers,
+        body: {
+          filename: `hero-banner-${Date.now()}.webp`,
+          url: "https://images.unsplash.com/photo-1483985988355-763728e1935b",
+          mimeType: "image/webp",
+          sizeBytes: 312000,
+          width: 1920,
+          height: 800,
+          altTextTr: "Sonbahar İndirimi Afişi",
+          altTextEn: "Autumn Sale Banner",
+          tags: ["hero", "banner", "fashion"],
+          referenceCount: 3,
+        },
+      });
+      assertEqual(res.status, 201, "Expected 201 Created");
+      assert(res.data.media, "Expected media object in response");
+      createdMediaId = res.data.media.id;
+    }
+  );
+
+  await test(
+    "T1.18.3",
+    "Fetch single media asset metadata by ID via GET /api/media/[id]",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const res = await request(`/api/media/${createdMediaId}`);
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(res.data.media, "Expected media object");
+      assertEqual(res.data.media.id, createdMediaId, "ID should match");
+      assertEqual(res.data.media.referenceCount, 3, "Reference count matches");
+    }
+  );
+
+  await test(
+    "T1.18.4",
+    "Admin updates media asset metadata and reference count via PUT /api/media/[id]",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request(`/api/media/${createdMediaId}`, {
+        method: "PUT",
+        headers,
+        body: {
+          altTextTr: "Güncellenmiş Sonbahar Afişi",
+          referenceCount: 5,
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.media.altTextTr, "Güncellenmiş Sonbahar Afişi", "Alt text updated");
+      assertEqual(res.data.media.referenceCount, 5, "Reference count updated to 5");
+    }
+  );
+
+  await test(
+    "T1.18.5",
+    "Admin deletes media asset via DELETE /api/media/[id]",
+    "Media Asset Library Management & Reference Tracking",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request(`/api/media/${createdMediaId}`, {
+        method: "DELETE",
+        headers,
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.success, true, "Delete should succeed");
+
+      const checkRes = await request(`/api/media/${createdMediaId}`);
+      assertEqual(checkRes.status, 404, "Media asset should be deleted");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 19: Product Commercial Mutations & AuditLog Diffs (AC6)
+  // ==========================================
+  await test(
+    "T1.19.1",
+    "Admin updates product commercial pricing and stock via PUT /api/products/[id]",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const prod = await prisma.product.findFirst({ where: { status: "ACTIVE" } });
+      const newPrice = prod.price + 25.5;
+
+      const res = await request(`/api/products/${prod.id}`, {
+        method: "PUT",
+        headers,
+        body: {
+          price: newPrice,
+          stock: prod.stock + 5,
+        },
+      });
+
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.product.price, newPrice, "Price should be updated");
+    }
+  );
+
+  await test(
+    "T1.19.2",
+    "Verify immutable AuditLog record created for product price/stock modification",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const log = await prisma.auditLog.findFirst({
+        where: { action: "PRODUCT_UPDATED", entityType: "PRODUCT" },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(log, "AuditLog record must exist for PRODUCT_UPDATED");
+      assert(log.metadataJson, "metadataJson must be present");
+      const meta = JSON.parse(log.metadataJson);
+      assert(meta.price !== undefined, "AuditLog must capture new price in metadata");
+    }
+  );
+
+  await test(
+    "T1.19.3",
+    "Admin moderates product status via PUT /api/admin/products and logs audit entry",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const prod = await prisma.product.findFirst();
+      const res = await request("/api/admin/products", {
+        method: "PUT",
+        headers,
+        body: {
+          productId: prod.id,
+          status: "ACTIVE",
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.product.status, "ACTIVE", "Status should be ACTIVE");
+    }
+  );
+
+  await test(
+    "T1.19.4",
+    "Verify AuditLog record generated with PRODUCT_MODERATED action",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const log = await prisma.auditLog.findFirst({
+        where: { action: "PRODUCT_MODERATED" },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(log, "AuditLog for PRODUCT_MODERATED should exist");
+      assertEqual(log.actorRole, "ADMIN", "Actor role must be ADMIN");
+    }
+  );
+
+  await test(
+    "T1.19.5",
+    "Filter audit log records by entityType=PRODUCT via GET /api/admin/audit?entityType=PRODUCT",
+    "Product Commercial Mutations & AuditLog Diffs",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/audit?entityType=PRODUCT", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.logs), "Expected logs array");
+      res.data.logs.forEach((l) => {
+        assertEqual(l.entityType, "PRODUCT", "All filtered logs should have entityType PRODUCT");
+      });
+    }
+  );
+
+  // ==========================================
+  // FEATURE 20: Admin Order Fulfillment & Turkish Carrier Logistics (AC7)
+  // ==========================================
+  await test(
+    "T1.20.1",
+    "Admin retrieves order details with customer and seller groups via GET /api/orders/[id]",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const order = await prisma.order.findFirst({
+        include: { customer: true, orderGroups: true },
+      });
+      assert(order, "Order must exist in DB");
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request(`/api/orders/${order.id}`, { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(res.data.order, "Expected order in response");
+      assertEqual(res.data.order.id, order.id, "Order ID matches");
+    }
+  );
+
+  await test(
+    "T1.20.2",
+    "Seller/Admin updates order group status to SHIPPED with Turkish carrier code",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const group = await prisma.orderGroup.findFirst();
+      assert(group, "OrderGroup must exist");
+      const headers = await getAuthHeaders("ADMIN");
+      const trackingCode = `YK-${Date.now().toString().slice(-9)}`;
+
+      const res = await request("/api/orders/seller", {
+        method: "PUT",
+        headers,
+        body: {
+          orderGroupId: group.id,
+          status: "SHIPPED",
+          carrierName: "Yurtiçi Kargo",
+          trackingNumber: trackingCode,
+          note: "Sipariş Yurtiçi Kargo şubesine teslim edildi.",
+        },
+      });
+
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.orderGroup.status, "SHIPPED", "Status updated to SHIPPED");
+      assertEqual(res.data.orderGroup.trackingNumber, trackingCode, "Tracking code matches");
+    }
+  );
+
+  await test(
+    "T1.20.3",
+    "Verify OrderStatusHistory captures Turkish carrier name, tracking code, and note",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const history = await prisma.orderStatusHistory.findFirst({
+        where: { status: "SHIPPED" },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(history, "OrderStatusHistory for SHIPPED must exist");
+      assertContains(history.note, "Yurtiçi Kargo", "Note must mention carrier name");
+    }
+  );
+
+  await test(
+    "T1.20.4",
+    "Verify parent Order status and tracking number synchronized with OrderGroup",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const group = await prisma.orderGroup.findFirst({ where: { status: "SHIPPED" } });
+      if (group) {
+        const parentOrder = await prisma.order.findUnique({ where: { id: group.orderId } });
+        assert(parentOrder, "Parent order must exist");
+        assert(parentOrder.status === "SHIPPED" || parentOrder.status === "PROCESSING" || parentOrder.status === "DELIVERED", "Order status advanced");
+        assertEqual(parentOrder.carrierName, group.carrierName, "Carrier name synchronized");
+        assertEqual(parentOrder.trackingNumber, group.trackingNumber, "Tracking number synchronized");
+      }
+    }
+  );
+
+  await test(
+    "T1.20.5",
+    "Verify customer in-app notification created with tracking number and link",
+    "Admin Order Fulfillment & Turkish Carrier Logistics",
+    async () => {
+      const notif = await prisma.notification.findFirst({
+        where: { type: "ORDER" },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(notif, "Notification must exist");
+      assert(notif.userId, "Notification must target customer user");
+      assert(notif.linkUrl?.startsWith("/account/orders"), "Link must point to order detail");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 21: Seller Commission Configuration & Governance (AC10)
+  // ==========================================
+  await test(
+    "T1.21.1",
+    "Admin retrieves all marketplace sellers via GET /api/admin/sellers",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/sellers", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.sellers), "Expected sellers array");
+      assert(res.data.sellers.length > 0, "Sellers should not be empty");
+    }
+  );
+
+  await test(
+    "T1.21.2",
+    "Admin updates seller verification badge and ACTIVE status via PUT /api/admin/sellers",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const seller = await prisma.seller.findFirst();
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/sellers", {
+        method: "PUT",
+        headers,
+        body: {
+          sellerId: seller.id,
+          verified: true,
+          status: "ACTIVE",
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.seller.verified, true, "Verified should be true");
+      assertEqual(res.data.seller.status, "ACTIVE", "Status should be ACTIVE");
+    }
+  );
+
+  await test(
+    "T1.21.3",
+    "Admin configures platform default commission rate via PUT /api/admin/settings",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/settings", {
+        method: "PUT",
+        headers,
+        body: {
+          defaultCommissionRate: 12.5,
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.settings.defaultCommissionRate, 12.5, "Commission rate updated to 12.5%");
+    }
+  );
+
+  await test(
+    "T1.21.4",
+    "Verify AuditLog record generated for SELLER_STATUS_CHANGED",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const log = await prisma.auditLog.findFirst({
+        where: { action: "SELLER_STATUS_CHANGED" },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(log, "AuditLog record for SELLER_STATUS_CHANGED must exist");
+      assertEqual(log.entityType, "SELLER", "EntityType must be SELLER");
+    }
+  );
+
+  await test(
+    "T1.21.5",
+    "Verify non-admin receives 403 Forbidden when attempting seller status modification",
+    "Seller Commission Configuration & Governance",
+    async () => {
+      const seller = await prisma.seller.findFirst();
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const res = await request("/api/admin/sellers", {
+        method: "PUT",
+        headers: custHeaders,
+        body: {
+          sellerId: seller.id,
+          verified: false,
+        },
+      });
+      assertEqual(res.status, 403, "Expected 403 Forbidden for non-admin");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 22: Customer CRM Profile Analytics & Account Controls (AC11)
+  // ==========================================
+  await test(
+    "T1.22.1",
+    "Admin retrieves customer CRM list via GET /api/admin/customers",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/customers", { headers });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.customers), "Expected customers array");
+      assert(res.data.customers.length > 0, "Customers array should not be empty");
+    }
+  );
+
+  await test(
+    "T1.22.2",
+    "Verify customer CRM calculates ordersCount, totalSpent, and savedAddressesCount",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/customers", { headers });
+      const firstCust = res.data.customers[0];
+      assert(firstCust.name && firstCust.email, "Customer must have name and email");
+      assert(typeof firstCust.ordersCount === "number", "ordersCount should be number");
+      assert(typeof firstCust.totalSpent === "number", "totalSpent should be number");
+      assert(typeof firstCust.savedAddressesCount === "number", "savedAddressesCount should be number");
+    }
+  );
+
+  await test(
+    "T1.22.3",
+    "Verify customer CRM does not expose passwordHash or credentials",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/customers", { headers });
+      res.data.customers.forEach((c) => {
+        assertEqual(c.passwordHash, undefined, "passwordHash must not be exposed");
+        assertEqual(c.password, undefined, "password must not be exposed");
+      });
+    }
+  );
+
+  await test(
+    "T1.22.4",
+    "Admin updates customer account status via PUT /api/admin/customers",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const cust = await prisma.user.findFirst({ where: { role: "CUSTOMER" } });
+      const headers = await getAuthHeaders("ADMIN");
+      const res = await request("/api/admin/customers", {
+        method: "PUT",
+        headers,
+        body: {
+          customerId: cust.id,
+          status: "active",
+        },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.user.status, "active", "Status should be active");
+    }
+  );
+
+  await test(
+    "T1.22.5",
+    "Verify non-admin receives 403 Forbidden on GET & PUT /api/admin/customers",
+    "Customer CRM Profile Analytics & Account Controls",
+    async () => {
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const resGet = await request("/api/admin/customers", { headers: custHeaders });
+      assertEqual(resGet.status, 403, "Expected 403 Forbidden for GET");
+
+      const resPut = await request("/api/admin/customers", {
+        method: "PUT",
+        headers: custHeaders,
+        body: { customerId: "some-id", status: "blocked" },
+      });
+      assertEqual(resPut.status, 403, "Expected 403 Forbidden for PUT");
+    }
+  );
+
+  // ==========================================
+  // FEATURE 23: KVKK Compliance & Cookie Consent Management (R12 / AC15)
+  // ==========================================
+  await test(
+    "T1.23.1",
+    "Verify KVKK disclosure route (/kvkk) loads with 200 OK and valid policy content",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/kvkk");
+      assertEqual(res.status, 200, "Expected 200 OK for /kvkk");
+      assert(typeof res.data === "string", "HTML content returned");
+      assertContains(res.data, "KVKK", "KVKK content present in document");
+    }
+  );
+
+  await test(
+    "T1.23.2",
+    "Verify Privacy Policy route (/privacy) loads with 200 OK",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/privacy");
+      assertEqual(res.status, 200, "Expected 200 OK for /privacy");
+    }
+  );
+
+  await test(
+    "T1.23.3",
+    "Verify Distance Sales Agreement / Terms route (/terms) loads with 200 OK",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/terms");
+      assertEqual(res.status, 200, "Expected 200 OK for /terms");
+    }
+  );
+
+  await test(
+    "T1.23.4",
+    "Verify Help & Support Center route (/help) loads with 200 OK",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/help");
+      assertEqual(res.status, 200, "Expected 200 OK for /help");
+    }
+  );
+
+  await test(
+    "T1.23.5",
+    "Verify Shipping Policy route (/shipping) loads with 200 OK",
+    "KVKK Compliance & Cookie Consent Management",
+    async () => {
+      const res = await request("/shipping");
+      assertEqual(res.status, 200, "Expected 200 OK for /shipping");
+    }
+  );
+
   return results;
 }
 

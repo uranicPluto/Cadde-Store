@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { SearchComponent } from "@/components/marketplace/search-component";
@@ -5,6 +7,8 @@ import { AccountMenu } from "@/components/layout/account-menu";
 import { HeaderFavorites } from "@/components/layout/header-favorites";
 import { HeaderCart } from "@/components/layout/header-cart";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/cart/cart-context";
+import { useFavorites } from "@/lib/favorites/favorites-context";
 
 export interface MainHeaderProps {
   isLoggedInMock?: boolean;
@@ -17,10 +21,16 @@ export interface MainHeaderProps {
 export const MainHeader: React.FC<MainHeaderProps> = ({
   isLoggedInMock,
   onLoginToggleMock,
-  favoriteCount = 3,
-  cartCount = 2,
+  favoriteCount,
+  cartCount,
   className,
 }) => {
+  const { totalCount: liveCartCount } = useCart();
+  const { favoriteCount: liveFavCount } = useFavorites();
+
+  const activeCartCount = cartCount !== undefined ? cartCount : liveCartCount;
+  const activeFavCount = favoriteCount !== undefined ? favoriteCount : liveFavCount;
+
   return (
     <div
       className={cn(
@@ -59,8 +69,8 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
             isLoggedInMock={isLoggedInMock}
             onLoginToggleMock={onLoginToggleMock}
           />
-          <HeaderFavorites favoriteCount={favoriteCount} />
-          <HeaderCart cartCount={cartCount} />
+          <HeaderFavorites favoriteCount={activeFavCount} />
+          <HeaderCart cartCount={activeCartCount} />
         </div>
       </div>
     </div>

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { getFullCatalog, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { formatCurrency } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
 import {
@@ -23,160 +22,305 @@ import {
   CheckCircle2,
   Ban,
   Layers,
+  Sparkles,
+  Store,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Footer } from "@/components/layout/footer";
 
-const ADMIN_PRODUCTS_KEY = "cadde-store-admin-products";
+export interface DbProduct {
+  id: string;
+  sellerId: string;
+  categoryId: string;
+  brandId?: string | null;
+  name: string;
+  slug: string;
+  description: string;
+  brand: string;
+  sku: string;
+  price: number;
+  originalPrice?: number | null;
+  stock: number;
+  rating: number;
+  reviewCount: number;
+  imageUrl: string;
+  images?: string | string[];
+  colors?: string | string[];
+  sizes?: string | string[];
+  status: string; // ACTIVE | DRAFT | PENDING_REVIEW | REJECTED | INACTIVE
+  createdAt?: string;
+  updatedAt?: string;
+  seller?: {
+    id: string;
+    storeName: string;
+    slug: string;
+  };
+  category?: {
+    id: string;
+    nameTR: string;
+    nameEN: string;
+    slug: string;
+  };
+  badges?: {
+    bestseller?: boolean;
+    freeShipping?: boolean;
+    fastDelivery?: boolean;
+    flashSale?: boolean;
+  } | string;
+}
 
 export default function AdminProductsPage() {
   const { language, currency, t } = useLanguage();
   const isEn = language === "en";
 
-  const [products, setProducts] = useState<DetailedProductMock[]>([]);
+  const [products, setProducts] = useState<DbProduct[]>([]);
+  const [categories, setCategories] = useState<{ id: string; nameTR: string; nameEN: string; slug: string }[]>([]);
+  const [sellers, setSellers] = useState<{ id: string; storeName: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Partial<DetailedProductMock>>({});
+  const [editingProduct, setEditingProduct] = useState<Partial<DbProduct>>({});
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
 
   const showFeedback = (msg: string) => {
     setFeedbackMsg(msg);
-    setTimeout(() => setFeedbackMsg(null), 3000);
+    setTimeout(() => setFeedbackMsg(null), 3500);
   };
 
-  const loadProducts = () => {
-    const catalog = getFullCatalog(language);
+  const fetchProductsAndMetadata = async () => {
     try {
-      const saved = localStorage.getItem(ADMIN_PRODUCTS_KEY);
-      if (saved) {
-        setProducts(JSON.parse(saved));
-        return;
+      setLoading(true);
+      const [prodRes, catRes, sellerRes] = await Promise.all([
+        fetch("/api/admin/products").then((r) => (r.ok ? r.json() : { products: [] })),
+        fetch("/api/categories").then((r) => (r.ok ? r.json() : { categories: [] })),
+        fetch("/api/admin/sellers").then((r) => (r.ok ? r.json() : { sellers: [] })),
+      ]);
+
+      if (prodRes.products && prodRes.products.length > 0) {
+        setProducts(prodRes.products);
+      } else {
+        // Fallback to public products endpoint
+        const pubRes = await fetch("/api/products");
+        if (pubRes.ok) {
+          const pubData = await pubRes.json();
+          if (pubData.products) setProducts(pubData.products);
+        }
       }
-    } catch (e) {}
-    setProducts(catalog);
+
+      if (catRes.categories) setCategories(catRes.categories);
+      if (sellerRes.sellers) setSellers(sellerRes.sellers);
+    } catch (e) {
+      console.error("Failed to load products from API:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadProducts();
-  }, [language]);
+    fetchProductsAndMetadata();
+  }, []);
 
-  const saveProductsList = (updated: DetailedProductMock[]) => {
-    setProducts(updated);
+  const parseBadges = (badges: any) => {
+    if (!badges) return { bestseller: false, freeShipping: false, fastDelivery: false, flashSale: false };
+    if (typeof badges === "object") return badges;
     try {
-      localStorage.setItem(ADMIN_PRODUCTS_KEY, JSON.stringify(updated));
-    } catch (e) {}
+      return JSON.parse(badges);
+    } catch {
+      return { bestseller: false, freeShipping: false, fastDelivery: false, flashSale: false };
+    }
   };
 
   const handleOpenAdd = () => {
+    const defaultCat = categories[0]?.id || "cat-1";
+    const defaultSeller = sellers[0]?.id || "";
     setEditingProduct({
-      id: `p-${Date.now()}`,
-      slug: "",
       name: "",
       brand: "Cadde Collection",
-      categorySlug: "women",
-      categoryName: isEn ? "Women's Fashion" : "Kadın Giyim",
-      storeName: "Cadde Store Official",
-      price: 499.90,
-      originalPrice: 799.90,
+      categoryId: defaultCat,
+      sellerId: defaultSeller,
+      sku: `CAD-${Date.now().toString().slice(-6)}`,
+      price: 499.9,
+      originalPrice: 799.9,
       stock: 100,
       imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
-      galleryImages: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80"],
       description: isEn ? "High quality marketplace product." : "Yüksek kaliteli pazar yeri ürünü.",
-      specifications: {
-        [isEn ? "Material" : "Materyal"]: "100% Cotton",
-        [isEn ? "Origin" : "Menşei"]: "Türkiye",
-      },
-      rating: 4.8,
-      reviewCount: 24,
-      reviews: [],
+      status: "ACTIVE",
       badges: {
         bestseller: true,
-        fastDelivery: true,
         freeShipping: true,
+        fastDelivery: true,
       },
     });
     setIsAddModalOpen(true);
   };
 
-  const handleOpenEdit = (p: DetailedProductMock) => {
-    setEditingProduct({ ...p });
+  const handleOpenEdit = (p: DbProduct) => {
+    setEditingProduct({
+      ...p,
+      badges: parseBadges(p.badges),
+    });
     setIsEditModalOpen(true);
   };
 
-  const handleSaveAdd = (e: React.FormEvent) => {
+  const handleSaveAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingProduct.name || !editingProduct.price) return;
+    if (!editingProduct.name || !editingProduct.price || !editingProduct.categoryId) return;
 
-    const slug = editingProduct.slug || editingProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    const newProd = {
-      ...editingProduct,
-      slug,
-      id: editingProduct.id || `p-${Date.now()}`,
-      categorySlug: editingProduct.categorySlug || "women",
-      categoryName: editingProduct.categoryName || (isEn ? "Women's Fashion" : "Kadın Giyim"),
-      galleryImages: editingProduct.galleryImages || [editingProduct.imageUrl || ""],
-      specifications: editingProduct.specifications || {},
-      reviews: editingProduct.reviews || [],
-      rating: editingProduct.rating || 4.8,
-      reviewCount: editingProduct.reviewCount || 1,
-      stock: editingProduct.stock || 100,
-    } as DetailedProductMock;
+    try {
+      setActionLoading(true);
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...editingProduct,
+          price: Number(editingProduct.price),
+          originalPrice: editingProduct.originalPrice ? Number(editingProduct.originalPrice) : null,
+          stock: Number(editingProduct.stock || 0),
+          badges: JSON.stringify(editingProduct.badges || {}),
+        }),
+      });
 
-    const updated = [newProd, ...products];
-    saveProductsList(updated);
-    showFeedback(isEn ? "New product added to catalog" : "Yeni ürün kataloğa eklendi");
-    setIsAddModalOpen(false);
+      if (res.ok) {
+        showFeedback(isEn ? "Product created and saved to database" : "Ürün başarıyla veritabanına kaydedildi");
+        await fetchProductsAndMetadata();
+        setIsAddModalOpen(false);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Ürün eklenemedi");
+      }
+    } catch (err) {
+      console.error("Save product error:", err);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingProduct.id) return;
+    if (!editingProduct.id || !editingProduct.name || !editingProduct.price) return;
 
-    const updated = products.map((p) => (p.id === editingProduct.id ? ({ ...p, ...editingProduct } as DetailedProductMock) : p));
-    saveProductsList(updated);
-    showFeedback(isEn ? "Product updated successfully" : "Ürün başarıyla güncellendi");
-    setIsEditModalOpen(false);
+    try {
+      setActionLoading(true);
+      const res = await fetch(`/api/products/${editingProduct.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...editingProduct,
+          id: editingProduct.id,
+          productId: editingProduct.id,
+          price: Number(editingProduct.price),
+          originalPrice: editingProduct.originalPrice ? Number(editingProduct.originalPrice) : null,
+          stock: Number(editingProduct.stock || 0),
+          badges: JSON.stringify(editingProduct.badges || {}),
+        }),
+      });
+
+      if (!res.ok) {
+        // Fallback to top-level PUT /api/products
+        await fetch("/api/products", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...editingProduct,
+            id: editingProduct.id,
+            productId: editingProduct.id,
+            price: Number(editingProduct.price),
+            originalPrice: editingProduct.originalPrice ? Number(editingProduct.originalPrice) : null,
+            stock: Number(editingProduct.stock || 0),
+            badges: JSON.stringify(editingProduct.badges || {}),
+          }),
+        });
+      }
+
+      showFeedback(isEn ? "Product updated with audit trail" : "Ürün güncellendi ve denetim kaydı oluşturuldu");
+      await fetchProductsAndMetadata();
+      setIsEditModalOpen(false);
+    } catch (err) {
+      console.error("Edit product error:", err);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleDeleteProduct = (id: string, name: string) => {
-    if (!confirm(isEn ? `Delete ${name} from platform catalog?` : `${name} ürününü katalogdan silmek istediğinize emin misiniz?`)) {
+  const handleDeleteProduct = async (id: string, name: string) => {
+    if (!confirm(isEn ? `Permanently delete "${name}" from database catalog?` : `"${name}" ürününü veritabanından kalıcı olarak silmek istediğinize emin misiniz?`)) {
       return;
     }
-    const updated = products.filter((p) => p.id !== id);
-    saveProductsList(updated);
-    showFeedback(isEn ? "Product deleted" : "Ürün silindi");
+    try {
+      setActionLoading(true);
+      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        await fetch(`/api/products?id=${id}`, { method: "DELETE" });
+      }
+      showFeedback(isEn ? "Product deleted from catalog" : "Ürün katalogdan silindi");
+      await fetchProductsAndMetadata();
+    } catch (err) {
+      console.error("Delete product error:", err);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleToggleBestseller = (id: string) => {
-    const updated = products.map((p) =>
-      p.id === id ? { ...p, badges: { ...p.badges, bestseller: !p.badges?.bestseller } } : p
-    );
-    saveProductsList(updated);
-    showFeedback(isEn ? "Bestseller badge updated" : "Çok satan rozeti güncellendi");
-  };
+  const handleToggleBestseller = async (product: DbProduct) => {
+    const currentBadges = parseBadges(product.badges);
+    const newBadges = { ...currentBadges, bestseller: !currentBadges.bestseller };
 
-  const categories = Array.from(new Set(products.map((p) => p.categoryName || p.categorySlug)));
+    try {
+      setActionLoading(true);
+      await fetch(`/api/products/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: product.id,
+          badges: JSON.stringify(newBadges),
+        }),
+      });
+
+      // Update state optimistically
+      setProducts(
+        products.map((p) =>
+          p.id === product.id ? { ...p, badges: newBadges } : p
+        )
+      );
+      showFeedback(isEn ? "Bestseller badge updated" : "Çok satan rozeti güncellendi");
+    } catch (err) {
+      console.error("Toggle bestseller error:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const filtered = products.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.brand.toLowerCase().includes(search.toLowerCase()) ||
-      (p.storeName && p.storeName.toLowerCase().includes(search.toLowerCase()));
+      p.sku.toLowerCase().includes(search.toLowerCase()) ||
+      (p.seller?.storeName && p.seller.storeName.toLowerCase().includes(search.toLowerCase()));
 
-    const matchesCategory = categoryFilter === "ALL" || p.categoryName === categoryFilter || p.categorySlug === categoryFilter;
+    const catName = p.category ? (isEn ? p.category.nameEN : p.category.nameTR) : "";
+    const matchesCategory =
+      categoryFilter === "ALL" ||
+      p.categoryId === categoryFilter ||
+      p.category?.slug === categoryFilter ||
+      catName === categoryFilter;
+
+    const badges = parseBadges(p.badges);
     const matchesStatus =
       statusFilter === "ALL" ||
-      (statusFilter === "BESTSELLER" && p.badges?.bestseller) ||
-      (statusFilter === "FREESHIP" && p.badges?.freeShipping);
+      p.status === statusFilter ||
+      (statusFilter === "BESTSELLER" && badges.bestseller) ||
+      (statusFilter === "FREESHIP" && badges.freeShipping);
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
-
-  const countBadgeText = t("admin.products.countBadge").replace("{count}", String(filtered.length));
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
@@ -206,7 +350,7 @@ export default function AdminProductsPage() {
                   <h1 className="text-xl font-black text-text-main flex items-center gap-2">
                     <span>{t("admin.products.title")}</span>
                     <span className="text-xs bg-indigo-600 text-white font-extrabold px-2 py-0.5 rounded-full">
-                      {countBadgeText}
+                      {filtered.length} {isEn ? "Products" : "Ürün"}
                     </span>
                   </h1>
                   <span className="text-xs text-text-muted">{t("admin.products.subtitle")}</span>
@@ -248,8 +392,8 @@ export default function AdminProductsPage() {
                   >
                     <option value="ALL">{isEn ? "All Categories" : "Tüm Kategoriler"}</option>
                     {categories.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
+                      <option key={c.id} value={c.id}>
+                        {isEn ? c.nameEN : c.nameTR}
                       </option>
                     ))}
                   </select>
@@ -262,8 +406,10 @@ export default function AdminProductsPage() {
                     className="w-full h-9 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-medium"
                   >
                     <option value="ALL">{isEn ? "All Badges & Status" : "Tüm Durumlar"}</option>
+                    <option value="ACTIVE">{isEn ? "Status: ACTIVE" : "Durum: AKTİF"}</option>
+                    <option value="PENDING_REVIEW">{isEn ? "Status: PENDING REVIEW" : "Durum: ONAY BEKLEYEN"}</option>
                     <option value="BESTSELLER">{isEn ? "Bestsellers" : "Çok Satanlar"}</option>
-                    <option value="FREESHIP">{isEn ? "Free Cargo" : "Ücretsiz Kargo"}</option>
+                    <option value="FREESHIP">{isEn ? "Free Shipping" : "Ücretsiz Kargo"}</option>
                   </select>
                 </div>
               </div>
@@ -278,108 +424,137 @@ export default function AdminProductsPage() {
                       <th className="p-3">{t("admin.products.thCategory")}</th>
                       <th className="p-3">{t("admin.products.thPrice")}</th>
                       <th className="p-3">{t("admin.products.thStock")}</th>
-                      <th className="p-3">{isEn ? "Badges" : "Rozetler"}</th>
+                      <th className="p-3">{isEn ? "Badges & Status" : "Rozetler & Durum"}</th>
                       <th className="p-3 text-right">{t("admin.products.thActions")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {filtered.length === 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-text-muted">
+                          {isEn ? "Loading products from database..." : "Ürünler veritabanından yükleniyor..."}
+                        </td>
+                      </tr>
+                    ) : filtered.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="p-8 text-center text-text-muted">
                           {t("admin.products.noProductsFound")}
                         </td>
                       </tr>
                     ) : (
-                      filtered.map((p) => (
-                        <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="p-3">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={p.imageUrl}
-                                alt=""
-                                className="w-10 h-12 object-cover rounded border border-slate-200 shrink-0"
-                              />
-                              <div className="flex flex-col min-w-0">
-                                <span className="font-extrabold text-primary text-[11px] uppercase">{p.brand}</span>
-                                <Link
-                                  href={`/product/${p.slug}`}
-                                  target="_blank"
-                                  className="font-bold text-text-main line-clamp-1 hover:underline"
-                                >
-                                  {p.name}
-                                </Link>
+                      filtered.map((p) => {
+                        const badges = parseBadges(p.badges);
+
+                        return (
+                          <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="p-3">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={p.imageUrl}
+                                  alt=""
+                                  className="w-10 h-12 object-cover rounded border border-slate-200 shrink-0"
+                                />
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-extrabold text-primary text-[11px] uppercase">{p.brand}</span>
+                                  <Link
+                                    href={`/product/${p.slug}`}
+                                    target="_blank"
+                                    className="font-bold text-text-main line-clamp-1 hover:underline"
+                                  >
+                                    {p.name}
+                                  </Link>
+                                  <span className="text-[10px] text-slate-400 font-mono">SKU: {p.sku}</span>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="p-3 font-semibold text-slate-700">{p.storeName || "Cadde Store"}</td>
-                          <td className="p-3 font-semibold text-text-muted">{p.categoryName || p.categorySlug}</td>
-                          <td className="p-3 font-black text-text-main">
-                            <div className="flex flex-col">
-                              <span>{formatCurrency(p.price, currency)}</span>
-                              {p.originalPrice && (
-                                <span className="text-[10px] text-slate-400 line-through">
-                                  {formatCurrency(p.originalPrice, currency)}
+                            </td>
+                            <td className="p-3 font-semibold text-slate-700">{p.seller?.storeName || "Cadde Store"}</td>
+                            <td className="p-3 font-semibold text-text-muted">
+                              {p.category ? (isEn ? p.category.nameEN : p.category.nameTR) : "Genel"}
+                            </td>
+                            <td className="p-3 font-black text-text-main">
+                              <div className="flex flex-col">
+                                <span>{formatCurrency(p.price, currency)}</span>
+                                {p.originalPrice && (
+                                  <span className="text-[10px] text-slate-400 line-through">
+                                    {formatCurrency(p.originalPrice, currency)}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3 font-bold">
+                              <span className={p.stock <= 5 ? "text-rose-600 font-black" : "text-slate-900"}>
+                                {p.stock} Adet
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex flex-wrap items-center gap-1">
+                                <span
+                                  className={`px-1.5 py-0.5 rounded text-[9px] font-black border ${
+                                    p.status === "ACTIVE"
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                      : p.status === "PENDING_REVIEW"
+                                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                                      : "bg-slate-100 text-slate-600 border-slate-200"
+                                  }`}
+                                >
+                                  {p.status}
                                 </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-3 font-bold">{p.stock} Adet</td>
-                          <td className="p-3">
-                            <div className="flex items-center gap-1">
-                              {p.badges?.bestseller && (
-                                <span className="bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded text-[9px] font-black">
-                                  Çok Satan
-                                </span>
-                              )}
-                              {p.badges?.freeShipping && (
-                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded text-[9px] font-black">
-                                  Kargo Bedava
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => handleToggleBestseller(p.id)}
-                                title={isEn ? "Toggle Bestseller" : "Çok Satan Durumunu Değiştir"}
-                                className={`p-1.5 rounded-lg border transition-colors ${
-                                  p.badges?.bestseller
-                                    ? "bg-amber-50 text-amber-600 border-amber-200"
-                                    : "text-slate-400 border-slate-200 hover:bg-slate-50"
-                                }`}
-                              >
-                                <Flame className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleOpenEdit(p)}
-                                title={isEn ? "Edit" : "Düzenle"}
-                                className="p-1.5 text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition-colors"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <Link
-                                href={`/product/${p.slug}`}
-                                target="_blank"
-                                title={isEn ? "Preview on site" : "Sitede Gör"}
-                                className="p-1.5 text-slate-400 hover:text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </Link>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteProduct(p.id, p.name)}
-                                title={isEn ? "Delete" : "Sil"}
-                                className="p-1.5 text-rose-500 hover:text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                                {badges.bestseller && (
+                                  <span className="bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded text-[9px] font-black">
+                                    Çok Satan
+                                  </span>
+                                )}
+                                {badges.freeShipping && (
+                                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded text-[9px] font-black">
+                                    Kargo Bedava
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  disabled={actionLoading}
+                                  onClick={() => handleToggleBestseller(p)}
+                                  title={isEn ? "Toggle Bestseller" : "Çok Satan Durumunu Değiştir"}
+                                  className={`p-1.5 rounded-lg border transition-colors ${
+                                    badges.bestseller
+                                      ? "bg-amber-50 text-amber-600 border-amber-200"
+                                      : "text-slate-400 border-slate-200 hover:bg-slate-50"
+                                  }`}
+                                >
+                                  <Flame className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEdit(p)}
+                                  title={isEn ? "Edit" : "Düzenle"}
+                                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition-colors"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <Link
+                                  href={`/admin/products/${p.id}`}
+                                  title={isEn ? "View Detail / Moderation" : "Detay & Moderasyon"}
+                                  className="p-1.5 text-slate-400 hover:text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </Link>
+                                <button
+                                  type="button"
+                                  disabled={actionLoading}
+                                  onClick={() => handleDeleteProduct(p.id, p.name)}
+                                  title={isEn ? "Delete" : "Sil"}
+                                  className="p-1.5 text-rose-500 hover:text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -426,13 +601,45 @@ export default function AdminProductsPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="font-bold text-slate-700">{isEn ? "Seller / Store Name" : "Satıcı Mağaza Adı"}</label>
+              <label className="font-bold text-slate-700">{isEn ? "Category *" : "Kategori *"}</label>
+              <select
+                value={editingProduct.categoryId || ""}
+                onChange={(e) => setEditingProduct({ ...editingProduct, categoryId: e.target.value })}
+                className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg font-medium outline-none focus:border-indigo-600"
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {isEn ? c.nameEN : c.nameTR}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="font-bold text-slate-700">{isEn ? "SKU / Stock Code *" : "SKU / Barkod Kodu *"}</label>
               <input
                 type="text"
-                value={editingProduct.storeName || ""}
-                onChange={(e) => setEditingProduct({ ...editingProduct, storeName: e.target.value })}
-                className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg font-medium outline-none focus:border-indigo-600"
+                required
+                value={editingProduct.sku || ""}
+                onChange={(e) => setEditingProduct({ ...editingProduct, sku: e.target.value })}
+                className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg font-mono outline-none focus:border-indigo-600"
               />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="font-bold text-slate-700">{isEn ? "Status" : "Yayın Durumu"}</label>
+              <select
+                value={editingProduct.status || "ACTIVE"}
+                onChange={(e) => setEditingProduct({ ...editingProduct, status: e.target.value })}
+                className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg font-bold outline-none focus:border-indigo-600"
+              >
+                <option value="ACTIVE">{isEn ? "ACTIVE" : "AKTİF"}</option>
+                <option value="PENDING_REVIEW">{isEn ? "PENDING REVIEW" : "ONAY BEKLEYEN"}</option>
+                <option value="DRAFT">{isEn ? "DRAFT" : "TASLAK"}</option>
+                <option value="INACTIVE">{isEn ? "INACTIVE" : "PASİF"}</option>
+              </select>
             </div>
           </div>
 
@@ -497,11 +704,11 @@ export default function AdminProductsPage() {
             <label className="flex items-center gap-1.5 font-bold text-slate-800 cursor-pointer">
               <input
                 type="checkbox"
-                checked={editingProduct.badges?.bestseller ?? false}
+                checked={(editingProduct.badges as any)?.bestseller ?? false}
                 onChange={(e) =>
                   setEditingProduct({
                     ...editingProduct,
-                    badges: { ...editingProduct.badges, bestseller: e.target.checked },
+                    badges: { ...(editingProduct.badges as any), bestseller: e.target.checked },
                   })
                 }
                 className="w-4 h-4 text-indigo-600 rounded"
@@ -512,11 +719,11 @@ export default function AdminProductsPage() {
             <label className="flex items-center gap-1.5 font-bold text-slate-800 cursor-pointer">
               <input
                 type="checkbox"
-                checked={editingProduct.badges?.freeShipping ?? false}
+                checked={(editingProduct.badges as any)?.freeShipping ?? false}
                 onChange={(e) =>
                   setEditingProduct({
                     ...editingProduct,
-                    badges: { ...editingProduct.badges, freeShipping: e.target.checked },
+                    badges: { ...(editingProduct.badges as any), freeShipping: e.target.checked },
                   })
                 }
                 className="w-4 h-4 text-indigo-600 rounded"
@@ -527,11 +734,11 @@ export default function AdminProductsPage() {
             <label className="flex items-center gap-1.5 font-bold text-slate-800 cursor-pointer">
               <input
                 type="checkbox"
-                checked={editingProduct.badges?.fastDelivery ?? false}
+                checked={(editingProduct.badges as any)?.fastDelivery ?? false}
                 onChange={(e) =>
                   setEditingProduct({
                     ...editingProduct,
-                    badges: { ...editingProduct.badges, fastDelivery: e.target.checked },
+                    badges: { ...(editingProduct.badges as any), fastDelivery: e.target.checked },
                   })
                 }
                 className="w-4 h-4 text-indigo-600 rounded"
@@ -553,7 +760,13 @@ export default function AdminProductsPage() {
             >
               {isEn ? "Cancel" : "Vazgeç"}
             </Button>
-            <Button type="submit" variant="primary" size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={actionLoading}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+            >
               {isEn ? "Save Product" : "Ürünü Kaydet"}
             </Button>
           </div>

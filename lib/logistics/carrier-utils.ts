@@ -5,6 +5,7 @@ export const TURKISH_CARRIERS = [
   "Sürat Kargo",
   "PTT Kargo",
   "HepsiJet",
+  "Trendyol Express",
 ] as const;
 
 export type TurkishCarrier = (typeof TURKISH_CARRIERS)[number];
@@ -67,6 +68,14 @@ export const CARRIER_REGISTRY: Record<TurkishCarrier, CarrierInfo> = {
     trackingPlaceholder: "Örn: HJ-998822019 veya takip no",
     samplePrefix: "HJ",
   },
+  "Trendyol Express": {
+    name: "Trendyol Express",
+    code: "TEX",
+    website: "https://kargotakip.trendyol.com",
+    customerService: "0850 755 99 99",
+    trackingPlaceholder: "Örn: TEX-73829104 veya 10 haneli takip no",
+    samplePrefix: "TEX",
+  },
 };
 
 /**
@@ -95,6 +104,8 @@ export function getCarrierTrackingUrl(
       return `https://gonderitakip.ptt.gov.tr/Track/Verify?q=${cleanNumber}`;
     case "HepsiJet":
       return `https://www.hepsijet.com/gonderi-takibi/${cleanNumber}`;
+    case "Trendyol Express":
+      return `https://kargotakip.trendyol.com/?trackingNumber=${encodeURIComponent(trackingNumber.trim())}`;
     default:
       return `https://www.google.com/search?q=${encodeURIComponent(`${carrierName || "Kargo"} ${trackingNumber} takip`)}`;
   }

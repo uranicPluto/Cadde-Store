@@ -90,6 +90,7 @@ export async function PUT(request: Request, context: RouteParams) {
       images,
       colors,
       sizes,
+      badges,
       status,
     } = body;
 
@@ -117,9 +118,18 @@ export async function PUT(request: Request, context: RouteParams) {
         ...(sizes !== undefined
           ? { sizes: typeof sizes === "string" ? sizes : JSON.stringify(sizes) }
           : {}),
+        ...(badges !== undefined
+          ? { badges: typeof badges === "string" ? badges : JSON.stringify(badges) }
+          : {}),
         ...(status ? { status } : {}),
       },
     });
+
+    const diff = {
+      price: { before: existing.price, after: updated.price },
+      stock: { before: existing.stock, after: updated.stock },
+      status: { before: existing.status, after: updated.status },
+    };
 
     // Record AuditLog
     await prisma.auditLog.create({
@@ -132,6 +142,7 @@ export async function PUT(request: Request, context: RouteParams) {
         entityId: updated.id,
         metadataJson: JSON.stringify({
           name: updated.name,
+          diff,
           price: updated.price,
           stock: updated.stock,
           status: updated.status,
@@ -139,7 +150,7 @@ export async function PUT(request: Request, context: RouteParams) {
       },
     });
 
-    return NextResponse.json({ success: true, product: updated });
+    return NextResponse.json({ success: true, product: updated, diff });
   } catch (error) {
     console.error("PUT Product [id] API Error:", error);
     return NextResponse.json({ error: "Ürün güncellenemedi." }, { status: 500 });

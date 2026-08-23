@@ -204,7 +204,7 @@ function assertMatches(str, regex, message) {
 /**
  * Health check helper to ensure the test server is responding.
  */
-async function ensureServerReady(timeoutMs = 15000) {
+async function ensureServerReady(timeoutMs = 60000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {

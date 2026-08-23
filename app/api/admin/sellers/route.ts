@@ -35,6 +35,7 @@ export async function PUT(request: Request) {
       sellerId,
       verified,
       status,
+      commissionRate,
       storeName,
       description,
       logo,
@@ -62,8 +63,9 @@ export async function PUT(request: Request) {
     const seller = await prisma.seller.update({
       where: { id: sellerId },
       data: {
-        ...(verified !== undefined && session.role === "ADMIN" ? { verified } : {}),
+        ...(verified !== undefined && session.role === "ADMIN" ? { verified: Boolean(verified) } : {}),
         ...(status && session.role === "ADMIN" ? { status } : {}),
+        ...(commissionRate !== undefined && session.role === "ADMIN" ? { commissionRate: Number(commissionRate) } : {}),
         ...(storeName ? { storeName } : {}),
         ...(description ? { description } : {}),
         ...(logo ? { logo } : {}),
@@ -79,13 +81,14 @@ export async function PUT(request: Request) {
         actorId: session.id,
         actorEmail: session.email,
         actorRole: session.role,
-        action: "SELLER_STATUS_CHANGED",
+        action: status && status !== existing.status ? "SELLER_STATUS_CHANGED" : "SELLER_UPDATED",
         entityType: "SELLER",
         entityId: seller.id,
         metadataJson: JSON.stringify({
           storeName: seller.storeName,
           verified: seller.verified,
           status: seller.status,
+          commissionRate: seller.commissionRate,
         }),
       },
     });

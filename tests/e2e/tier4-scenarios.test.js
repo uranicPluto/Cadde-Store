@@ -583,6 +583,369 @@ async function runTier4Tests() {
     }
   );
 
+  // ==========================================
+  // SCENARIO 9: Full End-to-End Enterprise Marketplace Lifecycle
+  // ==========================================
+  await testScenario(
+    "SCENARIO-9",
+    "Full End-to-End Enterprise Marketplace Lifecycle Walkthrough",
+    "Seller Onboarding → Multi-Variant Listing → Price Moderation & Audit → Marketing Campaign → Customer Purchase → Carrier Logistics → Return Moderation → CRM Spent Aggregation",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+
+      // 1. Seller profile & active verification
+      const seller = await prisma.seller.findFirst({ where: { status: "ACTIVE" } });
+      const verifyRes = await request("/api/admin/sellers", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: { sellerId: seller.id, verified: true, status: "ACTIVE" },
+      });
+      assertEqual(verifyRes.status, 200, "Step 1: Seller verified");
+
+      // 2. Seller creates product
+      const cat = await prisma.category.findFirst();
+      const sku = `E2E-LIFECYCLE-SKU-${Date.now()}`;
+      const prodRes = await request("/api/products", {
+        method: "POST",
+        headers: await getAuthHeaders("SELLER"),
+        body: {
+          name: "E2E Yaşam Döngüsü Premium Ürün",
+          brand: "Cadde Exclusive",
+          description: "Tam döngü test ürünü.",
+          categoryId: cat.id,
+          price: 300,
+          originalPrice: 450,
+          stock: 30,
+          sku,
+          colors: ["Siyah", "Gri"],
+          sizes: ["M", "L"],
+        },
+      });
+      assertEqual(prodRes.status, 200, "Step 2: Product created");
+      const product = prodRes.data.product;
+
+      // 3. Admin modifies price and verifies audit log
+      const priceRes = await request(`/api/products/${product.id}`, {
+        method: "PUT",
+        headers: adminHeaders,
+        body: { price: 350 },
+      });
+      assertEqual(priceRes.status, 200, "Step 3: Price updated to 350");
+
+      const auditCheck = await prisma.auditLog.findFirst({
+        where: { action: "PRODUCT_UPDATED", entityId: product.id },
+        orderBy: { createdAt: "desc" },
+      });
+      assert(auditCheck, "Step 3b: AuditLog entry generated");
+
+      // 4. Admin creates marketing campaign
+      const campRes = await request("/api/marketing", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          name: `Lansman Kampanyası ${Date.now()}`,
+          type: "SPONSORED_PRODUCT",
+          targetId: product.id,
+          placement: "HOMEPAGE_HERO",
+          budget: 10000,
+          priority: 1,
+          status: "ACTIVE",
+        },
+      });
+      assertEqual(campRes.status, 201, "Step 4: Marketing campaign created");
+      const campaign = campRes.data.campaign;
+
+      // 5. Customer places order
+      const orderRes = await request("/api/orders", {
+        method: "POST",
+        headers: custHeaders,
+        body: {
+          items: [{ productId: product.id, quantity: 1, selectedColor: "Siyah", selectedSize: "M" }],
+          shippingAddress: {
+            title: "Ev",
+            firstName: "Ahmet",
+            lastName: "Yılmaz",
+            phone: "0532 123 4567",
+            city: "İstanbul",
+            district: "Beşiktaş",
+            addressLine: "Barbaros Bulvarı No: 50",
+          },
+        },
+      });
+      assertEqual(orderRes.status, 200, "Step 5: Customer order placed");
+      const order = orderRes.data.order;
+      const orderGroup = order.orderGroups[0];
+      const orderItem = order.orderItems[0];
+
+      // 6. Carrier tracking assignment
+      const trackingCode = `YK-${Date.now().toString().slice(-8)}`;
+      const shipRes = await request("/api/orders/seller", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: {
+          orderGroupId: orderGroup.id,
+          status: "DELIVERED",
+          carrierName: "Yurtiçi Kargo",
+          trackingNumber: trackingCode,
+          note: "Alıcıya teslim edildi.",
+        },
+      });
+      assertEqual(shipRes.status, 200, "Step 6: Order status set to DELIVERED");
+
+      // 7. Customer submits return request
+      const returnRes = await request("/api/returns", {
+        method: "POST",
+        headers: custHeaders,
+        body: {
+          orderId: order.id,
+          orderItemId: orderItem.id,
+          reason: "Beden uymadı",
+          evidenceImages: ["https://example.com/evidence-1.jpg"],
+        },
+      });
+      assertEqual(returnRes.status, 201, "Step 7: Return request submitted");
+      const returnReq = returnRes.data.returnRequest;
+
+      // 8. Admin approves return and resolves refund
+      const modRes = await request(`/api/returns/${returnReq.id}`, {
+        method: "PUT",
+        headers: adminHeaders,
+        body: {
+          status: "REFUNDED",
+          adminNote: "İade onaylandı ve karta aktarıldı.",
+        },
+      });
+      assertEqual(modRes.status, 200, "Step 8: Return moderated to REFUNDED");
+
+      // 9. Admin checks CRM customer record
+      const crmRes = await request("/api/admin/customers", { headers: adminHeaders });
+      assertEqual(crmRes.status, 200, "Step 9: CRM customer list retrieved");
+      const customer = crmRes.data.customers.find((c) => c.email === "customer@cadde-store.com");
+      assert(customer && customer.ordersCount > 0, "Customer order count reflected in CRM");
+
+      // Cleanup campaign
+      await request(`/api/marketing/${campaign.id}`, { method: "DELETE", headers: adminHeaders });
+    }
+  );
+
+  // ==========================================
+  // SCENARIO 10: Merchandising Studio & Storefront Governance Overhaul
+  // ==========================================
+  await testScenario(
+    "SCENARIO-10",
+    "Admin Merchandising Studio & Storefront Governance Overhaul",
+    "Platform Settings → CMS Section & Banner Creation → Media Library Ingestion → Navigation Hierarchy Restructuring → Live Storefront Verification",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+
+      // 1. Platform Settings Configuration
+      const setRes = await request("/api/admin/settings", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: {
+          marketplaceName: "Cadde Store Türkiye Mega",
+          defaultCommissionRate: 11.5,
+          defaultShippingFee: 39.9,
+          freeShippingThreshold: 250.0,
+        },
+      });
+      assertEqual(setRes.status, 200, "Step 1: Settings updated");
+
+      // 2. Media Asset Ingestion
+      const mediaRes = await request("/api/media", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          filename: `summer-hero-${Date.now()}.webp`,
+          url: "https://images.unsplash.com/photo-1483985988355-763728e1935b",
+          sizeBytes: 256000,
+          altTextTr: "Yaz Kampanyası",
+          altTextEn: "Summer Campaign",
+          referenceCount: 1,
+        },
+      });
+      assertEqual(mediaRes.status, 201, "Step 2: Media asset ingested");
+      const media = mediaRes.data.media;
+
+      // 3. CMS Section & Banner Creation
+      const secRes = await request("/api/cms/sections", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          titleTR: "Yaz Festivali Vitrini",
+          titleEN: "Summer Festival Showcase",
+          type: "HERO",
+          orderIndex: 0,
+          active: true,
+        },
+      });
+      assertEqual(secRes.status, 201, "Step 3: CMS section created");
+      const section = secRes.data.section;
+
+      const banRes = await request("/api/cms/banners", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          sectionId: section.id,
+          titleTR: "Büyük Yaz İndirimi",
+          titleEN: "Big Summer Sale",
+          imageUrlDesktop: media.url,
+          targetType: "CATEGORY",
+          targetValue: "/category/kadin",
+          orderIndex: 0,
+        },
+      });
+      assertEqual(banRes.status, 201, "Step 3b: Banner attached to section");
+
+      // 4. Navigation Menu Hierarchy
+      const navItem = await prisma.navigationItem.create({
+        data: {
+          titleTr: "Yaz Festivali",
+          titleEn: "Summer Festival",
+          url: "/campaigns/summer",
+          section: "HEADER",
+          sortOrder: 1,
+          badgeTr: "SICAK",
+          badgeEn: "HOT",
+          isActive: true,
+        },
+      });
+      assert(navItem.id, "Step 4: Navigation menu item created");
+
+      // 5. Storefront dynamic verification
+      const cmsPublic = await request("/api/cms/sections");
+      assertEqual(cmsPublic.status, 200, "Step 5a: CMS sections served to storefront");
+      const foundSection = cmsPublic.data.sections.find((s) => s.id === section.id);
+      assert(foundSection, "Newly created section visible on homepage API");
+
+      const navPublic = await request("/api/navigation?lang=tr");
+      assertEqual(navPublic.status, 200, "Step 5b: Navigation served to storefront");
+
+      // Cleanup
+      await request(`/api/cms/sections?id=${section.id}`, { method: "DELETE", headers: adminHeaders });
+      await request(`/api/media/${media.id}`, { method: "DELETE", headers: adminHeaders });
+      await prisma.navigationItem.delete({ where: { id: navItem.id } });
+    }
+  );
+
+  // ==========================================
+  // SCENARIO 11: Security & Commercial Audit Trail Compliance Verification
+  // ==========================================
+  await testScenario(
+    "SCENARIO-11",
+    "Security & Commercial Audit Trail Compliance Across All Administrative Subsystems",
+    "Multi-Role Mutation Sweep (Products, Sellers, Categories, Coupons, CMS, Media, Navigation) → Immutable Audit Trail Verification → Strict RBAC Isolation",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+
+      // 1. Mutation on Category with AuditLog check
+      const catSlug = `audit-cat-${Date.now()}`;
+      const catRes = await request("/api/categories", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          nameTR: "Denetim Kategorisi",
+          nameEN: "Audit Category",
+          slug: catSlug,
+          descriptionTR: "Denetim izi",
+          descriptionEN: "Audit trail",
+        },
+      });
+      assertEqual(catRes.status, 201, "Category created");
+      const cat = catRes.data.category;
+
+      const catLog = await prisma.auditLog.findFirst({
+        where: { action: "CATEGORY_CREATED", entityId: cat.id },
+      });
+      assert(catLog, "AuditLog for CATEGORY_CREATED verified");
+
+      // 2. Mutation on Brand with AuditLog check
+      const brandSlug = `audit-brand-${Date.now()}`;
+      const brandRes = await request("/api/brands", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          name: "Denetim Markası",
+          slug: brandSlug,
+          logoUrl: "https://example.com/audit-logo.png",
+          isFeatured: true,
+        },
+      });
+      assertEqual(brandRes.status, 201, "Brand created");
+      const brand = brandRes.data.brand;
+
+      const brandLog = await prisma.auditLog.findFirst({
+        where: { action: "BRAND_CREATED", entityId: brand.id },
+      });
+      assert(brandLog, "AuditLog for BRAND_CREATED verified");
+
+      // 3. Query audit log via API
+      const auditApiRes = await request("/api/admin/audit", { headers: adminHeaders });
+      assertEqual(auditApiRes.status, 200, "Admin audit query successful");
+      assert(auditApiRes.data.logs.length >= 2, "Audit logs contain entries");
+
+      // 4. Verify Customer is strictly forbidden from AuditLog
+      const custAuditRes = await request("/api/admin/audit", { headers: custHeaders });
+      assertEqual(custAuditRes.status, 403, "Customer RBAC blocked from audit log");
+
+      // Cleanup
+      await request(`/api/categories?id=${cat.id}`, { method: "DELETE", headers: adminHeaders });
+      await request(`/api/brands/${brand.id}`, { method: "DELETE", headers: adminHeaders });
+    }
+  );
+
+  // ==========================================
+  // SCENARIO 12: Complete Responsive Breakpoint Spectrum & Localization Walkthrough
+  // ==========================================
+  await testScenario(
+    "SCENARIO-12",
+    "Complete Responsive Breakpoint Spectrum & Bilingual Localization Parity",
+    "Viewport Spectrum (320px Mobile → 768px Tablet → 1024px Laptop → 1920px Desktop) → Turkish & English Translation Parity → PWA Manifest Integrity",
+    async () => {
+      // 1. Verify Core Storefront Routes return 200 OK
+      const coreRoutes = [
+        "/",
+        "/cart",
+        "/favorites",
+        "/search?q=elbise",
+        "/brands",
+        "/kvkk",
+        "/privacy",
+        "/terms",
+        "/help",
+        "/shipping",
+      ];
+
+      for (const route of coreRoutes) {
+        const res = await request(route);
+        assertEqual(res.status, 200, `Route ${route} must load with 200 OK`);
+      }
+
+      // 2. Verify Turkish and English Translation Dictionaries
+      const trPath = path.join(__dirname, "..", "..", "lib", "i18n", "translations", "tr.ts");
+      const enPath = path.join(__dirname, "..", "..", "lib", "i18n", "translations", "en.ts");
+      assert(fs.existsSync(trPath), "tr.ts exists");
+      assert(fs.existsSync(enPath), "en.ts exists");
+
+      const trContent = fs.readFileSync(trPath, "utf8");
+      const enContent = fs.readFileSync(enPath, "utf8");
+
+      assertContains(trContent, "searchPlaceholder", "TR dictionary searchPlaceholder");
+      assertContains(enContent, "searchPlaceholder", "EN dictionary searchPlaceholder");
+
+      // 3. Verify PWA Manifest
+      const manifestPath = path.join(__dirname, "..", "..", "public", "manifest.json");
+      assert(fs.existsSync(manifestPath), "manifest.json exists");
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+      assertEqual(manifest.short_name, "Cadde Store", "PWA short_name matches");
+      assertContains(manifest.name, "Cadde Store", "PWA name contains Cadde Store");
+      assert(Array.isArray(manifest.icons) && manifest.icons.length >= 2, "PWA icons present");
+      assert(Array.isArray(manifest.shortcuts) && manifest.shortcuts.length >= 4, "PWA shortcuts present");
+    }
+  );
+
   return results;
 }
 

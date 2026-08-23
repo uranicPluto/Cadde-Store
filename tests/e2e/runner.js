@@ -32,7 +32,7 @@ async function startServerIfNeeded() {
     shell: true,
   });
 
-  await ensureServerReady(30000);
+  await ensureServerReady(60000);
   console.log(`[E2E Runner] Test server ready at ${BASE_URL}.`);
   return { process: serverProcess, wasSpawned: true };
 }

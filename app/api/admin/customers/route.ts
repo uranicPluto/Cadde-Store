@@ -54,6 +54,22 @@ export async function PUT(request: Request) {
       data: { status },
     });
 
+    // Record AuditLog
+    await prisma.auditLog.create({
+      data: {
+        actorId: session.id,
+        actorEmail: session.email,
+        actorRole: session.role,
+        action: "CUSTOMER_STATUS_CHANGED",
+        entityType: "USER",
+        entityId: user.id,
+        metadataJson: JSON.stringify({
+          email: user.email,
+          status: user.status,
+        }),
+      },
+    });
+
     return NextResponse.json({ success: true, user });
   } catch (error) {
     console.error("PUT Admin Customer Status API Error:", error);

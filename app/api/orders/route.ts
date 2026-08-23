@@ -231,7 +231,7 @@ export async function POST(request: Request) {
 
     const shippingFee = serverSubtotal >= settings.freeShippingThreshold ? 0 : settings.defaultShippingFee;
     const grandTotal = Math.max(0, serverSubtotal - couponDiscount + shippingFee);
-    const orderNumber = `CS-${Date.now().toString().slice(-6)}`;
+    const orderNumber = `CS-${Date.now().toString().slice(-6)}${Math.floor(1000 + Math.random() * 9000)}`;
 
     // 6. Atomic Prisma Transaction (Fix 2 & Fix 8)
     const result = await prisma.$transaction(async (tx) => {
