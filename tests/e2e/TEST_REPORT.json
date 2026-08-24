@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-24T13:08:18.172Z",
+  "timestamp": "2026-08-24T13:45:56.209Z",
   "summary": {
     "total": 273,
     "passed": 273,
     "failed": 0,
     "passRate": "100.0%",
-    "totalDurationMs": 137873
+    "totalDurationMs": 121590
   },
   "tierSummary": {
     "tier1": {
@@ -36,7 +36,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 1,
       "status": "PASSED",
-      "duration": 456
+      "duration": 122
     },
     {
       "id": "T1.1.2",
@@ -44,7 +44,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 1,
       "status": "PASSED",
-      "duration": 142
+      "duration": 113
     },
     {
       "id": "T1.1.3",
@@ -52,7 +52,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 1,
       "status": "PASSED",
-      "duration": 130
+      "duration": 126
     },
     {
       "id": "T1.1.4",
@@ -60,7 +60,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1591
+      "duration": 83
     },
     {
       "id": "T1.1.5",
@@ -68,7 +68,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 1,
       "status": "PASSED",
-      "duration": 125
+      "duration": 128
     },
     {
       "id": "T1.2.1",
@@ -76,7 +76,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 1,
       "status": "PASSED",
-      "duration": 88
+      "duration": 255
     },
     {
       "id": "T1.2.2",
@@ -84,7 +84,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 1,
       "status": "PASSED",
-      "duration": 99
+      "duration": 80
     },
     {
       "id": "T1.2.3",
@@ -92,7 +92,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 1,
       "status": "PASSED",
-      "duration": 82
+      "duration": 78
     },
     {
       "id": "T1.2.4",
@@ -100,7 +100,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 1,
       "status": "PASSED",
-      "duration": 84
+      "duration": 91
     },
     {
       "id": "T1.2.5",
@@ -108,7 +108,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 1,
       "status": "PASSED",
-      "duration": 79
+      "duration": 78
     },
     {
       "id": "T1.3.1",
@@ -116,7 +116,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 1,
       "status": "PASSED",
-      "duration": 452
+      "duration": 529
     },
     {
       "id": "T1.3.2",
@@ -124,7 +124,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 1,
       "status": "PASSED",
-      "duration": 120
+      "duration": 83
     },
     {
       "id": "T1.3.3",
@@ -132,7 +132,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 1,
       "status": "PASSED",
-      "duration": 238
+      "duration": 204
     },
     {
       "id": "T1.3.4",
@@ -140,7 +140,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 1,
       "status": "PASSED",
-      "duration": 138
+      "duration": 95
     },
     {
       "id": "T1.3.5",
@@ -148,7 +148,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 1,
       "status": "PASSED",
-      "duration": 278
+      "duration": 240
     },
     {
       "id": "T1.4.1",
@@ -156,7 +156,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 1,
       "status": "PASSED",
-      "duration": 310
+      "duration": 187
     },
     {
       "id": "T1.4.2",
@@ -164,7 +164,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 1,
       "status": "PASSED",
-      "duration": 90
+      "duration": 76
     },
     {
       "id": "T1.4.3",
@@ -172,7 +172,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 1,
       "status": "PASSED",
-      "duration": 75
+      "duration": 79
     },
     {
       "id": "T1.4.4",
@@ -180,7 +180,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 1,
       "status": "PASSED",
-      "duration": 62
+      "duration": 75
     },
     {
       "id": "T1.4.5",
@@ -188,7 +188,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 1,
       "status": "PASSED",
-      "duration": 65
+      "duration": 74
     },
     {
       "id": "T1.5.1",
@@ -196,7 +196,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 1,
       "status": "PASSED",
-      "duration": 540
+      "duration": 254
     },
     {
       "id": "T1.5.2",
@@ -204,7 +204,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 1,
       "status": "PASSED",
-      "duration": 136
+      "duration": 97
     },
     {
       "id": "T1.5.3",
@@ -212,7 +212,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 1,
       "status": "PASSED",
-      "duration": 109
+      "duration": 104
     },
     {
       "id": "T1.5.4",
@@ -220,7 +220,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 1,
       "status": "PASSED",
-      "duration": 236
+      "duration": 127
     },
     {
       "id": "T1.5.5",
@@ -228,7 +228,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 1,
       "status": "PASSED",
-      "duration": 139
+      "duration": 87
     },
     {
       "id": "T1.6.1",
@@ -236,7 +236,7 @@
       "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
       "tier": 1,
       "status": "PASSED",
-      "duration": 19
+      "duration": 23
     },
     {
       "id": "T1.6.2",
@@ -276,7 +276,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 1,
       "status": "PASSED",
-      "duration": 491
+      "duration": 431
     },
     {
       "id": "T1.7.2",
@@ -284,7 +284,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 1,
       "status": "PASSED",
-      "duration": 189
+      "duration": 130
     },
     {
       "id": "T1.7.3",
@@ -292,7 +292,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 1,
       "status": "PASSED",
-      "duration": 192
+      "duration": 115
     },
     {
       "id": "T1.7.4",
@@ -308,7 +308,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 1,
       "status": "PASSED",
-      "duration": 181
+      "duration": 184
     },
     {
       "id": "T1.8.1",
@@ -316,7 +316,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 1,
       "status": "PASSED",
-      "duration": 390
+      "duration": 202
     },
     {
       "id": "T1.8.2",
@@ -324,7 +324,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 1,
       "status": "PASSED",
-      "duration": 2
+      "duration": 1
     },
     {
       "id": "T1.8.3",
@@ -340,7 +340,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 1,
       "status": "PASSED",
-      "duration": 55
+      "duration": 67
     },
     {
       "id": "T1.8.5",
@@ -356,7 +356,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 1,
       "status": "PASSED",
-      "duration": 103
+      "duration": 120
     },
     {
       "id": "T1.9.2",
@@ -364,7 +364,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 1,
       "status": "PASSED",
-      "duration": 791
+      "duration": 602
     },
     {
       "id": "T1.9.3",
@@ -372,7 +372,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 1,
       "status": "PASSED",
-      "duration": 121
+      "duration": 106
     },
     {
       "id": "T1.9.4",
@@ -380,7 +380,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 1,
       "status": "PASSED",
-      "duration": 872
+      "duration": 104
     },
     {
       "id": "T1.9.5",
@@ -388,7 +388,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 1,
       "status": "PASSED",
-      "duration": 3
+      "duration": 4
     },
     {
       "id": "T1.10.1",
@@ -396,7 +396,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 1,
       "status": "PASSED",
-      "duration": 332
+      "duration": 184
     },
     {
       "id": "T1.10.2",
@@ -404,7 +404,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 1,
       "status": "PASSED",
-      "duration": 179
+      "duration": 92
     },
     {
       "id": "T1.10.3",
@@ -412,7 +412,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 1,
       "status": "PASSED",
-      "duration": 295
+      "duration": 332
     },
     {
       "id": "T1.10.4",
@@ -420,7 +420,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 1,
       "status": "PASSED",
-      "duration": 2420
+      "duration": 93
     },
     {
       "id": "T1.10.5",
@@ -428,7 +428,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 1,
       "status": "PASSED",
-      "duration": 144
+      "duration": 86
     },
     {
       "id": "T1.11.1",
@@ -436,7 +436,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 1,
       "status": "PASSED",
-      "duration": 216
+      "duration": 219
     },
     {
       "id": "T1.11.2",
@@ -444,7 +444,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 1,
       "status": "PASSED",
-      "duration": 63
+      "duration": 75
     },
     {
       "id": "T1.11.3",
@@ -452,7 +452,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1505
+      "duration": 74
     },
     {
       "id": "T1.11.4",
@@ -460,7 +460,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 1,
       "status": "PASSED",
-      "duration": 3610
+      "duration": 511
     },
     {
       "id": "T1.11.5",
@@ -468,7 +468,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 1,
       "status": "PASSED",
-      "duration": 13295
+      "duration": 189
     },
     {
       "id": "T1.12.1",
@@ -476,7 +476,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 1,
       "status": "PASSED",
-      "duration": 10032
+      "duration": 116
     },
     {
       "id": "T1.12.2",
@@ -484,7 +484,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 1,
       "status": "PASSED",
-      "duration": 463
+      "duration": 1
     },
     {
       "id": "T1.12.3",
@@ -492,7 +492,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 1,
       "status": "PASSED",
-      "duration": 3802
+      "duration": 264
     },
     {
       "id": "T1.12.4",
@@ -500,7 +500,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1090
+      "duration": 100
     },
     {
       "id": "T1.12.5",
@@ -508,7 +508,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1088
+      "duration": 133
     },
     {
       "id": "T1.13.1",
@@ -516,7 +516,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1144
+      "duration": 176
     },
     {
       "id": "T1.13.2",
@@ -524,7 +524,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 1,
       "status": "PASSED",
-      "duration": 2033
+      "duration": 209
     },
     {
       "id": "T1.13.3",
@@ -532,7 +532,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 1,
       "status": "PASSED",
-      "duration": 76
+      "duration": 2
     },
     {
       "id": "T1.13.4",
@@ -540,7 +540,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 1,
       "status": "PASSED",
-      "duration": 136
+      "duration": 81
     },
     {
       "id": "T1.13.5",
@@ -548,7 +548,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 1,
       "status": "PASSED",
-      "duration": 64
+      "duration": 75
     },
     {
       "id": "T1.14.1",
@@ -556,7 +556,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 1,
       "status": "PASSED",
-      "duration": 329
+      "duration": 265
     },
     {
       "id": "T1.14.2",
@@ -564,7 +564,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 1,
       "status": "PASSED",
-      "duration": 3761
+      "duration": 293
     },
     {
       "id": "T1.14.3",
@@ -572,7 +572,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 1,
       "status": "PASSED",
-      "duration": 2126
+      "duration": 321
     },
     {
       "id": "T1.14.4",
@@ -580,7 +580,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1399
+      "duration": 256
     },
     {
       "id": "T1.14.5",
@@ -588,7 +588,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 1,
       "status": "PASSED",
-      "duration": 149
+      "duration": 128
     },
     {
       "id": "T1.15.1",
@@ -596,7 +596,7 @@
       "feature": "Turkish/English Localization & PWA Manifest",
       "tier": 1,
       "status": "PASSED",
-      "duration": 94
+      "duration": 9
     },
     {
       "id": "T1.15.2",
@@ -604,7 +604,7 @@
       "feature": "Turkish/English Localization & PWA Manifest",
       "tier": 1,
       "status": "PASSED",
-      "duration": 2
+      "duration": 1
     },
     {
       "id": "T1.15.3",
@@ -612,7 +612,7 @@
       "feature": "Turkish/English Localization & PWA Manifest",
       "tier": 1,
       "status": "PASSED",
-      "duration": 285
+      "duration": 2
     },
     {
       "id": "T1.15.4",
@@ -620,7 +620,7 @@
       "feature": "Turkish/English Localization & PWA Manifest",
       "tier": 1,
       "status": "PASSED",
-      "duration": 92
+      "duration": 1
     },
     {
       "id": "T1.15.5",
@@ -628,7 +628,7 @@
       "feature": "Turkish/English Localization & PWA Manifest",
       "tier": 1,
       "status": "PASSED",
-      "duration": 921
+      "duration": 394
     },
     {
       "id": "T1.16.1",
@@ -636,7 +636,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 952
+      "duration": 174
     },
     {
       "id": "T1.16.2",
@@ -644,7 +644,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 278
+      "duration": 93
     },
     {
       "id": "T1.16.3",
@@ -652,7 +652,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 12282
+      "duration": 528
     },
     {
       "id": "T1.16.4",
@@ -660,7 +660,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 631
+      "duration": 110
     },
     {
       "id": "T1.16.5",
@@ -668,7 +668,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 152
+      "duration": 160
     },
     {
       "id": "T1.17.1",
@@ -676,7 +676,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 1,
       "status": "PASSED",
-      "duration": 496
+      "duration": 237
     },
     {
       "id": "T1.17.2",
@@ -684,7 +684,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 1,
       "status": "PASSED",
-      "duration": 15
+      "duration": 41
     },
     {
       "id": "T1.17.3",
@@ -692,7 +692,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1170
+      "duration": 881
     },
     {
       "id": "T1.17.4",
@@ -700,7 +700,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 1,
       "status": "PASSED",
-      "duration": 108
+      "duration": 89
     },
     {
       "id": "T1.17.5",
@@ -708,7 +708,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 1,
       "status": "PASSED",
-      "duration": 164
+      "duration": 166
     },
     {
       "id": "T1.18.1",
@@ -716,7 +716,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 1,
       "status": "PASSED",
-      "duration": 368
+      "duration": 206
     },
     {
       "id": "T1.18.2",
@@ -724,7 +724,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 1,
       "status": "PASSED",
-      "duration": 84
+      "duration": 82
     },
     {
       "id": "T1.18.3",
@@ -732,7 +732,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1189
+      "duration": 582
     },
     {
       "id": "T1.18.4",
@@ -740,7 +740,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 1,
       "status": "PASSED",
-      "duration": 103
+      "duration": 111
     },
     {
       "id": "T1.18.5",
@@ -748,7 +748,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 1,
       "status": "PASSED",
-      "duration": 145
+      "duration": 163
     },
     {
       "id": "T1.19.1",
@@ -756,7 +756,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 1,
       "status": "PASSED",
-      "duration": 691
+      "duration": 603
     },
     {
       "id": "T1.19.2",
@@ -764,7 +764,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 1,
       "status": "PASSED",
-      "duration": 66
+      "duration": 4
     },
     {
       "id": "T1.19.3",
@@ -772,7 +772,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 1,
       "status": "PASSED",
-      "duration": 82
+      "duration": 93
     },
     {
       "id": "T1.19.4",
@@ -780,7 +780,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 1,
       "status": "PASSED",
-      "duration": 7
+      "duration": 4
     },
     {
       "id": "T1.19.5",
@@ -788,7 +788,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 1,
       "status": "PASSED",
-      "duration": 78
+      "duration": 71
     },
     {
       "id": "T1.20.1",
@@ -796,7 +796,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 1,
       "status": "PASSED",
-      "duration": 656
+      "duration": 555
     },
     {
       "id": "T1.20.2",
@@ -804,7 +804,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 1,
       "status": "PASSED",
-      "duration": 199
+      "duration": 111
     },
     {
       "id": "T1.20.3",
@@ -812,7 +812,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 1,
       "status": "PASSED",
-      "duration": 3
+      "duration": 2
     },
     {
       "id": "T1.20.4",
@@ -820,7 +820,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 1,
       "status": "PASSED",
-      "duration": 3
+      "duration": 2
     },
     {
       "id": "T1.20.5",
@@ -828,7 +828,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 1,
       "status": "PASSED",
-      "duration": 21
+      "duration": 3
     },
     {
       "id": "T1.21.1",
@@ -836,7 +836,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 1,
       "status": "PASSED",
-      "duration": 131
+      "duration": 118
     },
     {
       "id": "T1.21.2",
@@ -844,7 +844,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 1,
       "status": "PASSED",
-      "duration": 68
+      "duration": 144
     },
     {
       "id": "T1.21.3",
@@ -852,7 +852,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 1,
       "status": "PASSED",
-      "duration": 68
+      "duration": 111
     },
     {
       "id": "T1.21.4",
@@ -860,7 +860,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 1,
       "status": "PASSED",
-      "duration": 6
+      "duration": 4
     },
     {
       "id": "T1.21.5",
@@ -868,7 +868,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 1,
       "status": "PASSED",
-      "duration": 63
+      "duration": 58
     },
     {
       "id": "T1.22.1",
@@ -876,7 +876,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 1,
       "status": "PASSED",
-      "duration": 117
+      "duration": 233
     },
     {
       "id": "T1.22.2",
@@ -884,7 +884,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 1,
       "status": "PASSED",
-      "duration": 104
+      "duration": 106
     },
     {
       "id": "T1.22.3",
@@ -892,7 +892,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 1,
       "status": "PASSED",
-      "duration": 103
+      "duration": 107
     },
     {
       "id": "T1.22.4",
@@ -900,7 +900,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 1,
       "status": "PASSED",
-      "duration": 86
+      "duration": 111
     },
     {
       "id": "T1.22.5",
@@ -908,7 +908,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 1,
       "status": "PASSED",
-      "duration": 141
+      "duration": 125
     },
     {
       "id": "T1.23.1",
@@ -916,7 +916,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 1,
       "status": "PASSED",
-      "duration": 6490
+      "duration": 35868
     },
     {
       "id": "T1.23.2",
@@ -924,7 +924,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1058
+      "duration": 1469
     },
     {
       "id": "T1.23.3",
@@ -932,7 +932,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 1,
       "status": "PASSED",
-      "duration": 659
+      "duration": 525
     },
     {
       "id": "T1.23.4",
@@ -940,7 +940,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 1,
       "status": "PASSED",
-      "duration": 654
+      "duration": 1408
     },
     {
       "id": "T1.24.1",
@@ -948,7 +948,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 453
+      "duration": 841
     },
     {
       "id": "T1.24.2",
@@ -956,7 +956,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 189
+      "duration": 176
     },
     {
       "id": "T1.24.3",
@@ -964,7 +964,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 643
+      "duration": 568
     },
     {
       "id": "T1.24.4",
@@ -972,7 +972,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 426
+      "duration": 1584
     },
     {
       "id": "T1.24.5",
@@ -980,7 +980,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 127
+      "duration": 167
     },
     {
       "id": "T1.24.6",
@@ -988,7 +988,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1668
+      "duration": 1238
     },
     {
       "id": "T1.24.7",
@@ -996,7 +996,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 393
+      "duration": 380
     },
     {
       "id": "T1.24.8",
@@ -1004,7 +1004,7 @@
       "feature": "Visual Homepage Studio & Versioning",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1080
+      "duration": 1431
     },
     {
       "id": "T2.1.1",
@@ -1012,7 +1012,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 2,
       "status": "PASSED",
-      "duration": 159
+      "duration": 147
     },
     {
       "id": "T2.1.2",
@@ -1020,7 +1020,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 2,
       "status": "PASSED",
-      "duration": 83
+      "duration": 80
     },
     {
       "id": "T2.1.3",
@@ -1028,7 +1028,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 2,
       "status": "PASSED",
-      "duration": 105
+      "duration": 75
     },
     {
       "id": "T2.1.4",
@@ -1036,7 +1036,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 2,
       "status": "PASSED",
-      "duration": 116
+      "duration": 61
     },
     {
       "id": "T2.1.5",
@@ -1044,7 +1044,7 @@
       "feature": "Product Catalog & Multi-Faceted Filters",
       "tier": 2,
       "status": "PASSED",
-      "duration": 91
+      "duration": 140
     },
     {
       "id": "T2.2.1",
@@ -1052,7 +1052,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 2,
       "status": "PASSED",
-      "duration": 179
+      "duration": 110
     },
     {
       "id": "T2.2.2",
@@ -1060,7 +1060,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 2,
       "status": "PASSED",
-      "duration": 93
+      "duration": 302
     },
     {
       "id": "T2.2.3",
@@ -1068,7 +1068,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 2,
       "status": "PASSED",
-      "duration": 2
+      "duration": 1
     },
     {
       "id": "T2.2.4",
@@ -1076,7 +1076,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 2,
       "status": "PASSED",
-      "duration": 2
+      "duration": 1
     },
     {
       "id": "T2.2.5",
@@ -1084,7 +1084,7 @@
       "feature": "Product Detail, Variants & Installment Matrix",
       "tier": 2,
       "status": "PASSED",
-      "duration": 94
+      "duration": 73
     },
     {
       "id": "T2.3.1",
@@ -1092,7 +1092,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 2,
       "status": "PASSED",
-      "duration": 391
+      "duration": 77
     },
     {
       "id": "T2.3.2",
@@ -1100,7 +1100,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 2,
       "status": "PASSED",
-      "duration": 77
+      "duration": 109
     },
     {
       "id": "T2.3.3",
@@ -1108,7 +1108,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 2,
       "status": "PASSED",
-      "duration": 63
+      "duration": 68
     },
     {
       "id": "T2.3.4",
@@ -1116,7 +1116,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 2,
       "status": "PASSED",
-      "duration": 57
+      "duration": 77
     },
     {
       "id": "T2.3.5",
@@ -1124,7 +1124,7 @@
       "feature": "Cart Management & Guest-to-Auth Sync",
       "tier": 2,
       "status": "PASSED",
-      "duration": 59
+      "duration": 62
     },
     {
       "id": "T2.4.1",
@@ -1132,7 +1132,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 2,
       "status": "PASSED",
-      "duration": 344
+      "duration": 81
     },
     {
       "id": "T2.4.2",
@@ -1140,7 +1140,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 2,
       "status": "PASSED",
-      "duration": 64
+      "duration": 61
     },
     {
       "id": "T2.4.3",
@@ -1148,7 +1148,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 2,
       "status": "PASSED",
-      "duration": 53
+      "duration": 64
     },
     {
       "id": "T2.4.4",
@@ -1156,7 +1156,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 2,
       "status": "PASSED",
-      "duration": 56
+      "duration": 61
     },
     {
       "id": "T2.4.5",
@@ -1164,7 +1164,7 @@
       "feature": "Coupon Validation & Calculation Engine",
       "tier": 2,
       "status": "PASSED",
-      "duration": 62
+      "duration": 61
     },
     {
       "id": "T2.5.1",
@@ -1172,7 +1172,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 2,
       "status": "PASSED",
-      "duration": 312
+      "duration": 67
     },
     {
       "id": "T2.5.2",
@@ -1180,7 +1180,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 2,
       "status": "PASSED",
-      "duration": 62
+      "duration": 74
     },
     {
       "id": "T2.5.3",
@@ -1188,7 +1188,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 2,
       "status": "PASSED",
-      "duration": 73
+      "duration": 62
     },
     {
       "id": "T2.5.4",
@@ -1196,7 +1196,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 2,
       "status": "PASSED",
-      "duration": 79
+      "duration": 60
     },
     {
       "id": "T2.5.5",
@@ -1204,7 +1204,7 @@
       "feature": "Server-Authoritative Multi-Vendor Checkout",
       "tier": 2,
       "status": "PASSED",
-      "duration": 85
+      "duration": 65
     },
     {
       "id": "T2.6.1",
@@ -1212,7 +1212,7 @@
       "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 58
+      "duration": 59
     },
     {
       "id": "T2.6.2",
@@ -1220,7 +1220,7 @@
       "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 80
+      "duration": 65
     },
     {
       "id": "T2.6.3",
@@ -1228,7 +1228,7 @@
       "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 143
+      "duration": 174
     },
     {
       "id": "T2.6.4",
@@ -1236,7 +1236,7 @@
       "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 1
+      "duration": 0
     },
     {
       "id": "T2.6.5",
@@ -1244,7 +1244,7 @@
       "feature": "Two-Tier Order Hierarchy & Carrier Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 6
+      "duration": 5
     },
     {
       "id": "T2.7.1",
@@ -1252,7 +1252,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 2,
       "status": "PASSED",
-      "duration": 76
+      "duration": 86
     },
     {
       "id": "T2.7.2",
@@ -1260,7 +1260,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 2,
       "status": "PASSED",
-      "duration": 76
+      "duration": 90
     },
     {
       "id": "T2.7.3",
@@ -1268,7 +1268,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 2,
       "status": "PASSED",
-      "duration": 75
+      "duration": 73
     },
     {
       "id": "T2.7.4",
@@ -1276,7 +1276,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 2,
       "status": "PASSED",
-      "duration": 366
+      "duration": 91
     },
     {
       "id": "T2.7.5",
@@ -1284,7 +1284,7 @@
       "feature": "Order Status Transitions & Notifications",
       "tier": 2,
       "status": "PASSED",
-      "duration": 62
+      "duration": 66
     },
     {
       "id": "T2.8.1",
@@ -1292,7 +1292,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 2,
       "status": "PASSED",
-      "duration": 661
+      "duration": 187
     },
     {
       "id": "T2.8.2",
@@ -1300,7 +1300,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 2,
       "status": "PASSED",
-      "duration": 91
+      "duration": 74
     },
     {
       "id": "T2.8.3",
@@ -1308,7 +1308,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 2,
       "status": "PASSED",
-      "duration": 78
+      "duration": 60
     },
     {
       "id": "T2.8.4",
@@ -1316,7 +1316,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 2,
       "status": "PASSED",
-      "duration": 87
+      "duration": 144
     },
     {
       "id": "T2.8.5",
@@ -1324,7 +1324,7 @@
       "feature": "Customer Return Request & Evidence Upload",
       "tier": 2,
       "status": "PASSED",
-      "duration": 62
+      "duration": 59
     },
     {
       "id": "T2.9.1",
@@ -1332,7 +1332,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 2,
       "status": "PASSED",
-      "duration": 336
+      "duration": 85
     },
     {
       "id": "T2.9.2",
@@ -1340,7 +1340,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 2,
       "status": "PASSED",
-      "duration": 69
+      "duration": 99
     },
     {
       "id": "T2.9.3",
@@ -1348,7 +1348,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 2,
       "status": "PASSED",
-      "duration": 78
+      "duration": 68
     },
     {
       "id": "T2.9.4",
@@ -1356,7 +1356,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 2,
       "status": "PASSED",
-      "duration": 114
+      "duration": 160
     },
     {
       "id": "T2.9.5",
@@ -1364,7 +1364,7 @@
       "feature": "Seller & Admin Return Moderation & Refunds",
       "tier": 2,
       "status": "PASSED",
-      "duration": 76
+      "duration": 153
     },
     {
       "id": "T2.10.1",
@@ -1372,7 +1372,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 2,
       "status": "PASSED",
-      "duration": 486
+      "duration": 56
     },
     {
       "id": "T2.10.2",
@@ -1380,7 +1380,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 2,
       "status": "PASSED",
-      "duration": 364
+      "duration": 64
     },
     {
       "id": "T2.10.3",
@@ -1388,7 +1388,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 2,
       "status": "PASSED",
-      "duration": 66
+      "duration": 74
     },
     {
       "id": "T2.10.4",
@@ -1396,7 +1396,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 2,
       "status": "PASSED",
-      "duration": 83
+      "duration": 46
     },
     {
       "id": "T2.10.5",
@@ -1404,7 +1404,7 @@
       "feature": "Admin Homepage CMS Sections & Banners",
       "tier": 2,
       "status": "PASSED",
-      "duration": 73
+      "duration": 62
     },
     {
       "id": "T2.11.1",
@@ -1412,7 +1412,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 2,
       "status": "PASSED",
-      "duration": 471
+      "duration": 69
     },
     {
       "id": "T2.11.2",
@@ -1420,7 +1420,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 2,
       "status": "PASSED",
-      "duration": 105
+      "duration": 101
     },
     {
       "id": "T2.11.3",
@@ -1428,7 +1428,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 2,
       "status": "PASSED",
-      "duration": 478
+      "duration": 80
     },
     {
       "id": "T2.11.4",
@@ -1436,7 +1436,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 2,
       "status": "PASSED",
-      "duration": 86
+      "duration": 67
     },
     {
       "id": "T2.11.5",
@@ -1444,7 +1444,7 @@
       "feature": "Dedicated Brand Directory & Admin Panel",
       "tier": 2,
       "status": "PASSED",
-      "duration": 22
+      "duration": 4
     },
     {
       "id": "T2.12.1",
@@ -1452,7 +1452,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 2,
       "status": "PASSED",
-      "duration": 403
+      "duration": 79
     },
     {
       "id": "T2.12.2",
@@ -1460,7 +1460,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 2,
       "status": "PASSED",
-      "duration": 72
+      "duration": 71
     },
     {
       "id": "T2.12.3",
@@ -1468,7 +1468,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 2,
       "status": "PASSED",
-      "duration": 73
+      "duration": 66
     },
     {
       "id": "T2.12.4",
@@ -1476,7 +1476,7 @@
       "feature": "Seller Product Management & Stock Alerts",
       "tier": 2,
       "status": "PASSED",
-      "duration": 76
+      "duration": 71
     },
     {
       "id": "T2.12.5",
@@ -1492,7 +1492,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 2,
       "status": "PASSED",
-      "duration": 61
+      "duration": 57
     },
     {
       "id": "T2.13.2",
@@ -1500,7 +1500,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 2,
       "status": "PASSED",
-      "duration": 73
+      "duration": 60
     },
     {
       "id": "T2.13.3",
@@ -1508,7 +1508,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 2,
       "status": "PASSED",
-      "duration": 13
+      "duration": 9
     },
     {
       "id": "T2.13.4",
@@ -1516,7 +1516,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 2,
       "status": "PASSED",
-      "duration": 66
+      "duration": 75
     },
     {
       "id": "T2.13.5",
@@ -1524,7 +1524,7 @@
       "feature": "Seller Review Replies & Custom Storefront",
       "tier": 2,
       "status": "PASSED",
-      "duration": 66
+      "duration": 60
     },
     {
       "id": "T2.14.1",
@@ -1532,7 +1532,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 2,
       "status": "PASSED",
-      "duration": 122
+      "duration": 123
     },
     {
       "id": "T2.14.2",
@@ -1540,7 +1540,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 2,
       "status": "PASSED",
-      "duration": 74
+      "duration": 53
     },
     {
       "id": "T2.14.3",
@@ -1548,7 +1548,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 2,
       "status": "PASSED",
-      "duration": 63
+      "duration": 67
     },
     {
       "id": "T2.14.4",
@@ -1556,7 +1556,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 2,
       "status": "PASSED",
-      "duration": 85
+      "duration": 110
     },
     {
       "id": "T2.14.5",
@@ -1564,7 +1564,7 @@
       "feature": "Admin Governance, Audit Trail & RBAC",
       "tier": 2,
       "status": "PASSED",
-      "duration": 54
+      "duration": 73
     },
     {
       "id": "T2.15.1",
@@ -1572,7 +1572,7 @@
       "feature": "Turkish/English Localization & PWA Manifest",
       "tier": 2,
       "status": "PASSED",
-      "duration": 3
+      "duration": 1
     },
     {
       "id": "T2.15.2",
@@ -1588,7 +1588,7 @@
       "feature": "Turkish/English Localization & PWA Manifest",
       "tier": 2,
       "status": "PASSED",
-      "duration": 2
+      "duration": 1
     },
     {
       "id": "T2.15.4",
@@ -1612,7 +1612,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 94
+      "duration": 112
     },
     {
       "id": "T2.16.2",
@@ -1620,7 +1620,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 63
+      "duration": 66
     },
     {
       "id": "T2.16.3",
@@ -1628,7 +1628,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 59
+      "duration": 63
     },
     {
       "id": "T2.16.4",
@@ -1636,7 +1636,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 71
+      "duration": 72
     },
     {
       "id": "T2.16.5",
@@ -1644,7 +1644,7 @@
       "feature": "Marketing Campaigns & Sponsored Advertising Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 101
+      "duration": 115
     },
     {
       "id": "T2.17.1",
@@ -1652,7 +1652,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 2,
       "status": "PASSED",
-      "duration": 13
+      "duration": 5
     },
     {
       "id": "T2.17.2",
@@ -1660,7 +1660,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 2,
       "status": "PASSED",
-      "duration": 78
+      "duration": 86
     },
     {
       "id": "T2.17.3",
@@ -1668,7 +1668,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 2,
       "status": "PASSED",
-      "duration": 6
+      "duration": 5
     },
     {
       "id": "T2.17.4",
@@ -1676,7 +1676,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 2,
       "status": "PASSED",
-      "duration": 81
+      "duration": 83
     },
     {
       "id": "T2.17.5",
@@ -1684,7 +1684,7 @@
       "feature": "Navigation Menu Governance & Hierarchies",
       "tier": 2,
       "status": "PASSED",
-      "duration": 61
+      "duration": 72
     },
     {
       "id": "T2.18.1",
@@ -1692,7 +1692,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 105
+      "duration": 141
     },
     {
       "id": "T2.18.2",
@@ -1700,7 +1700,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 79
+      "duration": 107
     },
     {
       "id": "T2.18.3",
@@ -1708,7 +1708,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 54
+      "duration": 68
     },
     {
       "id": "T2.18.4",
@@ -1716,7 +1716,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 61
+      "duration": 85
     },
     {
       "id": "T2.18.5",
@@ -1724,7 +1724,7 @@
       "feature": "Media Asset Library Management & Reference Tracking",
       "tier": 2,
       "status": "PASSED",
-      "duration": 75
+      "duration": 99
     },
     {
       "id": "T2.19.1",
@@ -1732,7 +1732,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 2,
       "status": "PASSED",
-      "duration": 62
+      "duration": 82
     },
     {
       "id": "T2.19.2",
@@ -1740,7 +1740,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 2,
       "status": "PASSED",
-      "duration": 58
+      "duration": 71
     },
     {
       "id": "T2.19.3",
@@ -1748,7 +1748,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 2,
       "status": "PASSED",
-      "duration": 13
+      "duration": 3290
     },
     {
       "id": "T2.19.4",
@@ -1756,7 +1756,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 2,
       "status": "PASSED",
-      "duration": 57
+      "duration": 5257
     },
     {
       "id": "T2.19.5",
@@ -1764,7 +1764,7 @@
       "feature": "Product Commercial Mutations & AuditLog Diffs",
       "tier": 2,
       "status": "PASSED",
-      "duration": 77
+      "duration": 83
     },
     {
       "id": "T2.20.1",
@@ -1772,7 +1772,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 2,
       "status": "PASSED",
-      "duration": 67
+      "duration": 1912
     },
     {
       "id": "T2.20.2",
@@ -1780,7 +1780,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 2,
       "status": "PASSED",
-      "duration": 59
+      "duration": 65
     },
     {
       "id": "T2.20.3",
@@ -1788,7 +1788,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 2,
       "status": "PASSED",
-      "duration": 107
+      "duration": 13736
     },
     {
       "id": "T2.20.4",
@@ -1796,7 +1796,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 2,
       "status": "PASSED",
-      "duration": 93
+      "duration": 164
     },
     {
       "id": "T2.20.5",
@@ -1804,7 +1804,7 @@
       "feature": "Admin Order Fulfillment & Turkish Carrier Logistics",
       "tier": 2,
       "status": "PASSED",
-      "duration": 64
+      "duration": 94
     },
     {
       "id": "T2.21.1",
@@ -1812,7 +1812,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 2,
       "status": "PASSED",
-      "duration": 79
+      "duration": 105
     },
     {
       "id": "T2.21.2",
@@ -1820,7 +1820,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 2,
       "status": "PASSED",
-      "duration": 94
+      "duration": 101
     },
     {
       "id": "T2.21.3",
@@ -1828,7 +1828,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 2,
       "status": "PASSED",
-      "duration": 71
+      "duration": 81
     },
     {
       "id": "T2.21.4",
@@ -1836,7 +1836,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 2,
       "status": "PASSED",
-      "duration": 44
+      "duration": 82
     },
     {
       "id": "T2.21.5",
@@ -1844,7 +1844,7 @@
       "feature": "Seller Commission Configuration & Governance",
       "tier": 2,
       "status": "PASSED",
-      "duration": 66
+      "duration": 104
     },
     {
       "id": "T2.22.1",
@@ -1852,7 +1852,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 2,
       "status": "PASSED",
-      "duration": 165
+      "duration": 166
     },
     {
       "id": "T2.22.2",
@@ -1860,7 +1860,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 2,
       "status": "PASSED",
-      "duration": 98
+      "duration": 70
     },
     {
       "id": "T2.22.3",
@@ -1868,7 +1868,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 2,
       "status": "PASSED",
-      "duration": 75
+      "duration": 69
     },
     {
       "id": "T2.22.4",
@@ -1876,7 +1876,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 2,
       "status": "PASSED",
-      "duration": 83
+      "duration": 72
     },
     {
       "id": "T2.22.5",
@@ -1884,7 +1884,7 @@
       "feature": "Customer CRM Profile Analytics & Account Controls",
       "tier": 2,
       "status": "PASSED",
-      "duration": 147
+      "duration": 106
     },
     {
       "id": "T2.23.1",
@@ -1892,7 +1892,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 2,
       "status": "PASSED",
-      "duration": 284
+      "duration": 132
     },
     {
       "id": "T2.23.2",
@@ -1900,7 +1900,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 2,
       "status": "PASSED",
-      "duration": 121
+      "duration": 124
     },
     {
       "id": "T2.23.3",
@@ -1908,7 +1908,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 2,
       "status": "PASSED",
-      "duration": 117
+      "duration": 127
     },
     {
       "id": "T2.23.4",
@@ -1916,7 +1916,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 2,
       "status": "PASSED",
-      "duration": 147
+      "duration": 166
     },
     {
       "id": "T2.23.5",
@@ -1924,7 +1924,7 @@
       "feature": "KVKK Compliance & Cookie Consent Management",
       "tier": 2,
       "status": "PASSED",
-      "duration": 1095
+      "duration": 1136
     },
     {
       "id": "T3.1",
@@ -1932,7 +1932,7 @@
       "feature": "Seller Grouping + Coupons + Checkout",
       "tier": 3,
       "status": "PASSED",
-      "duration": 305
+      "duration": 228
     },
     {
       "id": "T3.2",
@@ -1940,7 +1940,7 @@
       "feature": "Multi-Vendor Logistics & Fulfillment",
       "tier": 3,
       "status": "PASSED",
-      "duration": 210
+      "duration": 786
     },
     {
       "id": "T3.3",
@@ -1948,7 +1948,7 @@
       "feature": "Returns & Refunds Lifecycle + Notifications",
       "tier": 3,
       "status": "PASSED",
-      "duration": 277
+      "duration": 295
     },
     {
       "id": "T3.4",
@@ -1956,7 +1956,7 @@
       "feature": "Returns & Refunds Lifecycle + Moderation",
       "tier": 3,
       "status": "PASSED",
-      "duration": 110
+      "duration": 164
     },
     {
       "id": "T3.5",
@@ -1964,7 +1964,7 @@
       "feature": "CMS Merchandising + Homepage API",
       "tier": 3,
       "status": "PASSED",
-      "duration": 365
+      "duration": 319
     },
     {
       "id": "T3.6",
@@ -1972,7 +1972,7 @@
       "feature": "Brand Directory + Product Catalog",
       "tier": 3,
       "status": "PASSED",
-      "duration": 207
+      "duration": 486
     },
     {
       "id": "T3.7",
@@ -1980,7 +1980,7 @@
       "feature": "Guest-to-Auth Sync + Checkout",
       "tier": 3,
       "status": "PASSED",
-      "duration": 189
+      "duration": 224
     },
     {
       "id": "T3.8",
@@ -1988,7 +1988,7 @@
       "feature": "Seller Portal + Customer Reviews",
       "tier": 3,
       "status": "PASSED",
-      "duration": 165
+      "duration": 248
     },
     {
       "id": "T3.9",
@@ -1996,7 +1996,7 @@
       "feature": "Admin Governance + Seller Operations",
       "tier": 3,
       "status": "PASSED",
-      "duration": 95
+      "duration": 125
     },
     {
       "id": "T3.10",
@@ -2004,7 +2004,7 @@
       "feature": "Coupon Engine + Atomic Checkout",
       "tier": 3,
       "status": "PASSED",
-      "duration": 183
+      "duration": 228
     },
     {
       "id": "T3.11",
@@ -2012,7 +2012,7 @@
       "feature": "Coupon Engine + Customer Redemptions",
       "tier": 3,
       "status": "PASSED",
-      "duration": 170
+      "duration": 201
     },
     {
       "id": "T3.12",
@@ -2020,7 +2020,7 @@
       "feature": "Admin Settings + Checkout Calculation",
       "tier": 3,
       "status": "PASSED",
-      "duration": 2723
+      "duration": 424
     },
     {
       "id": "T3.13",
@@ -2028,7 +2028,7 @@
       "feature": "Product Catalog Search & Filters",
       "tier": 3,
       "status": "PASSED",
-      "duration": 72
+      "duration": 83
     },
     {
       "id": "T3.14",
@@ -2036,7 +2036,7 @@
       "feature": "Admin Governance & Security Audit Trail",
       "tier": 3,
       "status": "PASSED",
-      "duration": 147
+      "duration": 170
     },
     {
       "id": "T3.15",
@@ -2044,7 +2044,7 @@
       "feature": "In-App Notification Engine",
       "tier": 3,
       "status": "PASSED",
-      "duration": 222
+      "duration": 286
     },
     {
       "id": "T3.16",
@@ -2052,7 +2052,7 @@
       "feature": "Role-Based Access Control (RBAC)",
       "tier": 3,
       "status": "PASSED",
-      "duration": 599
+      "duration": 625
     },
     {
       "id": "T3.17",
@@ -2060,7 +2060,7 @@
       "feature": "CMS Merchandising + Homepage Engine",
       "tier": 3,
       "status": "PASSED",
-      "duration": 548
+      "duration": 1422
     },
     {
       "id": "T3.18",
@@ -2068,7 +2068,7 @@
       "feature": "Product Pricing + Audit Trail + Checkout",
       "tier": 3,
       "status": "PASSED",
-      "duration": 224
+      "duration": 706
     },
     {
       "id": "T3.19",
@@ -2076,7 +2076,7 @@
       "feature": "Logistics Fulfillment + Notifications",
       "tier": 3,
       "status": "PASSED",
-      "duration": 353
+      "duration": 711
     },
     {
       "id": "T3.20",
@@ -2084,7 +2084,7 @@
       "feature": "Marketing Studio + Search Indexing",
       "tier": 3,
       "status": "PASSED",
-      "duration": 531
+      "duration": 611
     },
     {
       "id": "T3.21",
@@ -2092,7 +2092,7 @@
       "feature": "Navigation Menu + Public Storefront",
       "tier": 3,
       "status": "PASSED",
-      "duration": 248
+      "duration": 1090
     },
     {
       "id": "T3.22",
@@ -2100,7 +2100,7 @@
       "feature": "Media Library + Asset Reference Tracking",
       "tier": 3,
       "status": "PASSED",
-      "duration": 330
+      "duration": 469
     },
     {
       "id": "T3.23",
@@ -2108,7 +2108,7 @@
       "feature": "Seller Governance + AuditLog Trail",
       "tier": 3,
       "status": "PASSED",
-      "duration": 101
+      "duration": 122
     },
     {
       "id": "T3.24",
@@ -2116,7 +2116,7 @@
       "feature": "Customer CRM + Address Sync + Checkout",
       "tier": 3,
       "status": "PASSED",
-      "duration": 453
+      "duration": 640
     },
     {
       "id": "SCENARIO-1",
@@ -2124,7 +2124,7 @@
       "description": "Search → Product Detail → Cart → Coupon Validation → Atomic Checkout → Split OrderGroups → Stock Decrement",
       "tier": 4,
       "status": "PASSED",
-      "duration": 282
+      "duration": 351
     },
     {
       "id": "SCENARIO-2",
@@ -2132,7 +2132,7 @@
       "description": "Customer Return Request → Seller Notification → Moderation Approval → Refund Trigger",
       "tier": 4,
       "status": "PASSED",
-      "duration": 290
+      "duration": 521
     },
     {
       "id": "SCENARIO-3",
@@ -2140,7 +2140,7 @@
       "description": "Create Campaign Section → Add Banners → Feature Flagship Brand → Verify Dynamic CMS Delivery",
       "tier": 4,
       "status": "PASSED",
-      "duration": 374
+      "duration": 498
     },
     {
       "id": "SCENARIO-4",
@@ -2148,7 +2148,7 @@
       "description": "Seller Profile Setup → Multi-Variant Product Listing → Customer Review → Seller Reply",
       "tier": 4,
       "status": "PASSED",
-      "duration": 310
+      "duration": 2847
     },
     {
       "id": "SCENARIO-5",
@@ -2156,7 +2156,7 @@
       "description": "Bilingual TR/EN Parity → TRY/USD Support → KVKK Compliance → PWA Manifest",
       "tier": 4,
       "status": "PASSED",
-      "duration": 66
+      "duration": 1648
     },
     {
       "id": "SCENARIO-6",
@@ -2164,7 +2164,7 @@
       "description": "Register / Login → Address Book Sync → Default Address Selection → Favorite Management",
       "tier": 4,
       "status": "PASSED",
-      "duration": 471
+      "duration": 1368
     },
     {
       "id": "SCENARIO-7",
@@ -2172,7 +2172,7 @@
       "description": "Admin Settings Update → Seller Moderation → Security Audit Trail Verification",
       "tier": 4,
       "status": "PASSED",
-      "duration": 246
+      "duration": 243
     },
     {
       "id": "SCENARIO-8",
@@ -2180,7 +2180,7 @@
       "description": "Order Placement → Seller Fulfillment → Carrier Code Assignment (Yurtiçi, Aras, MNG, Sürat, PTT, HepsiJet) → Tracking Progression",
       "tier": 4,
       "status": "PASSED",
-      "duration": 314
+      "duration": 266
     },
     {
       "id": "SCENARIO-9",
@@ -2188,7 +2188,7 @@
       "description": "Seller Onboarding → Multi-Variant Listing → Price Moderation & Audit → Marketing Campaign → Customer Purchase → Carrier Logistics → Return Moderation → CRM Spent Aggregation",
       "tier": 4,
       "status": "PASSED",
-      "duration": 1065
+      "duration": 917
     },
     {
       "id": "SCENARIO-10",
@@ -2196,7 +2196,7 @@
       "description": "Platform Settings → CMS Section & Banner Creation → Media Library Ingestion → Navigation Hierarchy Restructuring → Live Storefront Verification",
       "tier": 4,
       "status": "PASSED",
-      "duration": 692
+      "duration": 650
     },
     {
       "id": "SCENARIO-11",
@@ -2204,7 +2204,7 @@
       "description": "Multi-Role Mutation Sweep (Products, Sellers, Categories, Coupons, CMS, Media, Navigation) → Immutable Audit Trail Verification → Strict RBAC Isolation",
       "tier": 4,
       "status": "PASSED",
-      "duration": 509
+      "duration": 459
     },
     {
       "id": "SCENARIO-12",
@@ -2212,7 +2212,7 @@
       "description": "Viewport Spectrum (320px Mobile → 768px Tablet → 1024px Laptop → 1920px Desktop) → Turkish & English Translation Parity → PWA Manifest Integrity",
       "tier": 4,
       "status": "PASSED",
-      "duration": 15983
+      "duration": 4969
     }
   ]
 }

@@ -71,12 +71,25 @@ export interface DbProduct {
   } | string;
 }
 
+const DEFAULT_FALLBACK_CATEGORIES = [
+  { id: "cat-kadin", nameTR: "Kadın Giyim & Moda", nameEN: "Women's Fashion", slug: "kadin" },
+  { id: "cat-erkek", nameTR: "Erkek Giyim & Moda", nameEN: "Men's Fashion", slug: "erkek" },
+  { id: "cat-cocuk", nameTR: "Çocuk & Bebek", nameEN: "Kids & Baby", slug: "cocuk" },
+  { id: "cat-elektronik", nameTR: "Elektronik & Teknoloji", nameEN: "Electronics & Tech", slug: "elektronik" },
+  { id: "cat-ev-yasam", nameTR: "Ev & Yaşam", nameEN: "Home & Living", slug: "ev-yasam" },
+  { id: "cat-kozmetik", nameTR: "Kozmetik & Kişisel Bakım", nameEN: "Beauty & Personal Care", slug: "kozmetik" },
+  { id: "cat-ayakkabi-canta", nameTR: "Ayakkabı & Çanta", nameEN: "Shoes & Bags", slug: "ayakkabi-canta" },
+  { id: "cat-spor", nameTR: "Spor & Outdoor", nameEN: "Sports & Outdoor", slug: "spor" },
+  { id: "cat-supermarket", nameTR: "Süpermarket & Gıda", nameEN: "Supermarket & Food", slug: "supermarket" },
+  { id: "cat-kitap", nameTR: "Kitap, Müzik & Hobi", nameEN: "Books, Music & Hobbies", slug: "kitap-kirtasiye" },
+];
+
 export default function AdminProductsPage() {
   const { language, currency, t } = useLanguage();
   const isEn = language === "en";
 
   const [products, setProducts] = useState<DbProduct[]>([]);
-  const [categories, setCategories] = useState<{ id: string; nameTR: string; nameEN: string; slug: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; nameTR: string; nameEN: string; slug: string }[]>(DEFAULT_FALLBACK_CATEGORIES);
   const [sellers, setSellers] = useState<{ id: string; storeName: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -115,10 +128,16 @@ export default function AdminProductsPage() {
         }
       }
 
-      if (catRes.categories) setCategories(catRes.categories);
+      if (catRes.categories && Array.isArray(catRes.categories) && catRes.categories.length > 0) {
+        setCategories(catRes.categories);
+      } else {
+        setCategories(DEFAULT_FALLBACK_CATEGORIES);
+      }
+
       if (sellerRes.sellers) setSellers(sellerRes.sellers);
     } catch (e) {
       console.error("Failed to load products from API:", e);
+      setCategories(DEFAULT_FALLBACK_CATEGORIES);
     } finally {
       setLoading(false);
     }
@@ -603,13 +622,14 @@ export default function AdminProductsPage() {
             <div className="flex flex-col gap-1">
               <label className="font-bold text-slate-700">{isEn ? "Category *" : "Kategori *"}</label>
               <select
-                value={editingProduct.categoryId || ""}
+                required
+                value={editingProduct.categoryId || categories[0]?.id || ""}
                 onChange={(e) => setEditingProduct({ ...editingProduct, categoryId: e.target.value })}
-                className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg font-medium outline-none focus:border-indigo-600"
+                className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-900 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
               >
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {isEn ? c.nameEN : c.nameTR}
+                  <option key={c.id || c.slug} value={c.id || c.slug}>
+                    {isEn ? c.nameEN || c.nameTR : c.nameTR || c.nameEN}
                   </option>
                 ))}
               </select>
