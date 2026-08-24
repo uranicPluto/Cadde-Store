@@ -13,6 +13,7 @@ import { SectionSettingsInspector } from "@/components/admin/homepage-studio/sec
 import { SectionLibraryModal } from "@/components/admin/homepage-studio/section-library-modal";
 import { SectionPreviewModal } from "@/components/admin/homepage-studio/section-preview-modal";
 import { VersionHistoryModal } from "@/components/admin/homepage-studio/version-history-modal";
+import { Modal } from "@/components/ui/modal";
 import {
   Sliders,
   Monitor,
@@ -29,6 +30,10 @@ import {
   AlertCircle,
   Plus,
   Bookmark,
+  PanelRightClose,
+  PanelRightOpen,
+  Send,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -44,6 +49,7 @@ export default function AdminHomepageStudioPage() {
   const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [currentVersion, setCurrentVersion] = useState<number>(1);
   const [isDraftDirty, setIsDraftDirty] = useState<boolean>(false);
+  const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(true);
 
   // Loading & Feedback
   const [loading, setLoading] = useState(true);
@@ -56,6 +62,7 @@ export default function AdminHomepageStudioPage() {
   const [insertIndex, setInsertIndex] = useState<number | undefined>(undefined);
   const [previewSection, setPreviewSection] = useState<SectionItem | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   const showNotice = (type: "success" | "error", text: string) => {
     setFeedback({ type, text });
@@ -205,6 +212,7 @@ export default function AdminHomepageStudioPage() {
     next.forEach((s, idx) => (s.orderIndex = idx));
     pushState(next);
     setSelectedSectionId(clonedId);
+    setIsInspectorOpen(true);
     showNotice("success", isEn ? "Section duplicated." : "Bölüm çoğaltıldı.");
   };
 
@@ -258,6 +266,7 @@ export default function AdminHomepageStudioPage() {
     next.forEach((s, idx) => (s.orderIndex = idx));
     pushState(next);
     setSelectedSectionId(newId);
+    setIsInspectorOpen(true);
     showNotice("success", isEn ? "Section added to layout." : "Yeni bölüm eklendi.");
   };
 
@@ -285,17 +294,7 @@ export default function AdminHomepageStudioPage() {
   };
 
   // 5. Publish to Live Storefront
-  const handlePublish = async () => {
-    if (
-      !confirm(
-        isEn
-          ? "Deploy these changes to the LIVE storefront now?"
-          : "Bu vitrin düzenini şimdi CANLI mağazada yayınlamak istiyor musunuz?"
-      )
-    ) {
-      return;
-    }
-
+  const handleExecutePublish = async () => {
     setPublishing(true);
     try {
       const res = await fetch("/api/cms/homepage/publish", {
@@ -311,6 +310,7 @@ export default function AdminHomepageStudioPage() {
         const data = await res.json();
         setCurrentVersion(data.versionNumber);
         setIsDraftDirty(false);
+        setIsPublishModalOpen(false);
         showNotice(
           "success",
           isEn
@@ -397,7 +397,7 @@ export default function AdminHomepageStudioPage() {
               }`}
             >
               <Monitor className="w-3.5 h-3.5" />
-              <span>{isEn ? "Desktop" : "Masaüstü"}</span>
+              <span>{isEn ? "Desktop (100%)" : "Masaüstü"}</span>
             </button>
             <button
               type="button"
@@ -425,7 +425,7 @@ export default function AdminHomepageStudioPage() {
             </button>
           </div>
 
-          {/* Right: Actions (Templates, History, Live Preview, Save Draft, Publish) */}
+          {/* Right: Actions */}
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -460,13 +460,22 @@ export default function AdminHomepageStudioPage() {
 
             <Button
               size="sm"
-              disabled={publishing}
-              onClick={handlePublish}
+              onClick={() => setIsPublishModalOpen(true)}
               className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm flex items-center gap-1.5"
             >
               <Rocket className="w-3.5 h-3.5" />
-              <span>{publishing ? (isEn ? "Publishing..." : "Yayınlanıyor...") : isEn ? "Publish Live" : "Canlıya Al"}</span>
+              <span>{isEn ? "Publish Live" : "Canlıya Al"}</span>
             </Button>
+
+            {/* Toggle Inspector Pane Button */}
+            <button
+              type="button"
+              onClick={() => setIsInspectorOpen(!isInspectorOpen)}
+              className="p-2 text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 transition-colors"
+              title={isInspectorOpen ? (isEn ? "Hide Inspector" : "Paneli Gizle") : isEn ? "Show Inspector" : "Paneli Göster"}
+            >
+              {isInspectorOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
@@ -497,14 +506,20 @@ export default function AdminHomepageStudioPage() {
           </div>
         )}
 
-        {/* 3-Column Studio Workspace */}
+        {/* Responsive Studio Visual Layout */}
         <div className="flex-1 grid grid-cols-12 gap-4 p-4 min-h-0 overflow-hidden bg-slate-100">
           {/* Left Column: Homepage Navigator Tree (3 cols) */}
           <div className="col-span-3 h-full min-h-0">
             <HomepageNavigatorTree
               sections={sections}
               selectedSectionId={selectedSectionId}
-              onSelectSection={setSelectedSectionId}
+              onSelectSection={(id) => {
+                setSelectedSectionId(id);
+              }}
+              onEditSection={(sec) => {
+                setSelectedSectionId(sec.id);
+                setIsInspectorOpen(true);
+              }}
               onMoveUp={handleMoveUp}
               onMoveDown={handleMoveDown}
               onToggleActive={handleToggleActive}
@@ -519,15 +534,22 @@ export default function AdminHomepageStudioPage() {
             />
           </div>
 
-          {/* Center Column: Live Responsive Canvas (6 cols) */}
-          <div className="col-span-5 h-full min-h-0">
+          {/* Center Column: Live Responsive Canvas (9 cols when inspector closed, 5 cols when open) */}
+          <div className={`${isInspectorOpen ? "col-span-5" : "col-span-9"} h-full min-h-0 transition-all duration-300`}>
             <HomepageCanvas
               sections={sections}
               selectedSectionId={selectedSectionId}
               viewport={viewport}
-              onSelectSection={setSelectedSectionId}
+              onSelectSection={(id) => {
+                setSelectedSectionId(id);
+              }}
+              onEditSection={(sec) => {
+                setSelectedSectionId(sec.id);
+                setIsInspectorOpen(true);
+              }}
               onMoveUp={handleMoveUp}
               onMoveDown={handleMoveDown}
+              onToggleActive={handleToggleActive}
               onDuplicateSection={handleDuplicateSection}
               onDeleteSection={handleDeleteSection}
               onOpenPreview={setPreviewSection}
@@ -539,17 +561,20 @@ export default function AdminHomepageStudioPage() {
             />
           </div>
 
-          {/* Right Column: Contextual Section Settings Inspector (4 cols) */}
-          <div className="col-span-4 h-full min-h-0">
-            <SectionSettingsInspector
-              section={selectedSection}
-              onUpdateSection={handleUpdateSection}
-              onDuplicateSection={handleDuplicateSection}
-              onDeleteSection={handleDeleteSection}
-              onOpenSectionPreview={setPreviewSection}
-              isEn={isEn}
-            />
-          </div>
+          {/* Right Column: Contextual Section Settings Inspector (4 cols, collapsible) */}
+          {isInspectorOpen && (
+            <div className="col-span-4 h-full min-h-0 animate-in fade-in slide-in-from-right-4 duration-200">
+              <SectionSettingsInspector
+                section={selectedSection}
+                onUpdateSection={handleUpdateSection}
+                onDuplicateSection={handleDuplicateSection}
+                onDeleteSection={handleDeleteSection}
+                onOpenSectionPreview={setPreviewSection}
+                onClose={() => setIsInspectorOpen(false)}
+                isEn={isEn}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -586,6 +611,56 @@ export default function AdminHomepageStudioPage() {
         }}
         isEn={isEn}
       />
+
+      {/* Pre-Publish Confirmation Gate Modal */}
+      <Modal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        title={isEn ? "Ready to Publish Live Storefront?" : "Canlı Mağazada Yayınlamaya Hazır Mısınız?"}
+      >
+        <div className="flex flex-col gap-4 text-xs p-1">
+          <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-900 flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+            <div className="flex flex-col gap-1">
+              <span className="font-extrabold">{isEn ? "Publish Summary" : "Yayın Özeti"}</span>
+              <p className="text-slate-600 font-medium">
+                {isEn
+                  ? `You are about to deploy ${sections.length} homepage blocks to the production storefront. A new version snapshot (v${currentVersion + 1}) will be created.`
+                  : `Şu anda ${sections.length} adet vitrin bloğunu canlı mağazaya yayına alıyorsunuz. Yeni bir sürüm anlık görüntüsü (v${currentVersion + 1}) oluşturulacaktır.`}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1 max-h-48 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50">
+            {sections.map((s, idx) => (
+              <div key={s.id} className="flex items-center justify-between py-1 px-2 text-[11px] border-b border-slate-100 last:border-none">
+                <span className="font-bold text-slate-700">{idx + 1}. {s.titleTR || s.titleEN}</span>
+                <span className="font-mono text-indigo-600 font-black">{s.type}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPublishModalOpen(false)}
+              className="rounded-xl font-bold"
+            >
+              {isEn ? "Cancel" : "Vazgeç"}
+            </Button>
+            <Button
+              size="sm"
+              disabled={publishing}
+              onClick={handleExecutePublish}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black flex items-center gap-1.5"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{publishing ? (isEn ? "Deploying..." : "Yayınlanıyor...") : isEn ? "Confirm & Deploy" : "Onayla ve Yayınla"}</span>
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

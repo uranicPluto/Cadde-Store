@@ -12,15 +12,15 @@ import {
   ArrowUp,
   ArrowDown,
   Layers,
-  Sparkles,
+  Edit2,
   ExternalLink,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface HomepageNavigatorTreeProps {
   sections: SectionItem[];
   selectedSectionId: string | null;
   onSelectSection: (id: string) => void;
+  onEditSection: (section: SectionItem) => void;
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
   onToggleActive: (id: string) => void;
@@ -35,6 +35,7 @@ export const HomepageNavigatorTree: React.FC<HomepageNavigatorTreeProps> = ({
   sections,
   selectedSectionId,
   onSelectSection,
+  onEditSection,
   onMoveUp,
   onMoveDown,
   onToggleActive,
@@ -54,7 +55,7 @@ export const HomepageNavigatorTree: React.FC<HomepageNavigatorTreeProps> = ({
             {isEn ? "Page Structure" : "Sayfa Yapısı"}
           </span>
         </div>
-        <span className="text-[11px] font-bold text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-full">
+        <span className="text-[11px] font-bold text-slate-500 bg-slate-200/70 px-2.5 py-0.5 rounded-full font-mono">
           {sections.length} {isEn ? "blocks" : "blok"}
         </span>
       </div>
@@ -69,10 +70,11 @@ export const HomepageNavigatorTree: React.FC<HomepageNavigatorTreeProps> = ({
             <div
               key={sec.id}
               onClick={() => onSelectSection(sec.id)}
+              onDoubleClick={() => onEditSection(sec)}
               className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 group ${
                 isSelected
-                  ? "bg-indigo-50/80 border-indigo-600 shadow-xs ring-1 ring-indigo-600"
-                  : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60"
+                  ? "bg-indigo-50/90 border-indigo-600 shadow-xs ring-1 ring-indigo-600"
+                  : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/70"
               }`}
             >
               {/* Left Grip & Info */}
@@ -111,7 +113,7 @@ export const HomepageNavigatorTree: React.FC<HomepageNavigatorTreeProps> = ({
                     {isEn ? sec.titleEN || sec.titleTR : sec.titleTR || sec.titleEN}
                   </span>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                       {sec.type}
                     </span>
                     {!isActive && (
@@ -129,23 +131,23 @@ export const HomepageNavigatorTree: React.FC<HomepageNavigatorTreeProps> = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
+                    onEditSection(sec);
+                  }}
+                  title={isEn ? "Edit Settings" : "Ayarları Düzenle"}
+                  className="p-1 text-slate-400 hover:text-indigo-600 rounded-md hover:bg-indigo-50"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     onToggleActive(sec.id);
                   }}
                   title={isActive ? (isEn ? "Hide" : "Gizle") : isEn ? "Show" : "Göster"}
                   className="p-1 text-slate-400 hover:text-slate-700 rounded-md hover:bg-slate-200/50"
                 >
                   {isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5 text-amber-500" />}
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenPreview(sec);
-                  }}
-                  title={isEn ? "Preview" : "Önizle"}
-                  className="p-1 text-slate-400 hover:text-indigo-600 rounded-md hover:bg-slate-200/50"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
                 </button>
                 <button
                   type="button"

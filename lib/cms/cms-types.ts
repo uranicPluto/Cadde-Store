@@ -138,6 +138,13 @@ export interface SectionConfig {
   selectedSellerIds?: string[];
   displayMode?: "GRID" | "CAROUSEL" | "STRIP" | "CARDS";
 
+  // Additional Layout & Visual Properties
+  heroBannerUrl?: string;
+  categoryColumns?: number;
+  cardStyle?: string;
+  grayscaleLogos?: boolean;
+  endDate?: string;
+
   // Rich Content / Custom HTML
   customHtmlTR?: string;
   customHtmlEN?: string;
