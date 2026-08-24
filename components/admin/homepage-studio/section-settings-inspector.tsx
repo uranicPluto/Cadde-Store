@@ -30,8 +30,19 @@ import {
   Store,
   Grid,
   Award,
+  Truck,
+  ShieldCheck,
+  CreditCard,
+  RotateCcw,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  ProductSelectorModal,
+  CategorySelectorModal,
+  IconPickerModal,
+  ICON_OPTIONS,
+} from "./data-selectors";
 
 interface SectionSettingsInspectorProps {
   section: SectionItem | null;
@@ -56,6 +67,12 @@ export const SectionSettingsInspector: React.FC<SectionSettingsInspectorProps> =
   const [templateName, setTemplateName] = useState("");
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
   const [templateSuccess, setTemplateSuccess] = useState(false);
+
+  // Selector Modals
+  const [isProductPickerOpen, setIsProductPickerOpen] = useState(false);
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
+  const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
+  const [activeBadgeIndex, setActiveBadgeIndex] = useState<number | null>(null);
 
   if (!section) {
     return (
@@ -298,9 +315,19 @@ export const SectionSettingsInspector: React.FC<SectionSettingsInspectorProps> =
             {/* PRODUCT CAROUSEL / BESTSELLERS CONTROLS */}
             {(normType.includes("PRODUCT") || normType.includes("BESTSELLER") || normType.includes("ARRIVALS") || normType.includes("TRENDING")) && (
               <div className="flex flex-col gap-3 p-3 bg-amber-50/50 border border-amber-200 rounded-xl">
-                <span className="font-bold text-amber-900 flex items-center gap-1.5">
-                  <ShoppingCart className="w-3.5 h-3.5 text-amber-600" />
-                  <span>{isEn ? "Product Source & Merchandising Rules" : "Ürün Kaynağı ve Sıralama Kuralları"}</span>
+                <span className="font-bold text-amber-900 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <ShoppingCart className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{isEn ? "Product Source & Merchandising Rules" : "Ürün Kaynağı ve Sıralama Kuralları"}</span>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setIsProductPickerOpen(true)}
+                    className="bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] h-6 px-2 font-bold"
+                  >
+                    {isEn ? "Select Products" : "Ürün Seç"}
+                  </Button>
                 </span>
 
                 <div className="flex flex-col gap-1">
@@ -325,6 +352,19 @@ export const SectionSettingsInspector: React.FC<SectionSettingsInspectorProps> =
                     <option value="MANUAL">{isEn ? "Manual Product Selection" : "Manuel Seçilmiş Ürünler"}</option>
                   </select>
                 </div>
+
+                {config.productRules?.selectedProductIds?.length ? (
+                  <div className="p-2 bg-white rounded-lg border border-amber-200 text-[10px] font-bold text-amber-900 flex items-center justify-between">
+                    <span>{config.productRules.selectedProductIds.length} {isEn ? "manually selected products" : "özel seçilmiş ürün"}</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsProductPickerOpen(true)}
+                      className="text-indigo-600 hover:underline"
+                    >
+                      {isEn ? "Edit" : "Düzenle"}
+                    </button>
+                  </div>
+                ) : null}
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex flex-col gap-1">
@@ -372,9 +412,19 @@ export const SectionSettingsInspector: React.FC<SectionSettingsInspectorProps> =
             {/* CATEGORY GRID CONTROLS */}
             {normType.includes("CATEGORY") && (
               <div className="flex flex-col gap-3 p-3 bg-purple-50/50 border border-purple-100 rounded-xl">
-                <span className="font-bold text-purple-900 flex items-center gap-1.5">
-                  <Grid className="w-3.5 h-3.5 text-purple-600" />
-                  <span>{isEn ? "Category Grid Layout" : "Kategori Düzeni"}</span>
+                <span className="font-bold text-purple-900 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Grid className="w-3.5 h-3.5 text-purple-600" />
+                    <span>{isEn ? "Category Grid Layout" : "Kategori Düzeni"}</span>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setIsCategoryPickerOpen(true)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[10px] h-6 px-2 font-bold"
+                  >
+                    {isEn ? "Select Categories" : "Kategori Seç"}
+                  </Button>
                 </span>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -428,9 +478,19 @@ export const SectionSettingsInspector: React.FC<SectionSettingsInspectorProps> =
             {/* FLASH DEALS CONTROLS */}
             {normType.includes("FLASH") && (
               <div className="flex flex-col gap-3 p-3 bg-rose-50 border border-rose-200 rounded-xl">
-                <span className="font-bold text-rose-900 flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5 text-rose-600" />
-                  <span>{isEn ? "Flash Deals & Countdown" : "Flaş Fırsatlar & Geri Sayım"}</span>
+                <span className="font-bold text-rose-900 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Flame className="w-3.5 h-3.5 text-rose-600" />
+                    <span>{isEn ? "Flash Deals & Countdown" : "Flaş Fırsatlar & Geri Sayım"}</span>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setIsProductPickerOpen(true)}
+                    className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] h-6 px-2 font-bold"
+                  >
+                    {isEn ? "Select Deals" : "Fırsat Seç"}
+                  </Button>
                 </span>
 
                 <div className="flex flex-col gap-1">
@@ -441,6 +501,40 @@ export const SectionSettingsInspector: React.FC<SectionSettingsInspectorProps> =
                     onChange={(e) => updateConfig({ endDate: e.target.value })}
                     className="h-8 px-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-indigo-600"
                   />
+                </div>
+              </div>
+            )}
+
+            {/* TRUST BADGES / SERVICE STRIP CONTROLS */}
+            {(normType.includes("TRUST") || normType.includes("BENEFIT")) && (
+              <div className="flex flex-col gap-3 p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl">
+                <span className="font-bold text-emerald-900 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{isEn ? "Reassurance Badges" : "Müşteri Güven Rozetleri"}</span>
+                </span>
+
+                <div className="flex flex-col gap-2">
+                  {ICON_OPTIONS.slice(0, 4).map((opt, idx) => {
+                    const IconC = opt.icon;
+                    return (
+                      <div key={opt.name} className="p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <IconC className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="font-bold text-slate-800">{opt.label}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveBadgeIndex(idx);
+                            setIsIconPickerOpen(true);
+                          }}
+                          className="text-[10px] font-bold text-indigo-600 hover:underline"
+                        >
+                          {isEn ? "Change Icon" : "İkon Değiştir"}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -581,6 +675,43 @@ export const SectionSettingsInspector: React.FC<SectionSettingsInspectorProps> =
           <span>{isEn ? "Delete" : "Sil"}</span>
         </Button>
       </div>
+
+      {/* Data Selector Modals */}
+      <ProductSelectorModal
+        isOpen={isProductPickerOpen}
+        onClose={() => setIsProductPickerOpen(false)}
+        selectedProductIds={config.productRules?.selectedProductIds || []}
+        onSave={(ids) =>
+          updateConfig({
+            productRules: {
+              ...(config.productRules || { source: "MANUAL", itemLimitDesktop: 8, itemLimitTablet: 4, itemLimitMobile: 2 }),
+              source: "MANUAL",
+              selectedProductIds: ids,
+            },
+          })
+        }
+        isEn={isEn}
+      />
+
+      <CategorySelectorModal
+        isOpen={isCategoryPickerOpen}
+        onClose={() => setIsCategoryPickerOpen(false)}
+        selectedCategoryIds={config.selectedCategoryIds || []}
+        onSave={(ids) => updateConfig({ selectedCategoryIds: ids })}
+        isEn={isEn}
+      />
+
+      <IconPickerModal
+        isOpen={isIconPickerOpen}
+        onClose={() => {
+          setIsIconPickerOpen(false);
+          setActiveBadgeIndex(null);
+        }}
+        onSelectIcon={(iconName) => {
+          console.log("Selected icon for badge:", iconName);
+        }}
+        isEn={isEn}
+      />
     </div>
   );
 };
