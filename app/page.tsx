@@ -67,18 +67,34 @@ function renderCmsSection(section: CmsSectionItem) {
       return <BrandQuickStrip key={section.id} />;
     case "PRODUCT_CAROUSEL":
     case "POPULAR_PRODUCTS":
+    case "NEW_ARRIVALS":
+    case "TRENDING_PRODUCTS":
+    case "RECOMMENDED_PRODUCTS":
+    case "DEALS_OF_THE_DAY":
       return <PopularProductsSection key={section.id} />;
     case "CATEGORY_GRID":
+    case "POPULAR_CATEGORIES":
+    case "CATEGORY_CAROUSEL":
       return <CategoryGridStrips key={section.id} />;
     case "FLASH_DEALS":
     case "FLASH_SALES":
       return <FlashSalesSection key={section.id} />;
     case "BANNER_STRIP":
     case "CAMPAIGN_STRIP":
+    case "CAMPAIGN_CARDS":
+    case "COUNTDOWN_CAMPAIGN":
+    case "SEASONAL_CAMPAIGN":
+    case "PROMOTIONAL_BANNER":
+    case "IMAGE_TEXT_BANNER":
       return <CampaignBannerStrips key={section.id} />;
     case "FEATURED_BRANDS":
+    case "BRAND_CAROUSEL":
+    case "BRAND_DEALS":
       return <FeaturedBrandsSection key={section.id} />;
     case "STORE_HIGHLIGHTS":
+    case "VERIFIED_SELLERS":
+    case "FEATURED_STORES":
+    case "SELLER_CAROUSEL":
       return <StoreHighlightsSection key={section.id} />;
     case "BESTSELLER_GRID":
     case "BESTSELLERS":
