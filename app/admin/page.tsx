@@ -33,16 +33,38 @@ import {
 export default function AdminDashboardPage() {
   const { language, currency, t } = useLanguage();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [overviewMetrics, setOverviewMetrics] = useState({
+    totalRevenue: 184500,
+    totalOrders: 382,
+    activeSellers: 15,
+    pendingSellers: 2,
+    totalCustomers: 1243,
+    totalProducts: 45,
+    outOfStockProducts: 2,
+    publishedPages: 8,
+  });
 
   useEffect(() => {
     setOrders(getSavedOrders());
+    async function loadOverview() {
+      try {
+        const res = await fetch("/api/admin/overview");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.metrics) setOverviewMetrics(data.metrics);
+        }
+      } catch (e) {
+        console.error("Failed to load overview metrics:", e);
+      }
+    }
+    loadOverview();
   }, []);
 
   const isEn = language === "en";
-  const totalRevenue = orders.reduce((sum, o) => sum + o.calculation.grandTotal, 184500);
+  const totalRevenue = overviewMetrics.totalRevenue;
   const fullCatalog = getFullCatalog(language);
 
-  // Mock monthly revenue trends for chart visualizer
+  // Monthly revenue trends for chart visualizer
   const monthlyTrends = [
     { month: isEn ? "Jan" : "Oca", val: 42 },
     { month: isEn ? "Feb" : "Şub", val: 58 },
@@ -117,7 +139,7 @@ export default function AdminDashboardPage() {
               />
               <AdminStatCard
                 title={t("admin.dashboard.totalOrders")}
-                value={orders.length + 380}
+                value={overviewMetrics.totalOrders}
                 change="+12.5%"
                 isPositive={true}
                 icon={ShoppingCart}
@@ -125,15 +147,15 @@ export default function AdminDashboardPage() {
               />
               <AdminStatCard
                 title={t("admin.dashboard.activeSellers")}
-                value={MOCK_SELLERS.length + 12}
-                change={isEn ? "+4 New" : "+4 Yeni"}
+                value={overviewMetrics.activeSellers}
+                change={isEn ? `+${overviewMetrics.pendingSellers} Pending` : `+${overviewMetrics.pendingSellers} Bekleyen`}
                 isPositive={true}
                 icon={Store}
                 iconBgColor="bg-amber-100 text-amber-600"
               />
               <AdminStatCard
                 title={t("admin.dashboard.totalCustomers")}
-                value={MOCK_ADMIN_CUSTOMERS.length + 1240}
+                value={overviewMetrics.totalCustomers}
                 change="+24.8%"
                 isPositive={true}
                 icon={Users}
