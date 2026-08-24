@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LanguageProvider } from "@/lib/i18n/language-context";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import { CartProvider } from "@/lib/cart/cart-context";
 import { FavoritesProvider } from "@/lib/favorites/favorites-context";
 import { RecentlyViewedProvider } from "@/lib/recently-viewed/recently-viewed-context";
@@ -23,15 +24,17 @@ export default function RootLayout({
     <html lang="tr" suppressHydrationWarning>
       <body className="bg-background text-text-main antialiased min-h-screen">
         <LanguageProvider>
-          <CartProvider>
-            <FavoritesProvider>
-              <RecentlyViewedProvider>
-                {children}
-                <CookieConsent />
-                <ServiceWorkerRegister />
-              </RecentlyViewedProvider>
-            </FavoritesProvider>
-          </CartProvider>
+          <ThemeProvider>
+            <CartProvider>
+              <FavoritesProvider>
+                <RecentlyViewedProvider>
+                  {children}
+                  <CookieConsent />
+                  <ServiceWorkerRegister />
+                </RecentlyViewedProvider>
+              </FavoritesProvider>
+            </CartProvider>
+          </ThemeProvider>
         </LanguageProvider>
       </body>
     </html>

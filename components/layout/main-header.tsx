@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart/cart-context";
 import { useFavorites } from "@/lib/favorites/favorites-context";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { useAppearance } from "@/components/layout/theme-provider";
 
 export interface MainHeaderProps {
   isLoggedInMock?: boolean;
@@ -27,12 +28,23 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
   className,
 }) => {
   const { language, t } = useLanguage();
+  const { settings, headerConfig } = useAppearance();
   const isEn = language === "en";
   const { totalCount: liveCartCount } = useCart();
   const { favoriteCount: liveFavCount } = useFavorites();
 
   const activeCartCount = cartCount !== undefined ? cartCount : liveCartCount;
   const activeFavCount = favoriteCount !== undefined ? favoriteCount : liveFavCount;
+
+  const marketplaceName = settings?.marketplaceName || "CADDE STORE";
+  const searchPlaceholder = isEn
+    ? (headerConfig?.searchPlaceholderEn || "Search products, categories or brands...")
+    : (headerConfig?.searchPlaceholderTr || "Ürün, kategori veya marka ara...");
+
+  const showSearch = headerConfig?.showSearch !== false;
+  const showAccountMenu = headerConfig?.showAccountMenu !== false;
+  const showFavorites = headerConfig?.showFavoritesButton !== false;
+  const showCart = headerConfig?.showCartButton !== false;
 
   return (
     <div
@@ -45,35 +57,48 @@ export const MainHeader: React.FC<MainHeaderProps> = ({
         {/* LEFT: Logo Wordmark - Clicking sends to home page / */}
         <Link
           href="/"
-          aria-label={isEn ? "Cadde Store Homepage" : "Cadde Store Anasayfa"}
+          aria-label={isEn ? `${marketplaceName} Homepage` : `${marketplaceName} Anasayfa`}
           className="flex items-center gap-2 text-text-main group shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded"
         >
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-sm group-hover:bg-primary-hover transition-colors">
-            C
-          </div>
+          {settings?.logoUrl && settings.logoUrl !== "/logo.svg" && !settings.logoUrl.endsWith(".svg") ? (
+            <img
+              src={settings.logoUrl}
+              alt={marketplaceName}
+              style={{ maxHeight: `${headerConfig?.logoHeight || 40}px` }}
+              className="h-auto w-auto object-contain rounded"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-sm group-hover:bg-primary-hover transition-colors">
+              {marketplaceName ? marketplaceName.charAt(0).toUpperCase() : "C"}
+            </div>
+          )}
           <div className="flex flex-col">
             <span className="font-extrabold text-xl tracking-tight text-text-main group-hover:text-primary transition-colors">
-              CADDE STORE
+              {marketplaceName.toUpperCase()}
             </span>
             <span className="text-[9px] text-text-subtle font-bold uppercase tracking-widest -mt-1">
-              {isEn ? "Marketplace" : "Pazaryeri"}
+              {settings?.tagline || (isEn ? "Marketplace" : "Pazaryeri")}
             </span>
           </div>
         </Link>
 
         {/* CENTER: Search Bar */}
-        <div className="flex-1 max-w-2xl mx-auto hidden lg:block">
-          <SearchComponent placeholder={isEn ? "Search product, brand or category..." : "Aradığınız ürün, marka veya kategoriyi yazınız..."} />
-        </div>
+        {showSearch && (
+          <div className="flex-1 max-w-2xl mx-auto hidden lg:block">
+            <SearchComponent placeholder={searchPlaceholder} />
+          </div>
+        )}
 
         {/* RIGHT: User Actions */}
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-          <AccountMenu
-            isLoggedInMock={isLoggedInMock}
-            onLoginToggleMock={onLoginToggleMock}
-          />
-          <HeaderFavorites favoriteCount={activeFavCount} />
-          <HeaderCart cartCount={activeCartCount} />
+          {showAccountMenu && (
+            <AccountMenu
+              isLoggedInMock={isLoggedInMock}
+              onLoginToggleMock={onLoginToggleMock}
+            />
+          )}
+          {showFavorites && <HeaderFavorites favoriteCount={activeFavCount} />}
+          {showCart && <HeaderCart cartCount={activeCartCount} />}
         </div>
       </div>
     </div>

@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
+import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { TopUtilityBar } from "@/components/layout/top-utility-bar";
 import { MainHeader } from "@/components/layout/main-header";
 import { CategoryNavigation } from "@/components/layout/category-navigation";
@@ -44,6 +47,9 @@ export const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
 
   return (
     <header className={cn("w-full z-40 flex flex-col font-sans select-none", className)}>
+      {/* Announcement Bar */}
+      <AnnouncementBar />
+
       {/* Desktop Header Layers */}
       <div className="hidden lg:flex flex-col w-full">
         {/* Layer 1: Top Utility Bar (hides on compact scroll) */}

@@ -108,11 +108,12 @@ export async function PUT(request: Request) {
     });
 
     // 3. Create OrderStatusHistory record
+    const sellerStoreName = group.seller?.storeName || "Satıcı";
     const statusNote =
       note ||
       (carrierName && trackingNumber
-        ? `Satıcı (${group.seller.storeName}) tarafından kargo bilgisi güncellendi: ${carrierName} (${trackingNumber}) - Durum: ${status}`
-        : `Satıcı (${group.seller.storeName}) tarafından durum "${status}" olarak güncellendi.`);
+        ? `Satıcı (${sellerStoreName}) tarafından kargo bilgisi güncellendi: ${carrierName} (${trackingNumber}) - Durum: ${status}`
+        : `Satıcı (${sellerStoreName}) tarafından durum "${status}" olarak güncellendi.`);
 
     await prisma.orderStatusHistory.create({
       data: {

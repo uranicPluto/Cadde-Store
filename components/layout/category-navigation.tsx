@@ -4,17 +4,32 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { getMockNavigationCategories, CategoryData } from "@/lib/navigation-data";
 import { MegaMenu } from "@/components/layout/mega-menu";
-import { Menu, Flame, ChevronDown } from "lucide-react";
+import { Menu, Flame, ChevronDown, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
 
+export interface HeaderNavItem {
+  id: string;
+  titleTr: string;
+  titleEn: string;
+  url: string;
+  section: string;
+  badgeTr?: string | null;
+  badgeEn?: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  deviceVisibility?: string;
+}
+
 export interface CategoryNavigationProps {
   categories?: CategoryData[];
+  headerLinks?: HeaderNavItem[];
   className?: string;
 }
 
 export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
   categories,
+  headerLinks,
   className,
 }) => {
   const { language, t } = useLanguage();
@@ -22,31 +37,49 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
   const [activeCategories, setActiveCategories] = useState<CategoryData[]>(
     categories || getMockNavigationCategories(language)
   );
+  const [activeHeaderLinks, setActiveHeaderLinks] = useState<HeaderNavItem[]>(headerLinks || []);
 
   useEffect(() => {
     if (categories && categories.length > 0) {
       setActiveCategories(categories);
-      return;
+    }
+    if (headerLinks && headerLinks.length > 0) {
+      setActiveHeaderLinks(headerLinks);
     }
 
     async function loadNavCategories() {
       try {
-        const res = await fetch(`/api/navigation?lang=${language}`);
+        const res = await fetch(`/api/navigation?lang=${language}&device=DESKTOP`);
         const data = await res.json();
         if (data.categories && Array.isArray(data.categories) && data.categories.length > 0) {
           setActiveCategories(data.categories);
-        } else {
+        } else if (!categories) {
           setActiveCategories(getMockNavigationCategories(language));
         }
+
+        if (data.items && Array.isArray(data.items)) {
+          const headers = data.items.filter(
+            (i: any) =>
+              i.section === "HEADER" &&
+              !i.parentId &&
+              i.isActive !== false &&
+              (i.deviceVisibility === "ALL" || i.deviceVisibility === "DESKTOP" || !i.deviceVisibility)
+          );
+          if (headers.length > 0) {
+            setActiveHeaderLinks(headers);
+          }
+        }
       } catch (err) {
-        setActiveCategories(getMockNavigationCategories(language));
+        if (!categories) {
+          setActiveCategories(getMockNavigationCategories(language));
+        }
       }
     }
 
     loadNavCategories();
-  }, [categories, language]);
+  }, [categories, headerLinks, language]);
 
-  // MegaMenu is open ONLY when hovering or clicking the main "☰ Categories NEW ∨" button
+  // MegaMenu is open ONLY when hovering or clicking the main "Categories" button
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +144,31 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
               </div>
             );
           })}
+
+          {/* Optional Header Quick Links if configured */}
+          {activeHeaderLinks.length > 0 && (
+            <div className="flex items-center gap-1.5 pl-2 ml-auto border-l border-slate-200 shrink-0">
+              {activeHeaderLinks.map((link) => {
+                const title = isEn ? link.titleEn || link.titleTr : link.titleTr;
+                const badge = isEn ? link.badgeEn || link.badgeTr : link.badgeTr;
+
+                return (
+                  <Link
+                    key={link.id}
+                    href={link.url}
+                    className="py-1 px-2.5 text-xs font-bold text-slate-700 hover:text-primary transition-colors flex items-center gap-1 shrink-0 rounded-md hover:bg-slate-50"
+                  >
+                    <span>{title}</span>
+                    {badge && (
+                      <span className="bg-amber-100 text-amber-800 text-[8px] font-black px-1.5 py-0.2 rounded uppercase">
+                        {badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </nav>
       </div>
 

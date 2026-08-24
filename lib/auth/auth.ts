@@ -8,6 +8,7 @@ export interface UserSessionPayload {
   firstName: string;
   lastName: string;
   role: "CUSTOMER" | "SELLER" | "ADMIN";
+  adminRole?: string;
   sellerSlug?: string;
 }
 

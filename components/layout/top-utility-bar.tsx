@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Store, HelpCircle, PhoneCall } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { useAppearance } from "@/components/layout/theme-provider";
 import { cn } from "@/lib/utils";
 
 export interface TopUtilityBarProps {
@@ -11,6 +12,9 @@ export interface TopUtilityBarProps {
 
 export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ className }) => {
   const { t } = useLanguage();
+  const { headerConfig } = useAppearance();
+
+  const showSellerHub = headerConfig?.showSellerHubLink !== false;
 
   return (
     <div
@@ -22,14 +26,16 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ className }) => {
       <div className="max-w-wide mx-auto flex items-center justify-between gap-4">
         {/* Left Announcement / Merchant Callout */}
         <div className="flex items-center gap-2 truncate">
-          <Link
-            href="/seller"
-            className="inline-flex items-center gap-1 font-semibold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded text-[11px] hover:bg-amber-400/20 transition-colors"
-          >
-            <Store className="w-3 h-3" />
-            {t("common.becomeSeller")}
-          </Link>
-          <span className="hidden md:inline text-slate-400">|</span>
+          {showSellerHub && (
+            <Link
+              href="/seller"
+              className="inline-flex items-center gap-1 font-semibold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded text-[11px] hover:bg-amber-400/20 transition-colors"
+            >
+              <Store className="w-3 h-3" />
+              {t("common.becomeSeller")}
+            </Link>
+          )}
+          {showSellerHub && <span className="hidden md:inline text-slate-400">|</span>}
           <span className="hidden md:inline text-slate-300 text-[11px] truncate">
             {t("header.sellerCallout")}
           </span>

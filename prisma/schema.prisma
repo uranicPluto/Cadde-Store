@@ -15,6 +15,7 @@ model User {
   lastName     String
   phone        String?
   role         String   @default("CUSTOMER") // CUSTOMER | SELLER | ADMIN
+  adminRole    String?  // SUPER_ADMIN | CONTENT_MANAGER | MERCHANDISING_MANAGER | MARKETING_MANAGER | OPERATIONS_MANAGER
   status       String   @default("active")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -405,20 +406,31 @@ model Campaign {
 }
 
 model NavigationItem {
-  id        String           @id @default(uuid())
-  titleTr   String
-  titleEn   String
-  url       String
-  section   String           @default("HEADER") // HEADER | FOOTER | MEGA_MENU
-  parentId  String?
-  parent    NavigationItem?  @relation("NavHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children  NavigationItem[] @relation("NavHierarchy")
-  sortOrder Int              @default(0)
-  badgeTr   String?
-  badgeEn   String?
-  isActive  Boolean          @default(true)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id               String           @id @default(uuid())
+  titleTr          String
+  titleEn          String
+  url              String
+  section          String           @default("HEADER") // HEADER | FOOTER | MEGA_MENU | MOBILE_DRAWER
+  parentId         String?
+  parent           NavigationItem?  @relation("NavHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children         NavigationItem[] @relation("NavHierarchy")
+  sortOrder        Int              @default(0)
+  badgeTr          String?
+  badgeEn          String?
+  isActive         Boolean          @default(true)
+  deviceVisibility String           @default("ALL") // ALL | DESKTOP | MOBILE
+  itemType         String           @default("LINK") // LINK | CATEGORY | BRAND | PROMO_CARD | HEADING
+  imageUrl         String?
+  descriptionTr    String?
+  descriptionEn    String?
+  ctaTextTr        String?
+  ctaTextEn        String?
+  targetUrl        String?
+  scheduleStartAt  DateTime?
+  scheduleEndAt    DateTime?
+  metadataJson     String?          @default("{}")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 }
 
 model MediaAsset {
@@ -437,5 +449,90 @@ model MediaAsset {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
+model CmsPage {
+  id                  String           @id @default(uuid())
+  slug                String           @unique
+  titleTr             String
+  titleEn             String
+  type                String           @default("CUSTOM") // LANDING | STATIC | POLICY | CAMPAIGN | CUSTOM
+  status              String           @default("DRAFT") // DRAFT | PUBLISHED | SCHEDULED | ARCHIVED
+  sectionsJson        String           @default("[]") // JSON string of SectionItem[]
+  metaTitleTr         String?
+  metaTitleEn         String?
+  metaDescriptionTr   String?
+  metaDescriptionEn   String?
+  schedulePublishAt   DateTime?
+  scheduleUnpublishAt DateTime?
+  publishedVersionId  String?
+  authorId            String?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  versions            CmsPageVersion[]
+}
+
+model CmsPageVersion {
+  id            String   @id @default(uuid())
+  pageId        String
+  page          CmsPage  @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  snapshotJson  String   @default("{}") // Full JSON snapshot of the page at versioning time
+  publishedBy   String?
+  changeSummary String?
+  createdAt     DateTime @default(now())
+}
+
+model AppearanceSettings {
+  id               String   @id @default("default")
+  logoUrl          String?
+  faviconUrl       String?
+  marketplaceName  String   @default("Cadde Store")
+  tagline          String?
+  brandColor       String   @default("#2563eb")
+  accentColor      String   @default("#f97316")
+  borderRadius     String   @default("8px")
+  fontHeading      String   @default("Inter")
+  fontBody         String   @default("Inter")
+  headerConfigJson String   @default("{}")
+  footerConfigJson String   @default("{}")
+  updatedAt        DateTime @updatedAt
+}
+
+model PageLayoutConfig {
+  id         String   @id @default(uuid())
+  pageType   String   @unique // PRODUCT | CATEGORY
+  isCustom   Boolean  @default(false)
+  blocksJson String   @default("[]") // JSON array of layout blocks
+  updatedAt  DateTime @updatedAt
+}
+
+model RolePermission {
+  id        String   @id @default(uuid())
+  role      String   // SUPER_ADMIN | CONTENT_MANAGER | MERCHANDISING_MANAGER | MARKETING_MANAGER | OPERATIONS_MANAGER
+  resource  String   // PAGES | HOMEPAGE | MEDIA | NAVIGATION | CATALOG | MARKETING | ORDERS | SETTINGS | AUDIT | ANALYTICS | HEALTH
+  action    String   // READ | WRITE | DELETE | PUBLISH | ALL
+  allowed   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([role, resource, action])
+}
+
+model SectionAnalytics {
+  id              String   @id @default(uuid())
+  pageType        String   @default("HOMEPAGE") // HOMEPAGE | PAGE | PRODUCT | CATEGORY
+  pageIdentifier  String?  // Slug or ID or "homepage"
+  sectionId       String   // Section or Block ID
+  sectionType     String   // HERO | PRODUCT_CAROUSEL | FLASH_DEALS | etc.
+  impressions     Int      @default(0)
+  clicks          Int      @default(0)
+  addToCartCount  Int      @default(0)
+  revenue         Float    @default(0)
+  date            DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 
 

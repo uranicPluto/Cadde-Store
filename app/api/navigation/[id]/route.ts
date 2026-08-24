@@ -18,6 +18,11 @@ export async function GET(request: Request, context: RouteParams) {
       include: {
         children: {
           orderBy: { sortOrder: "asc" },
+          include: {
+            children: {
+              orderBy: { sortOrder: "asc" },
+            },
+          },
         },
         parent: true,
       },
@@ -27,7 +32,7 @@ export async function GET(request: Request, context: RouteParams) {
       return NextResponse.json({ error: "Navigasyon öğesi bulunamadı." }, { status: 404 });
     }
 
-    return NextResponse.json({ item });
+    return NextResponse.json({ success: true, item });
   } catch (error) {
     console.error("GET Navigation Item [id] API Error:", error);
     return NextResponse.json({ error: "Navigasyon öğesi getirilemedi." }, { status: 500 });
@@ -60,20 +65,42 @@ export async function PUT(request: Request, context: RouteParams) {
       badgeTr,
       badgeEn,
       isActive,
+      deviceVisibility,
+      itemType,
+      imageUrl,
+      descriptionTr,
+      descriptionEn,
+      ctaTextTr,
+      ctaTextEn,
+      targetUrl,
+      scheduleStartAt,
+      scheduleEndAt,
+      metadataJson,
     } = body;
 
     const updated = await prisma.navigationItem.update({
       where: { id },
       data: {
-        ...(titleTr ? { titleTr } : {}),
-        ...(titleEn ? { titleEn } : {}),
-        ...(url ? { url } : {}),
-        ...(section ? { section } : {}),
+        ...(titleTr !== undefined ? { titleTr } : {}),
+        ...(titleEn !== undefined ? { titleEn } : {}),
+        ...(url !== undefined ? { url } : {}),
+        ...(section !== undefined ? { section } : {}),
         ...(parentId !== undefined ? { parentId: parentId || null } : {}),
         ...(sortOrder !== undefined ? { sortOrder: Number(sortOrder) } : {}),
         ...(badgeTr !== undefined ? { badgeTr: badgeTr || null } : {}),
         ...(badgeEn !== undefined ? { badgeEn: badgeEn || null } : {}),
         ...(isActive !== undefined ? { isActive: Boolean(isActive) } : {}),
+        ...(deviceVisibility !== undefined ? { deviceVisibility } : {}),
+        ...(itemType !== undefined ? { itemType } : {}),
+        ...(imageUrl !== undefined ? { imageUrl: imageUrl || null } : {}),
+        ...(descriptionTr !== undefined ? { descriptionTr: descriptionTr || null } : {}),
+        ...(descriptionEn !== undefined ? { descriptionEn: descriptionEn || null } : {}),
+        ...(ctaTextTr !== undefined ? { ctaTextTr: ctaTextTr || null } : {}),
+        ...(ctaTextEn !== undefined ? { ctaTextEn: ctaTextEn || null } : {}),
+        ...(targetUrl !== undefined ? { targetUrl: targetUrl || null } : {}),
+        ...(scheduleStartAt !== undefined ? { scheduleStartAt: scheduleStartAt ? new Date(scheduleStartAt) : null } : {}),
+        ...(scheduleEndAt !== undefined ? { scheduleEndAt: scheduleEndAt ? new Date(scheduleEndAt) : null } : {}),
+        ...(metadataJson !== undefined ? { metadataJson: typeof metadataJson === "object" ? JSON.stringify(metadataJson) : (metadataJson || "{}") } : {}),
       },
     });
 
@@ -92,6 +119,8 @@ export async function PUT(request: Request, context: RouteParams) {
           url: updated.url,
           section: updated.section,
           sortOrder: updated.sortOrder,
+          deviceVisibility: updated.deviceVisibility,
+          itemType: updated.itemType,
         }),
       },
     });

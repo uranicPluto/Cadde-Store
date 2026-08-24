@@ -1,0 +1,882 @@
+{
+  "timestamp": "2026-08-24T07:26:31.172Z",
+  "summary": {
+    "total": 106,
+    "passed": 106,
+    "failed": 0,
+    "passRate": "100.0%",
+    "totalDurationMs": 32457
+  },
+  "tierSummary": {
+    "tier1": {
+      "total": 45,
+      "passed": 45,
+      "failed": 0
+    },
+    "tier2": {
+      "total": 45,
+      "passed": 45,
+      "failed": 0
+    },
+    "tier3": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0
+    },
+    "tier4": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "T1.R1.1",
+      "name": "Admin creates new promotional CMS section with configuration",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 417
+    },
+    {
+      "id": "T1.R1.2",
+      "name": "Admin queries CMS sections including all active and inactive sections",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 73
+    },
+    {
+      "id": "T1.R1.3",
+      "name": "Admin creates dynamic banner inside CMS section",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 173
+    },
+    {
+      "id": "T1.R1.4",
+      "name": "Admin creates CMS section template for reusable layouts",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 197
+    },
+    {
+      "id": "T1.R1.5",
+      "name": "Verify public storefront static policy pages are accessible",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 7609
+    },
+    {
+      "id": "T1.R2.1",
+      "name": "Admin retrieves platform global appearance and operational settings",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 342
+    },
+    {
+      "id": "T1.R2.2",
+      "name": "Admin updates marketplace branding tokens and support coordinates",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 102
+    },
+    {
+      "id": "T1.R2.3",
+      "name": "Admin updates financial commission rate and shipping fee thresholds",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 90
+    },
+    {
+      "id": "T1.R2.4",
+      "name": "Admin updates cancellation and return policy duration windows",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 85
+    },
+    {
+      "id": "T1.R2.5",
+      "name": "Verify platform settings update creates AuditLog entry with metadata",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 54
+    },
+    {
+      "id": "T1.R3.1",
+      "name": "Admin creates top-level header navigation menu item",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 431
+    },
+    {
+      "id": "T1.R3.2",
+      "name": "Admin creates nested child item under parent navigation hierarchy",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 78
+    },
+    {
+      "id": "T1.R3.3",
+      "name": "Admin creates footer navigation menu column item",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 81
+    },
+    {
+      "id": "T1.R3.4",
+      "name": "Admin updates navigation item badge and label",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 72
+    },
+    {
+      "id": "T1.R3.5",
+      "name": "Admin bulk reorders navigation items",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 89
+    },
+    {
+      "id": "T1.R4.1",
+      "name": "Query active category hierarchy with dual-language metadata",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 227
+    },
+    {
+      "id": "T1.R4.2",
+      "name": "Admin creates new Category with rich description and image",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 86
+    },
+    {
+      "id": "T1.R4.3",
+      "name": "Fetch product detail payload including variants, seller, and images",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 764
+    },
+    {
+      "id": "T1.R4.4",
+      "name": "Admin updates product badges (BESTSELLER, FAST_DELIVERY)",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 103
+    },
+    {
+      "id": "T1.R4.5",
+      "name": "Filter product catalog by category slug and price bounds",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 156
+    },
+    {
+      "id": "T1.R5.1",
+      "name": "Admin uploads and indexes media asset with tags and dimensions",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 267
+    },
+    {
+      "id": "T1.R5.2",
+      "name": "Search media assets by keyword query",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 67
+    },
+    {
+      "id": "T1.R5.3",
+      "name": "Filter media assets by MIME type",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T1.R5.4",
+      "name": "Admin updates media asset metadata and alt text translations",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 611
+    },
+    {
+      "id": "T1.R5.5",
+      "name": "Admin safely deletes unreferenced media asset (referenceCount: 0)",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 101
+    },
+    {
+      "id": "T1.R6.1",
+      "name": "Admin saves multi-section draft state via autosave endpoint",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 410
+    },
+    {
+      "id": "T1.R6.2",
+      "name": "Admin retrieves persisted draft state for Multi-Persona Preview Center",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 68
+    },
+    {
+      "id": "T1.R6.3",
+      "name": "Admin publishes draft state creating version snapshot",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 279
+    },
+    {
+      "id": "T1.R6.4",
+      "name": "Admin retrieves version snapshot history list",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 244
+    },
+    {
+      "id": "T1.R6.5",
+      "name": "Admin rolls back to a previous homepage version snapshot with 1 click",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 85
+    },
+    {
+      "id": "T1.R7.1",
+      "name": "Admin retrieves platform audit logs with actor and entity records",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 251
+    },
+    {
+      "id": "T1.R7.2",
+      "name": "Admin filters audit trail logs by entityType (CMS)",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 74
+    },
+    {
+      "id": "T1.R7.3",
+      "name": "Seller role accesses seller-specific order operations",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 590
+    },
+    {
+      "id": "T1.R7.4",
+      "name": "Customer role accesses authenticated customer addresses",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 256
+    },
+    {
+      "id": "T1.R7.5",
+      "name": "Admin role accesses customer CRM directory and lifetime spend",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 333
+    },
+    {
+      "id": "T1.R8.1",
+      "name": "Public root and discoverability endpoints respond with 200 OK",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 1038
+    },
+    {
+      "id": "T1.R8.2",
+      "name": "Verify Category SEO metadata contains dual-language titles and descriptions",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 3
+    },
+    {
+      "id": "T1.R8.3",
+      "name": "Verify Product metadata includes SKU, brand, and OpenGraph images",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T1.R8.4",
+      "name": "Admin inspects active marketing campaign status via health filters",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 451
+    },
+    {
+      "id": "T1.R8.5",
+      "name": "Verify platform settings expose contact info for structured data markup",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 1
+    },
+    {
+      "id": "T1.R9.1",
+      "name": "Admin creates sponsored product campaign with budget and placement",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 86
+    },
+    {
+      "id": "T1.R9.2",
+      "name": "Admin updates campaign analytics (impressions, clicks, orders, revenue)",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 6030
+    },
+    {
+      "id": "T1.R9.3",
+      "name": "Retrieve marketing analytics filtered by campaign type",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T1.R9.4",
+      "name": "Admin queries market research intelligence center",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 2385
+    },
+    {
+      "id": "T1.R9.5",
+      "name": "Admin pauses active marketing campaign",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 1,
+      "status": "PASSED",
+      "duration": 109
+    },
+    {
+      "id": "T2.R1.1",
+      "name": "CMS section creation with missing titleTR or titleEN returns 400 Bad Request",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 99
+    },
+    {
+      "id": "T2.R1.2",
+      "name": "CMS section update with missing section id returns 400 Bad Request",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 81
+    },
+    {
+      "id": "T2.R1.3",
+      "name": "CMS section deletion with missing id returns 400 Bad Request",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 69
+    },
+    {
+      "id": "T2.R1.4",
+      "name": "CMS template creation with empty name returns 400 Bad Request",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 71
+    },
+    {
+      "id": "T2.R1.5",
+      "name": "CMS banner creation with missing imageUrlDesktop returns 400 Bad Request",
+      "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.R2.1",
+      "name": "Customer role attempting platform settings mutation returns 403 Forbidden",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.R2.2",
+      "name": "Platform settings zero shipping fee boundary (0.0) correctly saves",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 78
+    },
+    {
+      "id": "T2.R2.3",
+      "name": "Platform settings handles extreme free shipping threshold boundary",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 83
+    },
+    {
+      "id": "T2.R2.4",
+      "name": "Public unauthenticated GET request to settings returns platform defaults",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 99
+    },
+    {
+      "id": "T2.R2.5",
+      "name": "Platform settings handles Turkish unicode characters and quotes in branding",
+      "requirement": "R2. Global Appearance & Design Studio",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 77
+    },
+    {
+      "id": "T2.R3.1",
+      "name": "Navigation creation with missing titleTr or url returns 400 Bad Request",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 67
+    },
+    {
+      "id": "T2.R3.2",
+      "name": "Navigation update with missing id returns 400 Bad Request",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.R3.3",
+      "name": "Navigation deletion with missing id returns 400 Bad Request",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.R3.4",
+      "name": "Customer role attempting navigation item creation returns 403 Forbidden",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.R3.5",
+      "name": "Navigation query filters active items correctly with isActive parameter",
+      "requirement": "R3. Visual Navigation & Mega-Menu Builder",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 94
+    },
+    {
+      "id": "T2.R4.1",
+      "name": "Fetch product detail with non-existent product ID returns 404 Not Found",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 79
+    },
+    {
+      "id": "T2.R4.2",
+      "name": "Category creation with missing nameTR or slug returns 400 Bad Request",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.R4.3",
+      "name": "Product with stock level 0 returns stock: 0 without crashing PDP query",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 65
+    },
+    {
+      "id": "T2.R4.4",
+      "name": "Category query with non-matching filter returns empty products array",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 60
+    },
+    {
+      "id": "T2.R4.5",
+      "name": "Customer role attempting product status moderation returns 403 Forbidden",
+      "requirement": "R4. Product Page & Category Page Layout Builders",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 322
+    },
+    {
+      "id": "T2.R5.1",
+      "name": "Media creation with missing filename or url returns 400 Bad Request",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.R5.2",
+      "name": "Fetch media asset by non-existent ID returns 404 Not Found",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 56
+    },
+    {
+      "id": "T2.R5.3",
+      "name": "Media update for non-existent ID returns 404 Not Found",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 70
+    },
+    {
+      "id": "T2.R5.4",
+      "name": "Customer role attempting media upload returns 403 Forbidden",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 56
+    },
+    {
+      "id": "T2.R5.5",
+      "name": "Media deletion handles delete lifecycle and records AuditLog",
+      "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 101
+    },
+    {
+      "id": "T2.R6.1",
+      "name": "Draft autosave with invalid non-array payload returns 400 Bad Request",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 76
+    },
+    {
+      "id": "T2.R6.2",
+      "name": "Version rollback with missing versionId returns 400 Bad Request",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.R6.3",
+      "name": "Version rollback with non-existent versionId returns 404 Not Found",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 56
+    },
+    {
+      "id": "T2.R6.4",
+      "name": "Customer role attempting to publish homepage returns 403 Forbidden",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 63
+    },
+    {
+      "id": "T2.R6.5",
+      "name": "Customer role attempting draft save returns 403 Forbidden",
+      "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.R7.1",
+      "name": "Unauthenticated request to admin audit trail returns 403 Forbidden",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.R7.2",
+      "name": "Customer role attempt to access admin audit trail returns 403 Forbidden",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 67
+    },
+    {
+      "id": "T2.R7.3",
+      "name": "Seller role attempt to access admin audit trail returns 403 Forbidden",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 56
+    },
+    {
+      "id": "T2.R7.4",
+      "name": "Customer role attempt to update seller status returns 403 Forbidden",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 303
+    },
+    {
+      "id": "T2.R7.5",
+      "name": "Audit log query with non-existent entityType returns empty logs array",
+      "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.R8.1",
+      "name": "Marketing campaign query with non-existent status returns empty list",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 59
+    },
+    {
+      "id": "T2.R8.2",
+      "name": "Category navigation handling null/empty parentId correctly resolves root",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 61
+    },
+    {
+      "id": "T2.R8.3",
+      "name": "Search endpoint with Turkish characters (ç, ğ, ı, ö, ş, ü) escapes cleanly",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 67
+    },
+    {
+      "id": "T2.R8.4",
+      "name": "Health verification: Database entities (Product, Category, Seller, Settings) resolve cleanly",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 30
+    },
+    {
+      "id": "T2.R8.5",
+      "name": "Out of stock product queries do not break storefront aggregation",
+      "requirement": "R8. SEO Control Center & Website Health Monitor",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 118
+    },
+    {
+      "id": "T2.R9.1",
+      "name": "Marketing campaign creation with missing name or budget returns 400 Bad Request",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 65
+    },
+    {
+      "id": "T2.R9.2",
+      "name": "Fetch marketing campaign with non-existent ID returns 404 Not Found",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 72
+    },
+    {
+      "id": "T2.R9.3",
+      "name": "Marketing campaign update for non-existent ID returns 404 Not Found",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 70
+    },
+    {
+      "id": "T2.R9.4",
+      "name": "Marketing campaign deletion for non-existent ID returns 404 Not Found",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 62
+    },
+    {
+      "id": "T2.R9.5",
+      "name": "Customer role attempt to create marketing campaign returns 403 Forbidden",
+      "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
+      "tier": 2,
+      "status": "PASSED",
+      "duration": 67
+    },
+    {
+      "id": "T3.ENT.1",
+      "name": "CMS Section Banner creation linking to Media Asset URL",
+      "requirement": "CMS Sections + Media Asset Management",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 127
+    },
+    {
+      "id": "T3.ENT.2",
+      "name": "Media Asset with active usage reference updates and deletes cleanly when detached",
+      "requirement": "Media Tracking + Safe Deletion",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 188
+    },
+    {
+      "id": "T3.ENT.3",
+      "name": "Global Appearance platform settings update reflects in settings API query",
+      "requirement": "Global Appearance + Platform Settings",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 152
+    },
+    {
+      "id": "T3.ENT.4",
+      "name": "Navigation item linking to category slug verifies Category Landing integrity",
+      "requirement": "Visual Navigation + Category Landing",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 191
+    },
+    {
+      "id": "T3.ENT.5",
+      "name": "Admin mutates product price/stock and generates detailed AuditLog diff",
+      "requirement": "Product Management + AuditLog Diffs",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 97
+    },
+    {
+      "id": "T3.ENT.6",
+      "name": "Sponsored Campaign created, impressions incremented, and analytics aggregated",
+      "requirement": "Marketing Campaigns + Merchandising Intelligence",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 208
+    },
+    {
+      "id": "T3.ENT.7",
+      "name": "Homepage Draft autosaved, published to version snapshot, and restored via rollback",
+      "requirement": "Autosave Draft + Version Snapshot & Rollback",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 249
+    },
+    {
+      "id": "T3.ENT.8",
+      "name": "Category creation followed by category-filtered search and brand facets",
+      "requirement": "Category Management + Faceted Search",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 155
+    },
+    {
+      "id": "T3.ENT.9",
+      "name": "Seller profile verification state and catalog insertion integration",
+      "requirement": "Seller Platform + Catalog Insertion",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 98
+    },
+    {
+      "id": "T3.ENT.10",
+      "name": "Coupon creation with minimum order threshold and server-authoritative validation",
+      "requirement": "Coupon Engine + Validation",
+      "tier": 3,
+      "status": "PASSED",
+      "duration": 407
+    },
+    {
+      "id": "WORKLOAD-ENT-1",
+      "name": "Complete CMS Campaign Launch & Storefront Merchandising Lifecycle (Media -> Section -> Draft -> Publish -> Rollback)",
+      "requirement": "R1, R5, R6 Enterprise Lifecycle",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 292
+    },
+    {
+      "id": "WORKLOAD-ENT-2",
+      "name": "Global Theme & Visual Navigation Restructuring Workflow (Branding Tokens -> 3-Level Menu -> Footer Links)",
+      "requirement": "R2, R3 Enterprise Architecture",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 448
+    },
+    {
+      "id": "WORKLOAD-ENT-3",
+      "name": "Media Asset Governance & Protected Deletion Lifecycle (Ingest -> Metadata Update -> Tagging -> Deletion)",
+      "requirement": "R5 Enterprise Media Governance",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 209
+    },
+    {
+      "id": "WORKLOAD-ENT-4",
+      "name": "Multi-Role RBAC Governance & Audit Trail Verification Sweep across Customer, Seller, and Admin roles",
+      "requirement": "R7 Enterprise RBAC Governance",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 294
+    },
+    {
+      "id": "WORKLOAD-ENT-5",
+      "name": "Merchandising Intelligence & Sponsored Campaign Placement Lifecycle (Create -> Track -> Pause -> Analytics Aggregation)",
+      "requirement": "R9 Enterprise Merchandising Intelligence",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 266
+    },
+    {
+      "id": "WORKLOAD-ENT-6",
+      "name": "Website Health Center Diagnostic & Safe Publishing Quality Gate (Database Health -> Route Audits -> Quality Gate Verification)",
+      "requirement": "R8, R6 Enterprise Health & Safety",
+      "tier": 4,
+      "status": "PASSED",
+      "duration": 356
+    }
+  ]
+}

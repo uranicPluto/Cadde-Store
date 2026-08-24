@@ -5,13 +5,78 @@ import { getMockNavigationCategories, getMockTopUtilityLinks } from "@/lib/navig
 
 export const dynamic = "force-dynamic";
 
+export interface NavigationTreeItem {
+  id: string;
+  titleTr: string;
+  titleEn: string;
+  url: string;
+  section: string;
+  parentId: string | null;
+  sortOrder: number;
+  badgeTr: string | null;
+  badgeEn: string | null;
+  isActive: boolean;
+  deviceVisibility: string;
+  itemType: string;
+  imageUrl: string | null;
+  descriptionTr: string | null;
+  descriptionEn: string | null;
+  ctaTextTr: string | null;
+  ctaTextEn: string | null;
+  targetUrl: string | null;
+  scheduleStartAt: Date | null;
+  scheduleEndAt: Date | null;
+  metadataJson: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  children: NavigationTreeItem[];
+}
+
+function buildHierarchyTree(items: any[]): NavigationTreeItem[] {
+  const itemMap = new Map<string, NavigationTreeItem>();
+
+  for (const item of items) {
+    itemMap.set(item.id, {
+      ...item,
+      children: [],
+    });
+  }
+
+  const roots: NavigationTreeItem[] = [];
+
+  for (const item of items) {
+    const treeNode = itemMap.get(item.id)!;
+    if (item.parentId && itemMap.has(item.parentId)) {
+      const parentNode = itemMap.get(item.parentId)!;
+      parentNode.children.push(treeNode);
+    } else {
+      roots.push(treeNode);
+    }
+  }
+
+  const sortNodes = (nodes: NavigationTreeItem[]) => {
+    nodes.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    for (const node of nodes) {
+      if (node.children && node.children.length > 0) {
+        sortNodes(node.children);
+      }
+    }
+  };
+
+  sortNodes(roots);
+  return roots;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const section = searchParams.get("section");
     const active = searchParams.get("active") || searchParams.get("isActive");
+    const device = searchParams.get("device"); // ALL | DESKTOP | MOBILE
     const parentId = searchParams.get("parentId");
     const rootOnly = searchParams.get("rootOnly") === "true";
+    const treeParam = searchParams.get("tree") === "true";
+    const includeAll = searchParams.get("includeAll") === "true";
     const lang = searchParams.get("lang") === "en" ? "en" : "tr";
     const isEn = lang === "en";
 
@@ -20,16 +85,36 @@ export async function GET(request: Request) {
     if (section) {
       where.section = section;
     }
+
     if (active !== null && active !== undefined) {
       where.isActive = active === "true" || active === "1";
     }
+
+    if (device && device !== "ALL") {
+      where.deviceVisibility = {
+        in: ["ALL", device],
+      };
+    }
+
+    if (!includeAll) {
+      const now = new Date();
+      where.AND = [
+        {
+          OR: [{ scheduleStartAt: null }, { scheduleStartAt: { lte: now } }],
+        },
+        {
+          OR: [{ scheduleEndAt: null }, { scheduleEndAt: { gte: now } }],
+        },
+      ];
+    }
+
     if (parentId !== null && parentId !== undefined) {
       where.parentId = parentId === "null" || parentId === "" ? null : parentId;
     } else if (rootOnly) {
       where.parentId = null;
     }
 
-    // Fetch navigation items from NavigationItem table
+    // Fetch navigation items from DB
     const items = await prisma.navigationItem.findMany({
       where,
       include: {
@@ -39,6 +124,13 @@ export async function GET(request: Request) {
       },
       orderBy: { sortOrder: "asc" },
     });
+
+    // Build clean recursive tree structure
+    const allSectionItems = await prisma.navigationItem.findMany({
+      where: section ? { section } : {},
+      orderBy: { sortOrder: "asc" },
+    });
+    const tree = buildHierarchyTree(allSectionItems);
 
     // Also build rich category navigation tree for mega-menu and storefront navigation
     let dbCategories: any[] = [];
@@ -86,6 +178,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       items,
+      tree,
       navigation: items,
       categories: finalCategories,
       utilityLinks,
@@ -115,6 +208,17 @@ export async function POST(request: Request) {
       badgeTr,
       badgeEn,
       isActive,
+      deviceVisibility,
+      itemType,
+      imageUrl,
+      descriptionTr,
+      descriptionEn,
+      ctaTextTr,
+      ctaTextEn,
+      targetUrl,
+      scheduleStartAt,
+      scheduleEndAt,
+      metadataJson,
     } = body;
 
     if (!titleTr || !url) {
@@ -135,6 +239,17 @@ export async function POST(request: Request) {
         badgeTr: badgeTr || null,
         badgeEn: badgeEn || null,
         isActive: isActive !== undefined ? Boolean(isActive) : true,
+        deviceVisibility: deviceVisibility || "ALL",
+        itemType: itemType || "LINK",
+        imageUrl: imageUrl || null,
+        descriptionTr: descriptionTr || null,
+        descriptionEn: descriptionEn || null,
+        ctaTextTr: ctaTextTr || null,
+        ctaTextEn: ctaTextEn || null,
+        targetUrl: targetUrl || null,
+        scheduleStartAt: scheduleStartAt ? new Date(scheduleStartAt) : null,
+        scheduleEndAt: scheduleEndAt ? new Date(scheduleEndAt) : null,
+        metadataJson: typeof metadataJson === "object" ? JSON.stringify(metadataJson) : (metadataJson || "{}"),
       },
       include: {
         children: true,
@@ -155,6 +270,8 @@ export async function POST(request: Request) {
           titleEn: item.titleEn,
           url: item.url,
           section: item.section,
+          deviceVisibility: item.deviceVisibility,
+          itemType: item.itemType,
         }),
       },
     });
@@ -186,6 +303,7 @@ export async function PUT(request: Request) {
               ...(item.isActive !== undefined ? { isActive: Boolean(item.isActive) } : {}),
               ...(item.section ? { section: item.section } : {}),
               ...(item.parentId !== undefined ? { parentId: item.parentId || null } : {}),
+              ...(item.deviceVisibility ? { deviceVisibility: item.deviceVisibility } : {}),
             },
           });
         }
@@ -216,6 +334,17 @@ export async function PUT(request: Request) {
       badgeTr,
       badgeEn,
       isActive,
+      deviceVisibility,
+      itemType,
+      imageUrl,
+      descriptionTr,
+      descriptionEn,
+      ctaTextTr,
+      ctaTextEn,
+      targetUrl,
+      scheduleStartAt,
+      scheduleEndAt,
+      metadataJson,
     } = body;
 
     if (!id) {
@@ -225,15 +354,26 @@ export async function PUT(request: Request) {
     const updated = await prisma.navigationItem.update({
       where: { id },
       data: {
-        ...(titleTr ? { titleTr } : {}),
-        ...(titleEn ? { titleEn } : {}),
-        ...(url ? { url } : {}),
-        ...(section ? { section } : {}),
+        ...(titleTr !== undefined ? { titleTr } : {}),
+        ...(titleEn !== undefined ? { titleEn } : {}),
+        ...(url !== undefined ? { url } : {}),
+        ...(section !== undefined ? { section } : {}),
         ...(parentId !== undefined ? { parentId: parentId || null } : {}),
         ...(sortOrder !== undefined ? { sortOrder: Number(sortOrder) } : {}),
         ...(badgeTr !== undefined ? { badgeTr: badgeTr || null } : {}),
         ...(badgeEn !== undefined ? { badgeEn: badgeEn || null } : {}),
         ...(isActive !== undefined ? { isActive: Boolean(isActive) } : {}),
+        ...(deviceVisibility !== undefined ? { deviceVisibility } : {}),
+        ...(itemType !== undefined ? { itemType } : {}),
+        ...(imageUrl !== undefined ? { imageUrl: imageUrl || null } : {}),
+        ...(descriptionTr !== undefined ? { descriptionTr: descriptionTr || null } : {}),
+        ...(descriptionEn !== undefined ? { descriptionEn: descriptionEn || null } : {}),
+        ...(ctaTextTr !== undefined ? { ctaTextTr: ctaTextTr || null } : {}),
+        ...(ctaTextEn !== undefined ? { ctaTextEn: ctaTextEn || null } : {}),
+        ...(targetUrl !== undefined ? { targetUrl: targetUrl || null } : {}),
+        ...(scheduleStartAt !== undefined ? { scheduleStartAt: scheduleStartAt ? new Date(scheduleStartAt) : null } : {}),
+        ...(scheduleEndAt !== undefined ? { scheduleEndAt: scheduleEndAt ? new Date(scheduleEndAt) : null } : {}),
+        ...(metadataJson !== undefined ? { metadataJson: typeof metadataJson === "object" ? JSON.stringify(metadataJson) : (metadataJson || "{}") } : {}),
       },
     });
 
@@ -249,6 +389,7 @@ export async function PUT(request: Request) {
           titleTr: updated.titleTr,
           url: updated.url,
           section: updated.section,
+          deviceVisibility: updated.deviceVisibility,
         }),
       },
     });
