@@ -311,6 +311,32 @@ model Banner {
   updatedAt       DateTime         @updatedAt
 }
 
+model HomepageDraft {
+  id         String   @id @default("current_draft")
+  draftJson  String   @default("[]") // JSON string of SectionItem[]
+  updatedBy  String?
+  updatedAt  DateTime @updatedAt
+}
+
+model HomepageVersion {
+  id            String   @id @default(uuid())
+  versionNumber Int
+  snapshotJson  String   @default("[]") // JSON snapshot of published SectionItem[]
+  changeSummary String?
+  authorEmail   String?
+  publishedAt   DateTime @default(now())
+}
+
+model HomepageTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   @default("PRODUCT_CAROUSEL")
+  configJson  String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model ReturnRequest {
   id             String      @id @default(uuid())
   orderId        String

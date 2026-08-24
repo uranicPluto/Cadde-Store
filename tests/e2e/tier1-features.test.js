@@ -2201,13 +2201,199 @@ async function runTier1Tests() {
     }
   );
 
+  // ==========================================
+  // FEATURE 24: Visual Homepage Studio, Merchandising & Versioning Engine
+  // ==========================================
   await test(
-    "T1.23.5",
-    "Verify Shipping Policy route (/shipping) loads with 200 OK",
-    "KVKK Compliance & Cookie Consent Management",
+    "T1.24.1",
+    "Fetch draft homepage layout via GET /api/cms/homepage/draft",
+    "Visual Homepage Studio & Versioning",
     async () => {
-      const res = await request("/shipping");
-      assertEqual(res.status, 200, "Expected 200 OK for /shipping");
+      const res = await request("/api/cms/homepage/draft");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.sections), "Expected sections array");
+      assert(res.data.sections.length > 0, "Sections should contain baseline or draft blocks");
+    }
+  );
+
+  await test(
+    "T1.24.2",
+    "Save draft homepage layout via PUT /api/cms/homepage/draft (Admin auth required)",
+    "Visual Homepage Studio & Versioning",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const testSections = [
+        {
+          id: "sec-test-draft",
+          titleTR: "Özel Taslak Başlığı",
+          titleEN: "Special Draft Title",
+          type: "HERO",
+          orderIndex: 0,
+          active: true,
+          configJson: JSON.stringify({ subtitleTR: "Test alt başlık" }),
+          banners: [],
+        },
+      ];
+
+      const res = await request("/api/cms/homepage/draft", {
+        method: "PUT",
+        headers: adminHeaders,
+        body: { sections: testSections },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK for Admin PUT draft");
+      assertEqual(res.data.success, true, "Success should be true");
+
+      // Verify non-admin is blocked
+      const custHeaders = await getAuthHeaders("CUSTOMER");
+      const resCust = await request("/api/cms/homepage/draft", {
+        method: "PUT",
+        headers: custHeaders,
+        body: { sections: testSections },
+      });
+      assertEqual(resCust.status, 403, "Expected 403 Forbidden for non-admin");
+    }
+  );
+
+  await test(
+    "T1.24.3",
+    "Publish homepage draft via POST /api/cms/homepage/publish and generate HomepageVersion",
+    "Visual Homepage Studio & Versioning",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const publishPayload = {
+        sections: [
+          {
+            id: "sec-hero-published",
+            titleTR: "Vitrin Banner",
+            titleEN: "Hero Banner",
+            type: "HERO",
+            orderIndex: 0,
+            active: true,
+            configJson: JSON.stringify({ subtitleTR: "Yayınlandı" }),
+            banners: [],
+          },
+          {
+            id: "sec-bestsellers-published",
+            titleTR: "Çok Satanlar",
+            titleEN: "Bestsellers",
+            type: "PRODUCT_CAROUSEL",
+            orderIndex: 1,
+            active: true,
+            configJson: JSON.stringify({ productRules: { source: "BESTSELLING" } }),
+            banners: [],
+          },
+        ],
+        changeSummary: "E2E Automated Publish Test",
+      };
+
+      const res = await request("/api/cms/homepage/publish", {
+        method: "POST",
+        headers: adminHeaders,
+        body: publishPayload,
+      });
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assertEqual(res.data.success, true, "Publish success should be true");
+      assert(typeof res.data.versionNumber === "number", "Should return numeric versionNumber");
+    }
+  );
+
+  await test(
+    "T1.24.4",
+    "List published version history via GET /api/cms/homepage/versions",
+    "Visual Homepage Studio & Versioning",
+    async () => {
+      const res = await request("/api/cms/homepage/versions");
+      assertEqual(res.status, 200, "Expected 200 OK");
+      assert(Array.isArray(res.data.versions), "Expected versions array");
+      assert(res.data.versions.length > 0, "Versions list should contain at least one published version");
+    }
+  );
+
+  await test(
+    "T1.24.5",
+    "Rollback to previous version via POST /api/cms/homepage/versions",
+    "Visual Homepage Studio & Versioning",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const versionsRes = await request("/api/cms/homepage/versions");
+      const firstVer = versionsRes.data.versions[0];
+      assert(firstVer, "Target version should exist");
+
+      const res = await request("/api/cms/homepage/versions", {
+        method: "POST",
+        headers: adminHeaders,
+        body: { versionId: firstVer.id },
+      });
+      assertEqual(res.status, 200, "Expected 200 OK for version rollback");
+      assertEqual(res.data.success, true, "Rollback success should be true");
+    }
+  );
+
+  await test(
+    "T1.24.6",
+    "Manage reusable section templates via POST, GET, DELETE /api/cms/templates",
+    "Visual Homepage Studio & Versioning",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const createRes = await request("/api/cms/templates", {
+        method: "POST",
+        headers: adminHeaders,
+        body: {
+          name: "E2E Test Template",
+          description: "Reusable campaign block template",
+          type: "FLASH_DEALS",
+          configJson: { countdownEnabled: true },
+        },
+      });
+      assertEqual(createRes.status, 201, "Expected 201 Created");
+      assert(createRes.data.template?.id, "Created template must have id");
+
+      const templateId = createRes.data.template.id;
+
+      // GET templates
+      const listRes = await request("/api/cms/templates");
+      assertEqual(listRes.status, 200, "Expected 200 OK");
+      const found = listRes.data.templates.some((t) => t.id === templateId);
+      assert(found, "Created template must appear in templates list");
+
+      // DELETE template
+      const delRes = await request(`/api/cms/templates/${templateId}`, {
+        method: "DELETE",
+        headers: adminHeaders,
+      });
+      assertEqual(delRes.status, 200, "Expected 200 OK for DELETE");
+    }
+  );
+
+  await test(
+    "T1.24.7",
+    "Batch reorder sections via POST /api/cms/sections/reorder",
+    "Visual Homepage Studio & Versioning",
+    async () => {
+      const adminHeaders = await getAuthHeaders("ADMIN");
+      const secList = await prisma.homepageSection.findMany({ take: 2 });
+      if (secList.length >= 2) {
+        const reorderItems = [
+          { id: secList[0].id, orderIndex: 1 },
+          { id: secList[1].id, orderIndex: 0 },
+        ];
+        const res = await request("/api/cms/sections/reorder", {
+          method: "POST",
+          headers: adminHeaders,
+          body: { items: reorderItems },
+        });
+        assertEqual(res.status, 200, "Expected 200 OK for reorder");
+      }
+    }
+  );
+
+  await test(
+    "T1.24.8",
+    "Verify Live Preview route (/preview/homepage) loads with 200 OK",
+    "Visual Homepage Studio & Versioning",
+    async () => {
+      const res = await request("/preview/homepage");
+      assertEqual(res.status, 200, "Expected 200 OK for /preview/homepage");
     }
   );
 
