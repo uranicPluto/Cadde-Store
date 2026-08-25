@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-24T15:07:17.862Z",
+  "timestamp": "2026-08-25T14:20:18.732Z",
   "summary": {
     "total": 106,
     "passed": 106,
     "failed": 0,
     "passRate": "100.0%",
-    "totalDurationMs": 26899
+    "totalDurationMs": 27820
   },
   "tierSummary": {
     "tier1": {
@@ -36,7 +36,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 1,
       "status": "PASSED",
-      "duration": 197
+      "duration": 188
     },
     {
       "id": "T1.R1.2",
@@ -44,7 +44,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 1,
       "status": "PASSED",
-      "duration": 69
+      "duration": 66
     },
     {
       "id": "T1.R1.3",
@@ -52,7 +52,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 1,
       "status": "PASSED",
-      "duration": 158
+      "duration": 163
     },
     {
       "id": "T1.R1.4",
@@ -60,7 +60,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 1,
       "status": "PASSED",
-      "duration": 346
+      "duration": 162
     },
     {
       "id": "T1.R1.5",
@@ -68,7 +68,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 1,
       "status": "PASSED",
-      "duration": 7518
+      "duration": 10539
     },
     {
       "id": "T1.R2.1",
@@ -76,7 +76,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 313
+      "duration": 239
     },
     {
       "id": "T1.R2.2",
@@ -84,7 +84,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 82
+      "duration": 81
     },
     {
       "id": "T1.R2.3",
@@ -92,7 +92,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 75
+      "duration": 76
     },
     {
       "id": "T1.R2.4",
@@ -100,7 +100,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 77
+      "duration": 75
     },
     {
       "id": "T1.R2.5",
@@ -108,7 +108,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 1,
       "status": "PASSED",
-      "duration": 56
+      "duration": 57
     },
     {
       "id": "T1.R3.1",
@@ -116,7 +116,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 1,
       "status": "PASSED",
-      "duration": 487
+      "duration": 245
     },
     {
       "id": "T1.R3.2",
@@ -124,7 +124,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 1,
       "status": "PASSED",
-      "duration": 74
+      "duration": 69
     },
     {
       "id": "T1.R3.3",
@@ -132,7 +132,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 1,
       "status": "PASSED",
-      "duration": 76
+      "duration": 92
     },
     {
       "id": "T1.R3.4",
@@ -140,7 +140,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 1,
       "status": "PASSED",
-      "duration": 79
+      "duration": 77
     },
     {
       "id": "T1.R3.5",
@@ -148,7 +148,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 1,
       "status": "PASSED",
-      "duration": 65
+      "duration": 81
     },
     {
       "id": "T1.R4.1",
@@ -156,7 +156,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 1,
       "status": "PASSED",
-      "duration": 333
+      "duration": 229
     },
     {
       "id": "T1.R4.2",
@@ -164,7 +164,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 1,
       "status": "PASSED",
-      "duration": 87
+      "duration": 80
     },
     {
       "id": "T1.R4.3",
@@ -172,7 +172,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 1,
       "status": "PASSED",
-      "duration": 755
+      "duration": 617
     },
     {
       "id": "T1.R4.4",
@@ -180,7 +180,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 1,
       "status": "PASSED",
-      "duration": 102
+      "duration": 86
     },
     {
       "id": "T1.R4.5",
@@ -188,7 +188,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 1,
       "status": "PASSED",
-      "duration": 171
+      "duration": 138
     },
     {
       "id": "T1.R5.1",
@@ -196,7 +196,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 1,
       "status": "PASSED",
-      "duration": 334
+      "duration": 252
     },
     {
       "id": "T1.R5.2",
@@ -204,7 +204,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 1,
       "status": "PASSED",
-      "duration": 68
+      "duration": 63
     },
     {
       "id": "T1.R5.3",
@@ -212,7 +212,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 1,
       "status": "PASSED",
-      "duration": 76
+      "duration": 62
     },
     {
       "id": "T1.R5.4",
@@ -220,7 +220,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 1,
       "status": "PASSED",
-      "duration": 666
+      "duration": 594
     },
     {
       "id": "T1.R5.5",
@@ -228,7 +228,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 1,
       "status": "PASSED",
-      "duration": 106
+      "duration": 85
     },
     {
       "id": "T1.R6.1",
@@ -236,7 +236,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 1,
       "status": "PASSED",
-      "duration": 391
+      "duration": 340
     },
     {
       "id": "T1.R6.2",
@@ -244,7 +244,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 1,
       "status": "PASSED",
-      "duration": 76
+      "duration": 75
     },
     {
       "id": "T1.R6.3",
@@ -252,7 +252,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 1,
       "status": "PASSED",
-      "duration": 280
+      "duration": 267
     },
     {
       "id": "T1.R6.4",
@@ -260,7 +260,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 1,
       "status": "PASSED",
-      "duration": 271
+      "duration": 236
     },
     {
       "id": "T1.R6.5",
@@ -268,7 +268,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 1,
       "status": "PASSED",
-      "duration": 90
+      "duration": 84
     },
     {
       "id": "T1.R7.1",
@@ -276,7 +276,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 1,
       "status": "PASSED",
-      "duration": 267
+      "duration": 260
     },
     {
       "id": "T1.R7.2",
@@ -284,7 +284,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 1,
       "status": "PASSED",
-      "duration": 70
+      "duration": 64
     },
     {
       "id": "T1.R7.3",
@@ -292,7 +292,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 1,
       "status": "PASSED",
-      "duration": 613
+      "duration": 560
     },
     {
       "id": "T1.R7.4",
@@ -300,7 +300,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 1,
       "status": "PASSED",
-      "duration": 271
+      "duration": 256
     },
     {
       "id": "T1.R7.5",
@@ -308,7 +308,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 1,
       "status": "PASSED",
-      "duration": 300
+      "duration": 284
     },
     {
       "id": "T1.R8.1",
@@ -316,7 +316,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1006
+      "duration": 823
     },
     {
       "id": "T1.R8.2",
@@ -340,7 +340,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 1,
       "status": "PASSED",
-      "duration": 309
+      "duration": 263
     },
     {
       "id": "T1.R8.5",
@@ -348,7 +348,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 1,
       "status": "PASSED",
-      "duration": 2
+      "duration": 1
     },
     {
       "id": "T1.R9.1",
@@ -356,7 +356,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 1,
       "status": "PASSED",
-      "duration": 102
+      "duration": 68
     },
     {
       "id": "T1.R9.2",
@@ -364,7 +364,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 1,
       "status": "PASSED",
-      "duration": 820
+      "duration": 682
     },
     {
       "id": "T1.R9.3",
@@ -372,7 +372,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 1,
       "status": "PASSED",
-      "duration": 70
+      "duration": 63
     },
     {
       "id": "T1.R9.4",
@@ -380,7 +380,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 1,
       "status": "PASSED",
-      "duration": 1099
+      "duration": 1396
     },
     {
       "id": "T1.R9.5",
@@ -388,7 +388,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 1,
       "status": "PASSED",
-      "duration": 115
+      "duration": 104
     },
     {
       "id": "T2.R1.1",
@@ -396,7 +396,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 2,
       "status": "PASSED",
-      "duration": 76
+      "duration": 67
     },
     {
       "id": "T2.R1.2",
@@ -404,7 +404,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 2,
       "status": "PASSED",
-      "duration": 78
+      "duration": 76
     },
     {
       "id": "T2.R1.3",
@@ -412,7 +412,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 2,
       "status": "PASSED",
-      "duration": 78
+      "duration": 88
     },
     {
       "id": "T2.R1.4",
@@ -420,7 +420,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 2,
       "status": "PASSED",
-      "duration": 81
+      "duration": 104
     },
     {
       "id": "T2.R1.5",
@@ -428,7 +428,7 @@
       "requirement": "R1. Full Website Page Builder & Multi-Page CMS",
       "tier": 2,
       "status": "PASSED",
-      "duration": 73
+      "duration": 86
     },
     {
       "id": "T2.R2.1",
@@ -436,7 +436,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 77
+      "duration": 76
     },
     {
       "id": "T2.R2.2",
@@ -444,7 +444,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 90
+      "duration": 91
     },
     {
       "id": "T2.R2.3",
@@ -452,7 +452,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 80
+      "duration": 87
     },
     {
       "id": "T2.R2.4",
@@ -460,7 +460,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 62
+      "duration": 82
     },
     {
       "id": "T2.R2.5",
@@ -468,7 +468,7 @@
       "requirement": "R2. Global Appearance & Design Studio",
       "tier": 2,
       "status": "PASSED",
-      "duration": 226
+      "duration": 80
     },
     {
       "id": "T2.R3.1",
@@ -476,7 +476,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 2,
       "status": "PASSED",
-      "duration": 64
+      "duration": 68
     },
     {
       "id": "T2.R3.2",
@@ -484,7 +484,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 2,
       "status": "PASSED",
-      "duration": 60
+      "duration": 77
     },
     {
       "id": "T2.R3.3",
@@ -492,7 +492,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 2,
       "status": "PASSED",
-      "duration": 61
+      "duration": 78
     },
     {
       "id": "T2.R3.4",
@@ -500,7 +500,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 2,
       "status": "PASSED",
-      "duration": 64
+      "duration": 134
     },
     {
       "id": "T2.R3.5",
@@ -508,7 +508,7 @@
       "requirement": "R3. Visual Navigation & Mega-Menu Builder",
       "tier": 2,
       "status": "PASSED",
-      "duration": 92
+      "duration": 112
     },
     {
       "id": "T2.R4.1",
@@ -516,7 +516,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 2,
       "status": "PASSED",
-      "duration": 80
+      "duration": 81
     },
     {
       "id": "T2.R4.2",
@@ -524,7 +524,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 2,
       "status": "PASSED",
-      "duration": 74
+      "duration": 68
     },
     {
       "id": "T2.R4.3",
@@ -532,7 +532,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 2,
       "status": "PASSED",
-      "duration": 87
+      "duration": 67
     },
     {
       "id": "T2.R4.4",
@@ -540,7 +540,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 2,
       "status": "PASSED",
-      "duration": 71
+      "duration": 74
     },
     {
       "id": "T2.R4.5",
@@ -548,7 +548,7 @@
       "requirement": "R4. Product Page & Category Page Layout Builders",
       "tier": 2,
       "status": "PASSED",
-      "duration": 348
+      "duration": 340
     },
     {
       "id": "T2.R5.1",
@@ -556,7 +556,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 2,
       "status": "PASSED",
-      "duration": 73
+      "duration": 72
     },
     {
       "id": "T2.R5.2",
@@ -564,7 +564,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 2,
       "status": "PASSED",
-      "duration": 69
+      "duration": 68
     },
     {
       "id": "T2.R5.3",
@@ -572,7 +572,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 2,
       "status": "PASSED",
-      "duration": 73
+      "duration": 72
     },
     {
       "id": "T2.R5.4",
@@ -580,7 +580,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 2,
       "status": "PASSED",
-      "duration": 71
+      "duration": 43
     },
     {
       "id": "T2.R5.5",
@@ -588,7 +588,7 @@
       "requirement": "R5. Enhanced Media Asset Manager with Usage Tracking & Protection",
       "tier": 2,
       "status": "PASSED",
-      "duration": 110
+      "duration": 144
     },
     {
       "id": "T2.R6.1",
@@ -596,7 +596,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 2,
       "status": "PASSED",
-      "duration": 67
+      "duration": 62
     },
     {
       "id": "T2.R6.2",
@@ -604,7 +604,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 2,
       "status": "PASSED",
-      "duration": 59
+      "duration": 72
     },
     {
       "id": "T2.R6.3",
@@ -612,7 +612,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 2,
       "status": "PASSED",
-      "duration": 74
+      "duration": 64
     },
     {
       "id": "T2.R6.4",
@@ -620,7 +620,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 2,
       "status": "PASSED",
-      "duration": 62
+      "duration": 64
     },
     {
       "id": "T2.R6.5",
@@ -628,7 +628,7 @@
       "requirement": "R6. Advanced Preview Center, Autosave & Safe Publishing Checklist",
       "tier": 2,
       "status": "PASSED",
-      "duration": 72
+      "duration": 58
     },
     {
       "id": "T2.R7.1",
@@ -636,7 +636,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 2,
       "status": "PASSED",
-      "duration": 65
+      "duration": 64
     },
     {
       "id": "T2.R7.2",
@@ -660,7 +660,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 2,
       "status": "PASSED",
-      "duration": 279
+      "duration": 292
     },
     {
       "id": "T2.R7.5",
@@ -668,7 +668,7 @@
       "requirement": "R7. Role-Based Access Control (RBAC) & Fine-Grained Permissions",
       "tier": 2,
       "status": "PASSED",
-      "duration": 69
+      "duration": 72
     },
     {
       "id": "T2.R8.1",
@@ -676,7 +676,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 2,
       "status": "PASSED",
-      "duration": 70
+      "duration": 75
     },
     {
       "id": "T2.R8.2",
@@ -684,7 +684,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 2,
       "status": "PASSED",
-      "duration": 84
+      "duration": 80
     },
     {
       "id": "T2.R8.3",
@@ -692,7 +692,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 2,
       "status": "PASSED",
-      "duration": 74
+      "duration": 89
     },
     {
       "id": "T2.R8.4",
@@ -700,7 +700,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 2,
       "status": "PASSED",
-      "duration": 25
+      "duration": 6
     },
     {
       "id": "T2.R8.5",
@@ -708,7 +708,7 @@
       "requirement": "R8. SEO Control Center & Website Health Monitor",
       "tier": 2,
       "status": "PASSED",
-      "duration": 128
+      "duration": 126
     },
     {
       "id": "T2.R9.1",
@@ -716,7 +716,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 2,
       "status": "PASSED",
-      "duration": 60
+      "duration": 66
     },
     {
       "id": "T2.R9.2",
@@ -724,7 +724,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 2,
       "status": "PASSED",
-      "duration": 57
+      "duration": 72
     },
     {
       "id": "T2.R9.3",
@@ -732,7 +732,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 2,
       "status": "PASSED",
-      "duration": 71
+      "duration": 81
     },
     {
       "id": "T2.R9.4",
@@ -740,7 +740,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 2,
       "status": "PASSED",
-      "duration": 63
+      "duration": 67
     },
     {
       "id": "T2.R9.5",
@@ -748,7 +748,7 @@
       "requirement": "R9. Merchandising Intelligence & AI Website Assistant",
       "tier": 2,
       "status": "PASSED",
-      "duration": 72
+      "duration": 58
     },
     {
       "id": "T3.ENT.1",
@@ -756,7 +756,7 @@
       "requirement": "CMS Sections + Media Asset Management",
       "tier": 3,
       "status": "PASSED",
-      "duration": 135
+      "duration": 95
     },
     {
       "id": "T3.ENT.2",
@@ -764,7 +764,7 @@
       "requirement": "Media Tracking + Safe Deletion",
       "tier": 3,
       "status": "PASSED",
-      "duration": 205
+      "duration": 179
     },
     {
       "id": "T3.ENT.3",
@@ -772,7 +772,7 @@
       "requirement": "Global Appearance + Platform Settings",
       "tier": 3,
       "status": "PASSED",
-      "duration": 155
+      "duration": 142
     },
     {
       "id": "T3.ENT.4",
@@ -780,7 +780,7 @@
       "requirement": "Visual Navigation + Category Landing",
       "tier": 3,
       "status": "PASSED",
-      "duration": 219
+      "duration": 201
     },
     {
       "id": "T3.ENT.5",
@@ -788,7 +788,7 @@
       "requirement": "Product Management + AuditLog Diffs",
       "tier": 3,
       "status": "PASSED",
-      "duration": 102
+      "duration": 84
     },
     {
       "id": "T3.ENT.6",
@@ -796,7 +796,7 @@
       "requirement": "Marketing Campaigns + Merchandising Intelligence",
       "tier": 3,
       "status": "PASSED",
-      "duration": 181
+      "duration": 177
     },
     {
       "id": "T3.ENT.7",
@@ -804,7 +804,7 @@
       "requirement": "Autosave Draft + Version Snapshot & Rollback",
       "tier": 3,
       "status": "PASSED",
-      "duration": 267
+      "duration": 268
     },
     {
       "id": "T3.ENT.8",
@@ -812,7 +812,7 @@
       "requirement": "Category Management + Faceted Search",
       "tier": 3,
       "status": "PASSED",
-      "duration": 223
+      "duration": 142
     },
     {
       "id": "T3.ENT.9",
@@ -820,7 +820,7 @@
       "requirement": "Seller Platform + Catalog Insertion",
       "tier": 3,
       "status": "PASSED",
-      "duration": 96
+      "duration": 94
     },
     {
       "id": "T3.ENT.10",
@@ -828,7 +828,7 @@
       "requirement": "Coupon Engine + Validation",
       "tier": 3,
       "status": "PASSED",
-      "duration": 461
+      "duration": 387
     },
     {
       "id": "WORKLOAD-ENT-1",
@@ -836,7 +836,7 @@
       "requirement": "R1, R5, R6 Enterprise Lifecycle",
       "tier": 4,
       "status": "PASSED",
-      "duration": 361
+      "duration": 298
     },
     {
       "id": "WORKLOAD-ENT-2",
@@ -844,7 +844,7 @@
       "requirement": "R2, R3 Enterprise Architecture",
       "tier": 4,
       "status": "PASSED",
-      "duration": 480
+      "duration": 421
     },
     {
       "id": "WORKLOAD-ENT-3",
@@ -852,7 +852,7 @@
       "requirement": "R5 Enterprise Media Governance",
       "tier": 4,
       "status": "PASSED",
-      "duration": 226
+      "duration": 172
     },
     {
       "id": "WORKLOAD-ENT-4",
@@ -860,7 +860,7 @@
       "requirement": "R7 Enterprise RBAC Governance",
       "tier": 4,
       "status": "PASSED",
-      "duration": 519
+      "duration": 344
     },
     {
       "id": "WORKLOAD-ENT-5",
@@ -868,7 +868,7 @@
       "requirement": "R9 Enterprise Merchandising Intelligence",
       "tier": 4,
       "status": "PASSED",
-      "duration": 321
+      "duration": 252
     },
     {
       "id": "WORKLOAD-ENT-6",
@@ -876,7 +876,7 @@
       "requirement": "R8, R6 Enterprise Health & Safety",
       "tier": 4,
       "status": "PASSED",
-      "duration": 497
+      "duration": 354
     }
   ]
 }

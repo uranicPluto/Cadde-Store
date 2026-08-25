@@ -347,9 +347,28 @@ export default function AdminHomepageStudioPage() {
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" />
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-sm font-black text-slate-900 tracking-tight">
-                    {isEn ? "HOMEPAGE STUDIO" : "VİTRİN & ANASAYFA STÜDYOSU"}
+                  <h1 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                    <span>{isEn ? "HOMEPAGE STUDIO" : "VİTRİN STÜDYOSU"}</span>
                   </h1>
+
+                  {/* Page & Layout Selector Dropdown */}
+                  <select
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "pages") window.location.href = "/admin/pages";
+                      else if (val === "appearance") window.location.href = "/admin/appearance";
+                      else if (val === "navigation") window.location.href = "/admin/navigation";
+                      else if (val === "layouts") window.location.href = "/admin/layouts";
+                    }}
+                    className="h-7 px-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none cursor-pointer transition-colors"
+                  >
+                    <option value="homepage">🏠 {isEn ? "Homepage (/)" : "Anasayfa (/)"}</option>
+                    <option value="pages">📄 {isEn ? "All Pages & CMS (/admin/pages)" : "Tüm Sayfalar & CMS"}</option>
+                    <option value="appearance">🎨 {isEn ? "Global Appearance (/admin/appearance)" : "Görünüm & Tema Stüdyosu"}</option>
+                    <option value="navigation">🧭 {isEn ? "Menu & Navigation (/admin/navigation)" : "Menü & Navigasyon"}</option>
+                    <option value="layouts">📐 {isEn ? "Page Layouts (/admin/layouts)" : "Sayfa Düzenleri"}</option>
+                  </select>
+
                   <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-200">
                     LIVE v{currentVersion}
                   </span>
