@@ -3,11 +3,11 @@ import path from "path";
 import fs from "fs";
 
 function ensureTmpDatabase(): string {
-  const tmpDbPath = path.join("/tmp", "dev.db");
+  const tmpDbPath = "/tmp/dev.db";
 
   let tmpValid = false;
   try {
-    if (fs.existsSync(tmpDbPath) && fs.statSync(tmpDbPath).size > 0) {
+    if (fs.existsSync(tmpDbPath) && fs.statSync(tmpDbPath).size > 1000) {
       tmpValid = true;
     }
   } catch (e) {}
@@ -17,26 +17,21 @@ function ensureTmpDatabase(): string {
       path.join(process.cwd(), "public", "dev.db"),
       path.join(process.cwd(), "prisma", "dev.db"),
       path.join(process.cwd(), "dev.db"),
-      path.join(__dirname, "..", "..", "..", "public", "dev.db"),
-      path.join(__dirname, "..", "..", "..", "prisma", "dev.db"),
-      path.join(__dirname, "..", "..", "public", "dev.db"),
-      path.join(__dirname, "..", "..", "prisma", "dev.db"),
-      path.join(__dirname, "..", "public", "dev.db"),
-      path.join(__dirname, "..", "prisma", "dev.db"),
-      path.join(__dirname, "public", "dev.db"),
-      path.join(__dirname, "prisma", "dev.db"),
       path.resolve("./public/dev.db"),
       path.resolve("./prisma/dev.db"),
       path.resolve("./dev.db"),
-      path.join(process.cwd(), ".next", "server", "public", "dev.db"),
-      path.join(process.cwd(), ".next", "server", "prisma", "dev.db"),
+      "/var/task/public/dev.db",
+      "/var/task/prisma/dev.db",
     ];
 
     let copied = false;
     for (const c of candidates) {
       try {
-        if (fs.existsSync(c) && fs.statSync(c).size > 0) {
+        if (fs.existsSync(c) && fs.statSync(c).size > 1000) {
           fs.copyFileSync(c, tmpDbPath);
+          try {
+            fs.chmodSync(tmpDbPath, 0o666);
+          } catch (e) {}
           copied = true;
           console.log(`[Prisma] Successfully initialized /tmp/dev.db from ${c}`);
           break;
@@ -53,7 +48,7 @@ function ensureTmpDatabase(): string {
     }
   }
 
-  return `file:${tmpDbPath}`;
+  return "file:/tmp/dev.db";
 }
 
 function getDatabaseUrl(): string {

@@ -68,11 +68,25 @@ export async function GET() {
     });
   } catch (error: any) {
     console.error("Health Check Error:", error);
+    let fsDebug: any = {};
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      fsDebug = {
+        cwd: process.cwd(),
+        tmpFiles: fs.existsSync("/tmp") ? fs.readdirSync("/tmp") : [],
+        publicFiles: fs.existsSync(path.join(process.cwd(), "public")) ? fs.readdirSync(path.join(process.cwd(), "public")) : [],
+        prismaFiles: fs.existsSync(path.join(process.cwd(), "prisma")) ? fs.readdirSync(path.join(process.cwd(), "prisma")) : [],
+        envDatabaseUrl: process.env.DATABASE_URL,
+      };
+    } catch (e) {}
+
     return NextResponse.json(
       {
         success: false,
         status: "DEGRADED",
         error: error?.message || "Health check failed",
+        debug: fsDebug,
       },
       { status: 500 }
     );
