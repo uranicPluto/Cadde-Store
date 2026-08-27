@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 import { getDefaultBaselineSections } from "@/lib/cms/cms-service";
 
 export async function GET() {
@@ -53,11 +54,15 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+async function saveDraftHandler(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yetkisiz işlem" }, { status: 403 });
+    const perm = requirePermission(user, "HOMEPAGE", "WRITE");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yetkisiz işlem", code: "FORBIDDEN", resource: "HOMEPAGE", action: "WRITE" },
+        { status: perm.status || 403 }
+      );
     }
 
     const body = await request.json();
@@ -71,18 +76,22 @@ export async function PUT(request: Request) {
       where: { id: "current_draft" },
       update: {
         draftJson: JSON.stringify(sections),
-        updatedBy: user.email,
+        updatedBy: user!.email,
       },
       create: {
         id: "current_draft",
         draftJson: JSON.stringify(sections),
-        updatedBy: user.email,
+        updatedBy: user!.email,
       },
     });
 
     return NextResponse.json({ success: true, draft });
   } catch (error) {
-    console.error("[API Draft PUT Error]:", error);
+    console.error("[API Draft Save Error]:", error);
     return NextResponse.json({ error: "Taslak kaydedilemedi." }, { status: 500 });
   }
 }
+
+export const PUT = saveDraftHandler;
+export const POST = saveDraftHandler;
+

@@ -8,6 +8,8 @@ import {
   CmsPageInput,
 } from "@/lib/cms/page-repository";
 
+import { requirePermission } from "@/lib/auth/permissions";
+
 export const dynamic = "force-dynamic";
 
 export async function GET(
@@ -47,10 +49,11 @@ export async function PUT(
 ) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    const permCheck = requirePermission(session, "PAGES", "WRITE");
+    if (!permCheck.authorized) {
       return NextResponse.json(
-        { success: false, error: "Yönetici yetkisi gereklidir." },
-        { status: 403 }
+        { success: false, error: permCheck.error || "Bu işlem için yetkiniz bulunmamaktadır.", code: "FORBIDDEN", resource: "PAGES", action: "WRITE" },
+        { status: permCheck.status || 403 }
       );
     }
 
@@ -113,9 +116,9 @@ export async function PUT(
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "PAGE_UPDATED",
         entityType: "CMS",
         entityId: updated.id,
@@ -147,10 +150,11 @@ export async function DELETE(
 ) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    const permCheck = requirePermission(session, "PAGES", "DELETE");
+    if (!permCheck.authorized) {
       return NextResponse.json(
-        { success: false, error: "Yönetici yetkisi gereklidir." },
-        { status: 403 }
+        { success: false, error: permCheck.error || "Bu işlem için yetkiniz bulunmamaktadır.", code: "FORBIDDEN", resource: "PAGES", action: "DELETE" },
+        { status: permCheck.status || 403 }
       );
     }
 
@@ -168,9 +172,9 @@ export async function DELETE(
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "PAGE_DELETED",
         entityType: "CMS",
         entityId: id,

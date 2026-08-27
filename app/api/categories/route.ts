@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
+
 
 export async function GET(request: Request) {
   try {
@@ -110,10 +112,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    const perm = requirePermission(session, "CATALOG", "WRITE");
+    if (!perm.authorized) {
       return NextResponse.json(
-        { error: "Bu işlem için yönetici yetkisi gereklidir." },
-        { status: 403 }
+        { error: perm.error || "Bu işlem için yetkiniz bulunmamaktadır.", code: "FORBIDDEN", resource: "CATALOG", action: "WRITE" },
+        { status: perm.status || 403 }
       );
     }
 
@@ -162,9 +165,9 @@ export async function POST(request: Request) {
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "CATEGORY_CREATED",
         entityType: "CATEGORY",
         entityId: category.id,
@@ -186,10 +189,11 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    const perm = requirePermission(session, "CATALOG", "WRITE");
+    if (!perm.authorized) {
       return NextResponse.json(
-        { error: "Bu işlem için yönetici yetkisi gereklidir." },
-        { status: 403 }
+        { error: perm.error || "Bu işlem için yetkiniz bulunmamaktadır.", code: "FORBIDDEN", resource: "CATALOG", action: "WRITE" },
+        { status: perm.status || 403 }
       );
     }
 
@@ -232,9 +236,9 @@ export async function PUT(request: Request) {
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "CATEGORY_UPDATED",
         entityType: "CATEGORY",
         entityId: updated.id,
@@ -256,10 +260,11 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    const perm = requirePermission(session, "CATALOG", "DELETE");
+    if (!perm.authorized) {
       return NextResponse.json(
-        { error: "Bu işlem için yönetici yetkisi gereklidir." },
-        { status: 403 }
+        { error: perm.error || "Bu işlem için yetkiniz bulunmamaktadır.", code: "FORBIDDEN", resource: "CATALOG", action: "DELETE" },
+        { status: perm.status || 403 }
       );
     }
 
@@ -287,9 +292,9 @@ export async function DELETE(request: Request) {
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "CATEGORY_DELETED",
         entityType: "CATEGORY",
         entityId: id,

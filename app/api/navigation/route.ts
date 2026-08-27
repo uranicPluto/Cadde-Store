@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 import { getMockNavigationCategories, getMockTopUtilityLinks } from "@/lib/navigation-data";
+
 
 export const dynamic = "force-dynamic";
 
@@ -193,8 +195,12 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yönetici yetkisi gereklidir." }, { status: 403 });
+    const perm = requirePermission(session, "NAVIGATION", "WRITE");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yönetici yetkisi gereklidir.", code: "FORBIDDEN", resource: "NAVIGATION", action: "WRITE" },
+        { status: perm.status || 403 }
+      );
     }
 
     const body = await request.json();
@@ -259,9 +265,9 @@ export async function POST(request: Request) {
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "NAVIGATION_CREATED",
         entityType: "NAVIGATION",
         entityId: item.id,
@@ -286,8 +292,12 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yönetici yetkisi gereklidir." }, { status: 403 });
+    const perm = requirePermission(session, "NAVIGATION", "WRITE");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yönetici yetkisi gereklidir.", code: "FORBIDDEN", resource: "NAVIGATION", action: "WRITE" },
+        { status: perm.status || 403 }
+      );
     }
 
     const body = await request.json();
@@ -311,9 +321,9 @@ export async function PUT(request: Request) {
 
       await prisma.auditLog.create({
         data: {
-          actorId: session.id,
-          actorEmail: session.email,
-          actorRole: session.role,
+          actorId: session!.id,
+          actorEmail: session!.email,
+          actorRole: session!.role,
           action: "NAVIGATION_UPDATED",
           entityType: "NAVIGATION",
           metadataJson: JSON.stringify({ count: body.items.length }),
@@ -379,9 +389,9 @@ export async function PUT(request: Request) {
 
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "NAVIGATION_UPDATED",
         entityType: "NAVIGATION",
         entityId: id,
@@ -404,8 +414,12 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yönetici yetkisi gereklidir." }, { status: 403 });
+    const perm = requirePermission(session, "NAVIGATION", "DELETE");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yönetici yetkisi gereklidir.", code: "FORBIDDEN", resource: "NAVIGATION", action: "DELETE" },
+        { status: perm.status || 403 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -428,9 +442,9 @@ export async function DELETE(request: Request) {
 
       await prisma.auditLog.create({
         data: {
-          actorId: session.id,
-          actorEmail: session.email,
-          actorRole: session.role,
+          actorId: session!.id,
+          actorEmail: session!.email,
+          actorRole: session!.role,
           action: "NAVIGATION_DELETED",
           entityType: "NAVIGATION",
           entityId: id,

@@ -27,23 +27,34 @@ export async function POST(request: Request) {
     }
 
     // Auto-provision demo accounts if unseeded or running in isolated serverless DB
-    if (!user && (cleanEmail === "admin@cadde-store.com" || cleanEmail === "seller@cadde-store.com" || cleanEmail === "customer@cadde-store.com")) {
+    const demoAccounts: Record<string, { role: "ADMIN" | "SELLER" | "CUSTOMER"; adminRole?: string; firstName: string; lastName: string }> = {
+      "admin@cadde-store.com": { role: "ADMIN", adminRole: "SUPER_ADMIN", firstName: "Super", lastName: "Admin" },
+      "content@cadde-store.com": { role: "ADMIN", adminRole: "CONTENT_MANAGER", firstName: "Content", lastName: "Manager" },
+      "merchandiser@cadde-store.com": { role: "ADMIN", adminRole: "MERCHANDISING_MANAGER", firstName: "Merchandising", lastName: "Manager" },
+      "marketing@cadde-store.com": { role: "ADMIN", adminRole: "MARKETING_MANAGER", firstName: "Marketing", lastName: "Manager" },
+      "operations@cadde-store.com": { role: "ADMIN", adminRole: "OPERATIONS_MANAGER", firstName: "Operations", lastName: "Manager" },
+      "seller@cadde-store.com": { role: "SELLER", firstName: "Trendy", lastName: "Fashion" },
+      "customer@cadde-store.com": { role: "CUSTOMER", firstName: "Ahmet", lastName: "Yılmaz" },
+    };
+
+    if (!user && demoAccounts[cleanEmail]) {
       if (password === "Password123!") {
+        const demo = demoAccounts[cleanEmail];
         const passwordHash = await hashPassword("Password123!");
-        const role = cleanEmail === "admin@cadde-store.com" ? "ADMIN" : cleanEmail === "seller@cadde-store.com" ? "SELLER" : "CUSTOMER";
         try {
           user = await prisma.user.create({
             data: {
               email: cleanEmail,
               passwordHash,
-              firstName: cleanEmail === "admin@cadde-store.com" ? "Sistem" : cleanEmail === "seller@cadde-store.com" ? "Trendy" : "Ahmet",
-              lastName: cleanEmail === "admin@cadde-store.com" ? "Yöneticisi" : cleanEmail === "seller@cadde-store.com" ? "Fashion" : "Yılmaz",
-              role,
+              firstName: demo.firstName,
+              lastName: demo.lastName,
+              role: demo.role,
+              adminRole: demo.adminRole,
             },
             include: { sellerProfile: true },
           });
 
-          if (role === "SELLER") {
+          if (demo.role === "SELLER") {
             await prisma.seller.create({
               data: {
                 userId: user.id,
@@ -59,15 +70,15 @@ export async function POST(request: Request) {
             });
           }
         } catch (createErr) {
-          // Fallback user object if DB is read-only
           user = {
-            id: `demo-${role.toLowerCase()}`,
+            id: `demo-${cleanEmail.replace(/[^a-z0-9]/g, "-")}`,
             email: cleanEmail,
-            firstName: cleanEmail === "admin@cadde-store.com" ? "Sistem" : cleanEmail === "seller@cadde-store.com" ? "Trendy" : "Ahmet",
-            lastName: cleanEmail === "admin@cadde-store.com" ? "Yöneticisi" : cleanEmail === "seller@cadde-store.com" ? "Fashion" : "Yılmaz",
+            firstName: demo.firstName,
+            lastName: demo.lastName,
             passwordHash,
-            role,
-            sellerProfile: role === "SELLER" ? { slug: "trend-fashion-magazasi" } : null,
+            role: demo.role,
+            adminRole: demo.adminRole,
+            sellerProfile: demo.role === "SELLER" ? { slug: "trend-fashion-magazasi" } : null,
           };
         }
       }
@@ -88,6 +99,7 @@ export async function POST(request: Request) {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role as "CUSTOMER" | "SELLER" | "ADMIN",
+      adminRole: user.adminRole || (user.role === "ADMIN" ? "SUPER_ADMIN" : undefined),
       sellerSlug: user.sellerProfile?.slug || (user.role === "SELLER" ? "trend-fashion-magazasi" : undefined),
     };
 

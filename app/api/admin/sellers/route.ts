@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yönetici yetkisi gereklidir." }, { status: 403 });
+    const perm = requirePermission(session, "SELLERS", "READ");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yönetici yetkisi gereklidir.", code: "FORBIDDEN", resource: "SELLERS", action: "READ" },
+        { status: perm.status || 403 }
+      );
     }
 
     const sellers = await prisma.seller.findMany({
@@ -26,7 +31,18 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== "ADMIN" && session.role !== "SELLER")) {
+    if (!session) {
+      return NextResponse.json({ error: "Giriş yapmanız gerekmektedir." }, { status: 401 });
+    }
+    if (session.role === "ADMIN") {
+      const perm = requirePermission(session, "SELLERS", "WRITE");
+      if (!perm.authorized) {
+        return NextResponse.json(
+          { error: perm.error || "Yetkisiz erişim.", code: "FORBIDDEN", resource: "SELLERS", action: "WRITE" },
+          { status: 403 }
+        );
+      }
+    } else if (session.role !== "SELLER") {
       return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 403 });
     }
 

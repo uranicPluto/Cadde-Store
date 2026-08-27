@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yetkisiz işlem" }, { status: 403 });
+    const perm = requirePermission(user, "HOMEPAGE", "WRITE");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yetkisiz işlem", code: "FORBIDDEN", resource: "HOMEPAGE", action: "WRITE" },
+        { status: perm.status || 403 }
+      );
     }
 
     const body = await request.json();
@@ -28,9 +33,9 @@ export async function POST(request: Request) {
     try {
       await prisma.auditLog.create({
         data: {
-          actorId: user.id,
-          actorEmail: user.email,
-          actorRole: user.role,
+          actorId: user!.id,
+          actorEmail: user!.email,
+          actorRole: user!.role,
           action: "CMS_SECTIONS_REORDERED",
           entityType: "CMS",
           metadataJson: JSON.stringify({ reorderedCount: items.length }),

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -31,11 +32,16 @@ export async function GET(request: Request, context: RouteParams) {
 export async function PUT(request: Request, context: RouteParams) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== "ADMIN" && session.role !== "SELLER")) {
-      return NextResponse.json(
-        { error: "Bu işlem için yetkiniz bulunmamaktadır." },
-        { status: 403 }
-      );
+    if (!session) {
+      return NextResponse.json({ error: "Giriş yapmanız gerekmektedir." }, { status: 401 });
+    }
+    if (session.role === "ADMIN") {
+      const perm = requirePermission(session, "MEDIA", "WRITE");
+      if (!perm.authorized) {
+        return NextResponse.json({ error: perm.error || "Yetkisiz işlem.", code: "FORBIDDEN", resource: "MEDIA", action: "WRITE" }, { status: 403 });
+      }
+    } else if (session.role !== "SELLER") {
+      return NextResponse.json({ error: "Bu işlem için yetkiniz bulunmamaktadır." }, { status: 403 });
     }
 
     const params = await context.params;
@@ -102,11 +108,16 @@ export async function PUT(request: Request, context: RouteParams) {
 export async function DELETE(request: Request, context: RouteParams) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== "ADMIN" && session.role !== "SELLER")) {
-      return NextResponse.json(
-        { error: "Bu işlem için yetkiniz bulunmamaktadır." },
-        { status: 403 }
-      );
+    if (!session) {
+      return NextResponse.json({ error: "Giriş yapmanız gerekmektedir." }, { status: 401 });
+    }
+    if (session.role === "ADMIN") {
+      const perm = requirePermission(session, "MEDIA", "DELETE");
+      if (!perm.authorized) {
+        return NextResponse.json({ error: perm.error || "Yetkisiz işlem.", code: "FORBIDDEN", resource: "MEDIA", action: "DELETE" }, { status: 403 });
+      }
+    } else if (session.role !== "SELLER") {
+      return NextResponse.json({ error: "Bu işlem için yetkiniz bulunmamaktadır." }, { status: 403 });
     }
 
     const params = await context.params;

@@ -1,5 +1,6 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 import prisma from "@/lib/db/prisma";
 import {
   getAppearanceSettings,
@@ -31,10 +32,11 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    const perm = requirePermission(session, "APPEARANCE", "WRITE");
+    if (!perm.authorized) {
       return NextResponse.json(
-        { error: "Bu işlem için yönetici yetkisi gereklidir." },
-        { status: 403 }
+        { error: perm.error || "Bu işlem için yetkiniz bulunmamaktadır.", code: "FORBIDDEN", resource: "APPEARANCE", action: "WRITE" },
+        { status: perm.status || 403 }
       );
     }
 
@@ -73,9 +75,9 @@ export async function PUT(request: Request) {
     // Write Audit Log
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "APPEARANCE_UPDATED",
         entityType: "APPEARANCE",
         entityId: updated.id,

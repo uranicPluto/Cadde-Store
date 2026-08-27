@@ -188,23 +188,43 @@ export function getRolePermissions(role: AdminRole): Record<string, AdminAction[
   return ROLE_PERMISSIONS_MAP[role] || {};
 }
 
+export interface PermissionResult {
+  authorized: boolean;
+  error?: string;
+  status?: number;
+  session?: UserSessionPayload;
+}
+
 export function requirePermission(
-  session: UserSessionPayload | null,
+  session: UserSessionPayload | null | undefined,
   resource: AdminResource,
   action: AdminAction = "READ"
-): { authorized: boolean; error?: string; status?: number } {
-  if (!session) {
-    return { authorized: false, error: "Giriş yapmanız gerekmektedir.", status: 401 };
+): PermissionResult {
+  if (!session || session.role !== "ADMIN") {
+    return { authorized: false, error: "Bu işlem için yönetici yetkisi gereklidir.", status: 403 };
   }
-  if (session.role !== "ADMIN" && session.role !== "SELLER") {
-    return { authorized: false, error: "Bu işlem için yetkiniz bulunmamaktadır.", status: 403 };
+  const hasPerm = hasAdminPermission(session, resource, action);
+  if (!hasPerm) {
+    return { authorized: false, error: `Bu işlem için (${resource}:${action}) yetkiniz bulunmamaktadır.`, status: 403 };
   }
-  if (session.role === "ADMIN") {
-    const hasPerm = hasAdminPermission(session, resource, action);
-    if (!hasPerm) {
-      return { authorized: false, error: `Bu işlem için (${resource}:${action}) yetkiniz bulunmamaktadır.`, status: 403 };
-    }
-  }
-  return { authorized: true };
+  return { authorized: true, session };
 }
+
+export async function enforcePermission(
+  resource: AdminResource,
+  action: AdminAction = "READ"
+): Promise<{ session: UserSessionPayload | null; authorized: boolean; error?: string; status?: number }> {
+  // Dynamically import getSession to avoid circular dependencies
+  const { getSession } = await import("./session");
+  const session = await getSession();
+  const check = requirePermission(session, resource, action);
+  return {
+    session: session || null,
+    authorized: check.authorized,
+    error: check.error,
+    status: check.status,
+  };
+}
+
+
 

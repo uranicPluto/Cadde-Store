@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 import { SectionItem } from "@/lib/cms/cms-types";
 
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yetkisiz işlem" }, { status: 403 });
+    const perm = requirePermission(user, "HOMEPAGE", "PUBLISH");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yetkisiz işlem", code: "FORBIDDEN", resource: "HOMEPAGE", action: "PUBLISH" },
+        { status: perm.status || 403 }
+      );
     }
 
     const body = await request.json();
@@ -90,7 +95,7 @@ export async function POST(request: Request) {
           versionNumber: nextVersionNumber,
           snapshotJson: JSON.stringify(sections),
           changeSummary,
-          authorEmail: user.email,
+          authorEmail: user!.email,
         },
       });
 
@@ -99,21 +104,21 @@ export async function POST(request: Request) {
         where: { id: "current_draft" },
         update: {
           draftJson: JSON.stringify(sections),
-          updatedBy: user.email,
+          updatedBy: user!.email,
         },
         create: {
           id: "current_draft",
           draftJson: JSON.stringify(sections),
-          updatedBy: user.email,
+          updatedBy: user!.email,
         },
       });
 
       // 5. Audit Log
       await tx.auditLog.create({
         data: {
-          actorId: user.id,
-          actorEmail: user.email,
-          actorRole: user.role,
+          actorId: user!.id,
+          actorEmail: user!.email,
+          actorRole: user!.role,
           action: "HOMEPAGE_PUBLISHED",
           entityType: "CMS",
           entityId: `v${nextVersionNumber}`,

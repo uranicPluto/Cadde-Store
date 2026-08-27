@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +23,12 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yönetici yetkisi gereklidir." }, { status: 403 });
+    const perm = requirePermission(session, "SETTINGS", "WRITE");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yönetici yetkisi gereklidir.", code: "FORBIDDEN", resource: "SETTINGS", action: "WRITE" },
+        { status: perm.status || 403 }
+      );
     }
 
     const body = await request.json();
@@ -63,9 +68,9 @@ export async function PUT(request: Request) {
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "SETTINGS_UPDATED",
         entityType: "SETTINGS",
         entityId: "default",

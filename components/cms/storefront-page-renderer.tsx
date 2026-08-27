@@ -7,6 +7,8 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import { ProductCard } from "@/components/marketplace/product-card";
 import { getFullCatalog, DetailedProductMock } from "@/lib/catalog/product-repository";
 import { MOCK_BRANDS } from "@/lib/mock-data";
+import { SponsorCarouselSection } from "@/components/homepage/sponsor-carousel-section";
+
 import {
   ShieldCheck,
   Truck,
@@ -211,6 +213,10 @@ function SectionBlockRenderer({
 
     case "TRUST_BADGES":
       return <TrustBadgesSectionBlock isEn={isEn} config={config} />;
+
+    case "SPONSOR_CAROUSEL":
+    case "SPONSORS":
+      return <SponsorCarouselSection title={title} subtitle={subtitle} config={config} />;
 
     case "CUSTOM_GRID":
       return <CustomGridSectionBlock title={title} subtitle={subtitle} config={config} isEn={isEn} />;

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
 import { publishPage, unpublishPage, getPageById } from "@/lib/cms/page-repository";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +12,11 @@ export async function POST(
 ) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
+    const permCheck = requirePermission(session, "PAGES", "PUBLISH");
+    if (!permCheck.authorized) {
       return NextResponse.json(
-        { success: false, error: "Yönetici yetkisi gereklidir." },
-        { status: 403 }
+        { success: false, error: permCheck.error || "Bu işlem için yetkiniz bulunmamaktadır.", code: "FORBIDDEN", resource: "PAGES", action: "PUBLISH" },
+        { status: permCheck.status || 403 }
       );
     }
 
@@ -42,9 +44,9 @@ export async function POST(
 
       await prisma.auditLog.create({
         data: {
-          actorId: session.id,
-          actorEmail: session.email,
-          actorRole: session.role,
+          actorId: session!.id,
+          actorEmail: session!.email,
+          actorRole: session!.role,
           action: "PAGE_UNPUBLISHED",
           entityType: "CMS",
           entityId: id,
@@ -65,16 +67,16 @@ export async function POST(
 
     const { page: publishedPage, version } = await publishPage(
       id,
-      session.email || session.id,
+      session!.email || session!.id,
       changeSummary
     );
 
     // Record AuditLog
     await prisma.auditLog.create({
       data: {
-        actorId: session.id,
-        actorEmail: session.email,
-        actorRole: session.role,
+        actorId: session!.id,
+        actorEmail: session!.email,
+        actorRole: session!.role,
         action: "PAGE_PUBLISHED",
         entityType: "CMS",
         entityId: id,

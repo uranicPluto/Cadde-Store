@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 import fs from "fs";
 import path from "path";
 
@@ -9,11 +10,16 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== "ADMIN" && session.role !== "SELLER")) {
-      return NextResponse.json(
-        { error: "Bu işlem için yetkiniz bulunmamaktadır." },
-        { status: 403 }
-      );
+    if (!session) {
+      return NextResponse.json({ error: "Giriş yapmanız gerekmektedir." }, { status: 401 });
+    }
+    if (session.role === "ADMIN") {
+      const perm = requirePermission(session, "MEDIA", "WRITE");
+      if (!perm.authorized) {
+        return NextResponse.json({ error: perm.error || "Yetkisiz işlem.", code: "FORBIDDEN", resource: "MEDIA", action: "WRITE" }, { status: 403 });
+      }
+    } else if (session.role !== "SELLER") {
+      return NextResponse.json({ error: "Bu işlem için yetkiniz bulunmamaktadır." }, { status: 403 });
     }
 
     const contentType = request.headers.get("content-type") || "";

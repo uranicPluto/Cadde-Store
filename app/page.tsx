@@ -11,8 +11,10 @@ import { CampaignBannerStrips } from "@/components/homepage/campaign-banner-stri
 import { FeaturedBrandsSection } from "@/components/homepage/featured-brands-section";
 import { StoreHighlightsSection } from "@/components/homepage/store-highlights-section";
 import { BestsellerGridSection } from "@/components/homepage/bestseller-grid-section";
+import { SponsorCarouselSection } from "@/components/homepage/sponsor-carousel-section";
 import { CustomerTrustBadges } from "@/components/homepage/customer-trust-badges";
 import { Footer } from "@/components/layout/footer";
+
 
 export interface CmsSectionItem {
   id: string;
@@ -101,8 +103,10 @@ function renderCmsSection(section: CmsSectionItem) {
     case "FEATURED_BRANDS":
     case "BRAND_CAROUSEL":
     case "BRAND_DEALS":
-    case "SPONSOR_CAROUSEL":
       return <FeaturedBrandsSection key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
+    case "SPONSOR_CAROUSEL":
+    case "SPONSORS":
+      return <SponsorCarouselSection key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "STORE_HIGHLIGHTS":
     case "VERIFIED_SELLERS":
     case "FEATURED_STORES":

@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { getMockBrands } from "@/lib/mock-data";
 import { getSessionUser } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export async function GET(request: Request) {
+
   try {
     const { searchParams } = new URL(request.url);
     const includeAll = searchParams.get("all") === "true";
@@ -78,8 +80,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yetkisiz işlem / Unauthorized" }, { status: 403 });
+    const perm = requirePermission(user, "CATALOG", "WRITE");
+    if (!perm.authorized) {
+      return NextResponse.json({ error: perm.error || "Yetkisiz işlem", code: "FORBIDDEN", resource: "CATALOG", action: "WRITE" }, { status: perm.status || 403 });
     }
 
     const body = await request.json();
@@ -106,9 +109,9 @@ export async function POST(request: Request) {
     try {
       await prisma.auditLog.create({
         data: {
-          actorId: user.id,
-          actorEmail: user.email,
-          actorRole: user.role,
+          actorId: user!.id,
+          actorEmail: user!.email,
+          actorRole: user!.role,
           action: "BRAND_CREATED",
           entityType: "BRAND",
           entityId: brand.id,

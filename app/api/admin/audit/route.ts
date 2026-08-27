@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export async function GET(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Yetkisiz işlem" }, { status: 403 });
+    const perm = requirePermission(user, "AUDIT", "READ");
+    if (!perm.authorized) {
+      return NextResponse.json(
+        { error: perm.error || "Yetkisiz işlem", code: "FORBIDDEN", resource: "AUDIT", action: "READ" },
+        { status: perm.status || 403 }
+      );
     }
 
     const { searchParams } = new URL(request.url);

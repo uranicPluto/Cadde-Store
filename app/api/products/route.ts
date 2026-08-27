@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
+
 
 export async function GET(request: Request) {
   try {
@@ -123,11 +125,16 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== "SELLER" && session.role !== "ADMIN")) {
-      return NextResponse.json(
-        { error: "Bu işlem için satıcı veya yönetici yetkisi gereklidir." },
-        { status: 403 }
-      );
+    if (!session) {
+      return NextResponse.json({ error: "Giriş yapmanız gerekmektedir." }, { status: 401 });
+    }
+    if (session.role === "ADMIN") {
+      const perm = requirePermission(session, "CATALOG", "WRITE");
+      if (!perm.authorized) {
+        return NextResponse.json({ error: perm.error, code: "FORBIDDEN", resource: "CATALOG", action: "WRITE" }, { status: 403 });
+      }
+    } else if (session.role !== "SELLER") {
+      return NextResponse.json({ error: "Bu işlem için yetkiniz bulunmamaktadır." }, { status: 403 });
     }
 
     const body = await request.json();
@@ -230,11 +237,16 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== "SELLER" && session.role !== "ADMIN")) {
-      return NextResponse.json(
-        { error: "Bu işlem için yetkiniz bulunmamaktadır." },
-        { status: 403 }
-      );
+    if (!session) {
+      return NextResponse.json({ error: "Giriş yapmanız gerekmektedir." }, { status: 401 });
+    }
+    if (session.role === "ADMIN") {
+      const perm = requirePermission(session, "CATALOG", "WRITE");
+      if (!perm.authorized) {
+        return NextResponse.json({ error: perm.error, code: "FORBIDDEN", resource: "CATALOG", action: "WRITE" }, { status: 403 });
+      }
+    } else if (session.role !== "SELLER") {
+      return NextResponse.json({ error: "Bu işlem için yetkiniz bulunmamaktadır." }, { status: 403 });
     }
 
     const body = await request.json();
@@ -343,11 +355,16 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== "SELLER" && session.role !== "ADMIN")) {
-      return NextResponse.json(
-        { error: "Bu işlem için yetkiniz bulunmamaktadır." },
-        { status: 403 }
-      );
+    if (!session) {
+      return NextResponse.json({ error: "Giriş yapmanız gerekmektedir." }, { status: 401 });
+    }
+    if (session.role === "ADMIN") {
+      const perm = requirePermission(session, "CATALOG", "DELETE");
+      if (!perm.authorized) {
+        return NextResponse.json({ error: perm.error, code: "FORBIDDEN", resource: "CATALOG", action: "DELETE" }, { status: 403 });
+      }
+    } else if (session.role !== "SELLER") {
+      return NextResponse.json({ error: "Bu işlem için yetkiniz bulunmamaktadır." }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);

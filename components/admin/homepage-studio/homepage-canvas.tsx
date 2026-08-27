@@ -12,7 +12,10 @@ import { StoreHighlightsSection } from "@/components/homepage/store-highlights-s
 import { BestsellerGridSection } from "@/components/homepage/bestseller-grid-section";
 import { CustomerTrustBadges } from "@/components/homepage/customer-trust-badges";
 import { BrandQuickStrip } from "@/components/homepage/brand-quick-strip";
+import { SponsorCarouselSection } from "@/components/homepage/sponsor-carousel-section";
 import { Eye, Sliders, CheckCircle2, AlertCircle } from "lucide-react";
+
+
 
 interface HomepageCanvasProps {
   sections: SectionItem[];
@@ -83,8 +86,10 @@ export const HomepageCanvas: React.FC<HomepageCanvasProps> = ({
         return <CampaignBannerStrips title={sec.titleTR} subtitle={config?.subtitleTR} config={config} banners={sec.banners} />;
       case "FEATURED_BRANDS":
       case "BRAND_DEALS":
-      case "SPONSOR_CAROUSEL":
         return <FeaturedBrandsSection title={sec.titleTR} subtitle={config?.subtitleTR} config={config} />;
+      case "SPONSOR_CAROUSEL":
+      case "SPONSORS":
+        return <SponsorCarouselSection title={sec.titleTR} subtitle={config?.subtitleTR} config={config} />;
       case "STORE_HIGHLIGHTS":
       case "VERIFIED_SELLERS":
       case "FEATURED_STORES":
