@@ -4,6 +4,9 @@ import { getSessionUser } from "@/lib/auth/session";
 import { requirePermission } from "@/lib/auth/permissions";
 import { getDefaultBaselineSections } from "@/lib/cms/cms-service";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const draft = await prisma.homepageDraft.findUnique({

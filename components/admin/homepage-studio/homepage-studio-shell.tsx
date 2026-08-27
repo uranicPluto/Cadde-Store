@@ -101,7 +101,7 @@ function SortableSectionItem({
           type="button"
           {...attributes}
           {...listeners}
-          title="Sürükleyip Yeniden Sirala"
+          title="Sï¿½rï¿½kleyip Yeniden Sirala"
           className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-slate-200 rounded hover:bg-slate-800"
           onClick={(e) => e.stopPropagation()}
         >
@@ -339,7 +339,7 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
     if (restoredSections[0]) {
       setSelectedSectionId(restoredSections[0].id);
     }
-    setStatusMessage(isEn ? `Restored v${versionNumber} to canvas!` : `v${versionNumber} sürümü stüdyoya yüklendi!`);
+    setStatusMessage(isEn ? `Restored v${versionNumber} to canvas!` : `v${versionNumber} sï¿½rï¿½mï¿½ stï¿½dyoya yï¿½klendi!`);
     setTimeout(() => setStatusMessage(null), 4000);
   };
 
@@ -414,11 +414,11 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
           <button
             type="button"
             onClick={() => setIsHistoryOpen(true)}
-            title="Sürüm Geçmisi & Snapshotlar"
+            title="Sï¿½rï¿½m Geï¿½misi & Snapshotlar"
             className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg transition-colors"
           >
             <History className="w-3.5 h-3.5 text-indigo-400" />
-            <span>{isEn ? "History" : "Tarihçe"}</span>
+            <span>{isEn ? "History" : "Tarihï¿½e"}</span>
           </button>
         </div>
 
@@ -467,7 +467,7 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
         <div className="w-72 bg-slate-950 border-r border-slate-800/80 flex flex-col shrink-0">
           <div className="p-3 border-b border-slate-800 flex items-center justify-between">
             <span className="text-xs font-black text-slate-300 uppercase tracking-wider">
-              {isEn ? "Sections Outline" : "Sayfa Bölümleri"}
+              {isEn ? "Sections Outline" : "Sayfa Bï¿½lï¿½mleri"}
             </span>
             <Button
               size="sm"

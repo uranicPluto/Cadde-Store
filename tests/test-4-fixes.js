@@ -69,7 +69,7 @@ async function runAllFixTests() {
     headers: { "Content-Type": "application/json", Cookie: content.cookie },
     body: JSON.stringify({
       slug: `content-manager-test-${Date.now()}`,
-      titleTr: "Içerik Yöneticisi Sayfasi",
+      titleTr: "Iï¿½erik Yï¿½neticisi Sayfasi",
       titleEn: "Content Manager Page",
     }),
   });
@@ -199,7 +199,7 @@ async function runAllFixTests() {
       sections: [
         { id: "snap2-hero", type: "HERO", titleTR: "Sonbahar Vitrini", titleEN: "Autumn Hero", orderIndex: 0, active: true },
         { id: "snap2-cat", type: "CATEGORY_GRID", titleTR: "Kategoriler", titleEN: "Categories", orderIndex: 1, active: true },
-        { id: "snap2-best", type: "BESTSELLER_GRID", titleTR: "Çok Satanlar", titleEN: "Bestsellers", orderIndex: 2, active: true },
+        { id: "snap2-best", type: "BESTSELLER_GRID", titleTR: "ï¿½ok Satanlar", titleEN: "Bestsellers", orderIndex: 2, active: true },
       ],
     }),
   });
@@ -216,7 +216,7 @@ async function runAllFixTests() {
         { id: "snap3-hero", type: "HERO", titleTR: "Kis Firsatlari", titleEN: "Winter Hero", orderIndex: 0, active: true },
         { id: "snap3-spons", type: "SPONSOR_CAROUSEL", titleTR: "Sponsorlar", titleEN: "Sponsors", orderIndex: 1, active: true },
         { id: "snap3-brands", type: "FEATURED_BRANDS", titleTR: "Markalar", titleEN: "Brands", orderIndex: 2, active: true },
-        { id: "snap3-badges", type: "TRUST_BADGES", titleTR: "Güven Rozetleri", titleEN: "Trust Badges", orderIndex: 3, active: true },
+        { id: "snap3-badges", type: "TRUST_BADGES", titleTR: "Gï¿½ven Rozetleri", titleEN: "Trust Badges", orderIndex: 3, active: true },
       ],
     }),
   });

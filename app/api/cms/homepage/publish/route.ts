@@ -4,6 +4,9 @@ import { getSessionUser } from "@/lib/auth/session";
 import { requirePermission } from "@/lib/auth/permissions";
 import { SectionItem } from "@/lib/cms/cms-types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();

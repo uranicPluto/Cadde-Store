@@ -3,6 +3,9 @@ import prisma from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 import { SectionItem } from "@/lib/cms/cms-types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const versions = await prisma.homepageVersion.findMany({

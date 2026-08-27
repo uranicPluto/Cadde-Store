@@ -1,8 +1,20 @@
 const fs = require("fs");
 const path = require("path");
 
+const envPath = path.join(__dirname, "..", ".env");
+if (!fs.existsSync(envPath) && !process.env.DATABASE_URL) {
+  try {
+    fs.writeFileSync(envPath, 'DATABASE_URL="file:./prisma/dev.db"\nJWT_SECRET="cadde-store-secure-jwt-secret-key-2026-production"\n', "utf8");
+    console.log("[DB Config] Created default .env fallback file for build environments.");
+  } catch (e) {}
+}
+
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = "file:./prisma/dev.db";
+}
+
 const schemaPath = path.join(__dirname, "..", "prisma", "schema.prisma");
-const dbUrl = process.env.DATABASE_URL || "";
+const dbUrl = process.env.DATABASE_URL || "file:./prisma/dev.db";
 
 if (fs.existsSync(schemaPath)) {
   let content = fs.readFileSync(schemaPath, "utf8");
@@ -19,3 +31,4 @@ if (fs.existsSync(schemaPath)) {
     console.log(`[DB Config] Prisma provider is correctly configured as '${targetProvider}'.`);
   }
 }
+

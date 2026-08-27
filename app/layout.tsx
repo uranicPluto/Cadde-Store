@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   title: "Cadde Store — Türkiye'nin Çok Satıcılı Pazaryeri",
   description: "Türkiye'nin en hızlı büyüyen çok satıcılı e-ticaret pazaryeri platformu. Milyonlarca ürün, hızlı teslimat ve güvenli ödeme.",
   manifest: "/manifest.json",
-  themeColor: "#ea580c",
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
-# BRIEFING — 2026-08-23T14:50:00Z
+# BRIEFING ï¿½ 2026-08-23T14:50:00Z
 
 ## Mission
-Independent Victory Audit of Cadde Store: verify all requirements (R1–R12) and acceptance criteria (AC1–AC15) genuinely implemented with zero cheats, facades, or test mocks.
+Independent Victory Audit of Cadde Store: verify all requirements (R1ï¿½R12) and acceptance criteria (AC1ï¿½AC15) genuinely implemented with zero cheats, facades, or test mocks.
 
 ## ?? My Identity
 - Archetype: victory_auditor
@@ -11,8 +11,8 @@ Independent Victory Audit of Cadde Store: verify all requirements (R1–R12) and a
 - Target: Full project victory audit (Cadde Store)
 
 ## ?? Key Constraints
-- Audit-only — do NOT modify implementation code
-- Trust NOTHING — verify everything independently
+- Audit-only ï¿½ do NOT modify implementation code
+- Trust NOTHING ï¿½ verify everything independently
 - Strict zero-tolerance for facade implementations, hardcoded test passes, or unexecuted claims
 - Execute all canonical tests directly
 
@@ -43,6 +43,6 @@ Independent Victory Audit of Cadde Store: verify all requirements (R1–R12) and a
 - None explicitly loaded
 
 ## Artifact Index
-- .agents/victory_auditor_2/DISPATCH.md — User prompt record
-- .agents/victory_auditor_2/BRIEFING.md — Working state & identity
-- .agents/victory_auditor_2/progress.md — Liveness & heartbeat
+- .agents/victory_auditor_2/DISPATCH.md ï¿½ User prompt record
+- .agents/victory_auditor_2/BRIEFING.md ï¿½ Working state & identity
+- .agents/victory_auditor_2/progress.md ï¿½ Liveness & heartbeat

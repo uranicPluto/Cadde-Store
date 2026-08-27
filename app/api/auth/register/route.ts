@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db/prisma";
 import { hashPassword, createSessionToken } from "@/lib/auth/auth";
 import { getSessionCookieOptions } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

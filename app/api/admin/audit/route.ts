@@ -3,6 +3,9 @@ import prisma from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 import { requirePermission } from "@/lib/auth/permissions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(request: Request) {
   try {
     const user = await getSessionUser();
