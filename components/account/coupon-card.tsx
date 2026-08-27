@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Coupon } from "@/lib/cart/coupon-utils";
 import { Tag, Copy, Check, Scissors } from "lucide-react";

@@ -20,6 +20,21 @@ export default function AccountSettingsPage() {
   const [smsNotif, setSmsNotif] = useState(true);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          if (data.user.firstName || data.user.lastName) {
+            setFullName(`${data.user.firstName || ""} ${data.user.lastName || ""}`.trim());
+          }
+          if (data.user.email) setEmail(data.user.email);
+          if (data.user.phone) setPhone(data.user.phone);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setToastMsg(language === "en" ? "Account settings updated." : "Hesap ayarları güncellendi.");

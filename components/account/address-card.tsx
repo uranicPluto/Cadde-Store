@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Address } from "@/lib/orders/order-types";
 import { MapPin, Edit2, Trash2, CheckCircle2 } from "lucide-react";

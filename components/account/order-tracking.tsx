@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { StatusHistoryStep, OrderStatusType } from "@/lib/orders/order-types";
 import { Check, Truck, Package, Home, Clock } from "lucide-react";

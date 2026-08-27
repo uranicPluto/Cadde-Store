@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -31,6 +33,32 @@ export const AccountSidebar: React.FC<{ className?: string }> = ({ className }) 
   const pathname = usePathname();
   const { language } = useLanguage();
   const isEn = language === "en";
+
+  const [user, setUser] = useState<{ firstName: string; lastName: string; email: string; role: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {}
+    window.location.href = "/login";
+  };
+
+  const displayName = user ? `${user.firstName} ${user.lastName}` : "Ahmet Yılmaz";
+  const displayEmail = user ? user.email : "customer@cadde-store.com";
+  const initials = user
+    ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "AY"
+    : "AY";
 
   const navGroups = [
     {
@@ -77,11 +105,11 @@ export const AccountSidebar: React.FC<{ className?: string }> = ({ className }) 
       <div className="flex flex-col gap-2 p-3.5 bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/80 rounded-xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs shadow-sm">
-            AY
+            {initials}
           </div>
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="font-extrabold text-xs text-slate-900 truncate">Ahmet Yılmaz</span>
-            <span className="text-[11px] text-slate-500 truncate">ahmet.yilmaz@cadde-store.com</span>
+            <span className="font-extrabold text-xs text-slate-900 truncate">{displayName}</span>
+            <span className="text-[11px] text-slate-500 truncate">{displayEmail}</span>
           </div>
         </div>
         <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[10px]">
@@ -95,7 +123,7 @@ export const AccountSidebar: React.FC<{ className?: string }> = ({ className }) 
         </div>
       </div>
 
-      {/* 2. Premium Cadde Plus Subscription Card (Matches Screenshot 1 & 2) */}
+      {/* 2. Premium Cadde Plus Subscription Card */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 p-4 text-white shadow-md group cursor-pointer">
         <div className="absolute right-0 top-0 translate-x-3 -translate-y-3 w-20 h-20 rounded-full bg-white/10 blur-md pointer-events-none" />
         <div className="flex flex-col gap-2 relative z-10">
@@ -106,30 +134,20 @@ export const AccountSidebar: React.FC<{ className?: string }> = ({ className }) 
             </span>
             <span className="text-[10px] font-bold underline">Keşfet &gt;</span>
           </div>
-          <div className="flex flex-col">
-            <h4 className="font-black text-sm leading-tight text-white">Cadde Plus Üyesi Ol!</h4>
-            <p className="text-[11px] text-white/90 font-medium leading-tight mt-0.5">
-              10'lu Ücretsiz Kargo Paketi &amp; Özel Sepet İndirimleri!
-            </p>
-          </div>
-          <button
-            type="button"
-            className="w-full bg-white text-slate-900 font-black text-xs py-1.5 rounded-lg shadow-sm hover:bg-slate-50 transition-colors mt-1"
-          >
-            Hemen Katıl
-          </button>
+          <span className="font-black text-sm leading-tight">Cadde Plus'a Geçin</span>
+          <span className="text-[11px] opacity-90 leading-tight">Tüm siparişlerde Ücretsiz Kargo &amp; %10 Ekstra İndirim</span>
         </div>
       </div>
 
-      {/* 3. Categorized Portal Sidebar Links */}
-      <div className="flex flex-col gap-4 pt-1 divide-y divide-slate-100">
-        {navGroups.map((grp, gIdx) => (
-          <div key={gIdx} className={cn("flex flex-col gap-1.5", gIdx > 0 && "pt-3")}>
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2">
-              {grp.title}
+      {/* 3. Grouped Navigation Links */}
+      <div className="flex flex-col gap-4">
+        {navGroups.map((group, gIdx) => (
+          <div key={gIdx} className="flex flex-col gap-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 mb-0.5">
+              {group.title}
             </span>
             <nav className="flex flex-col gap-0.5">
-              {grp.items.map((item) => {
+              {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
@@ -137,9 +155,9 @@ export const AccountSidebar: React.FC<{ className?: string }> = ({ className }) 
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all",
+                      "flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group",
                       isActive
-                        ? "bg-primary text-white shadow-xs font-black"
+                        ? "bg-primary text-white shadow-xs font-bold"
                         : "text-slate-700 hover:bg-amber-50/60 hover:text-primary"
                     )}
                   >
@@ -155,9 +173,12 @@ export const AccountSidebar: React.FC<{ className?: string }> = ({ className }) 
           </div>
         ))}
 
-        {/* 4. Assistant Callout Box (Competitor Screenshot 2) */}
+        {/* 4. Assistant Callout Box & Logout Button */}
         <div className="pt-3 flex flex-col gap-2">
-          <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl flex items-center gap-3">
+          <Link
+            href="/account/assistant"
+            className="p-3 bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200/80 rounded-xl flex items-center gap-3 transition-colors cursor-pointer"
+          >
             <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center shrink-0 shadow-xs">
               <Headphones className="w-5 h-5" />
             </div>
@@ -165,11 +186,12 @@ export const AccountSidebar: React.FC<{ className?: string }> = ({ className }) 
               <span className="font-extrabold text-xs text-slate-900">Cadde Asistanı'na Sor</span>
               <span className="text-[10px] text-slate-500 font-medium">Sorularınızı 7/24 yanıtlıyor</span>
             </div>
-          </div>
+          </Link>
 
           <button
             type="button"
-            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-extrabold text-rose-600 hover:bg-rose-50 transition-all border border-rose-100 mt-1"
+            onClick={handleLogout}
+            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-extrabold text-rose-600 hover:bg-rose-50 transition-all border border-rose-100 mt-1 cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <LogOut className="w-4 h-4 text-rose-500" />

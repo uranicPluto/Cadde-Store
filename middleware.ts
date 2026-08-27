@@ -28,11 +28,27 @@ export async function middleware(request: NextRequest) {
     "MARKETING_MANAGER",
   ];
 
-  // Allow login page without checks, or redirect to /admin if already authenticated
+  // Allow /admin/login or redirect if already authenticated
   if (pathname === "/admin/login") {
     if (user && adminRoles.includes(user.role)) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
+  // Allow /login and /register or redirect if already authenticated
+  if (pathname === "/login" || pathname === "/register") {
+    if (user) {
+      const url = request.nextUrl.clone();
+      if (adminRoles.includes(user.role)) {
+        url.pathname = "/admin";
+      } else if (user.role === "SELLER") {
+        url.pathname = "/seller/dashboard";
+      } else {
+        url.pathname = "/account";
+      }
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
@@ -60,9 +76,10 @@ export async function middleware(request: NextRequest) {
   // Protect Customer Account Routes (/account/*)
   if (pathname.startsWith("/account")) {
     if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
@@ -70,5 +87,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/seller/dashboard/:path*", "/account/:path*"],
+  matcher: ["/admin/:path*", "/seller/dashboard/:path*", "/account/:path*", "/login", "/register"],
 };

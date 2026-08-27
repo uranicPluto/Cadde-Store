@@ -21,11 +21,26 @@ export default function AccountDashboardPage() {
   const { favoriteCount } = useFavorites();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [addressCount, setAddressCount] = useState(2);
+  const [user, setUser] = useState<{ firstName: string; lastName: string; email: string } | null>(null);
 
   useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch(() => {});
+
     setOrders(getSavedOrders());
     setAddressCount(getSavedAddresses().length);
   }, []);
+
+  const displayName = user ? `${user.firstName} ${user.lastName}` : "Ahmet Yılmaz";
+  const initials = user
+    ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || "AY"
+    : "AY";
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
@@ -53,14 +68,14 @@ export default function AccountDashboardPage() {
             <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">
-                  AY
+                  {initials}
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
                     {language === "en" ? "VIP Marketplace Customer" : "VIP Pazaryeri Müşterisi"}
                   </span>
                   <h1 className="text-2xl font-black tracking-tight">
-                    {language === "en" ? "Welcome back, Ahmet Yılmaz" : "Hoş Geldiniz, Ahmet Yılmaz"}
+                    {language === "en" ? `Welcome back, ${displayName}` : `Hoş Geldiniz, ${displayName}`}
                   </h1>
                   <span className="text-xs text-slate-300">
                     {language === "en"
