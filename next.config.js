@@ -9,6 +9,13 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/**/*': ['./prisma/**'],
+      '/**/*': ['./prisma/**'],
+    },
+  },
 };
 
 module.exports = nextConfig;
+
