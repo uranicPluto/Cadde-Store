@@ -14,14 +14,21 @@ function ensureTmpDatabase(): string {
 
   if (!tmpValid) {
     const candidates = [
+      path.join(process.cwd(), "public", "dev.db"),
       path.join(process.cwd(), "prisma", "dev.db"),
       path.join(process.cwd(), "dev.db"),
+      path.join(__dirname, "..", "..", "..", "public", "dev.db"),
       path.join(__dirname, "..", "..", "..", "prisma", "dev.db"),
+      path.join(__dirname, "..", "..", "public", "dev.db"),
       path.join(__dirname, "..", "..", "prisma", "dev.db"),
+      path.join(__dirname, "..", "public", "dev.db"),
       path.join(__dirname, "..", "prisma", "dev.db"),
+      path.join(__dirname, "public", "dev.db"),
       path.join(__dirname, "prisma", "dev.db"),
+      path.resolve("./public/dev.db"),
       path.resolve("./prisma/dev.db"),
       path.resolve("./dev.db"),
+      path.join(process.cwd(), ".next", "server", "public", "dev.db"),
       path.join(process.cwd(), ".next", "server", "prisma", "dev.db"),
     ];
 
