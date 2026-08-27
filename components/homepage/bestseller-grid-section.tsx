@@ -6,7 +6,17 @@ import { fetchDbProducts, DetailedProductMock } from "@/lib/catalog/product-repo
 import { ProductCard } from "@/components/marketplace/product-card";
 import { Sparkles, ArrowRight } from "lucide-react";
 
-export const BestsellerGridSection: React.FC = () => {
+export interface BestsellerGridSectionProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+}
+
+export const BestsellerGridSection: React.FC<BestsellerGridSectionProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+}) => {
   const { language, t } = useLanguage();
   const [products, setProducts] = useState<DetailedProductMock[]>([]);
 
@@ -21,10 +31,10 @@ export const BestsellerGridSection: React.FC = () => {
           <div className="flex flex-col">
             <h2 className="text-xl sm:text-2xl font-black text-text-main tracking-tight flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
-              <span>{t("homepage.bestsellerTitle")}</span>
+              <span>{propTitle || t("homepage.bestsellerTitle")}</span>
             </h2>
             <p className="text-xs text-text-subtle">
-              {t("homepage.bestsellerSubtitle")}
+              {propSubtitle || t("homepage.bestsellerSubtitle")}
             </p>
           </div>
           <a href="/search" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">

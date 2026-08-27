@@ -336,7 +336,19 @@ function BrandLogoRenderer({ brand }: { brand: BrandItem }) {
   );
 }
 
-export const BrandQuickStrip: React.FC = () => {
+export interface BrandQuickStripProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+  brands?: BrandItem[];
+}
+
+export const BrandQuickStrip: React.FC<BrandQuickStripProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+  brands: propBrands,
+}) => {
   const { language } = useLanguage();
   const isEn = language === "en";
   const scrollRef = useRef<HTMLDivElement>(null);

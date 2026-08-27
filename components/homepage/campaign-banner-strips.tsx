@@ -14,7 +14,19 @@ interface CampaignItem {
   img2: string;
 }
 
-export const CampaignBannerStrips: React.FC = () => {
+export interface CampaignBannerStripsProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+  banners?: any[];
+}
+
+export const CampaignBannerStrips: React.FC<CampaignBannerStripsProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+  banners: propBanners,
+}) => {
   const { language } = useLanguage();
   const isEn = language === "en";
 

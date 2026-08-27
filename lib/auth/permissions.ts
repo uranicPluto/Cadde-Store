@@ -188,3 +188,23 @@ export function getRolePermissions(role: AdminRole): Record<string, AdminAction[
   return ROLE_PERMISSIONS_MAP[role] || {};
 }
 
+export function requirePermission(
+  session: UserSessionPayload | null,
+  resource: AdminResource,
+  action: AdminAction = "READ"
+): { authorized: boolean; error?: string; status?: number } {
+  if (!session) {
+    return { authorized: false, error: "Giriş yapmanız gerekmektedir.", status: 401 };
+  }
+  if (session.role !== "ADMIN" && session.role !== "SELLER") {
+    return { authorized: false, error: "Bu işlem için yetkiniz bulunmamaktadır.", status: 403 };
+  }
+  if (session.role === "ADMIN") {
+    const hasPerm = hasAdminPermission(session, resource, action);
+    if (!hasPerm) {
+      return { authorized: false, error: `Bu işlem için (${resource}:${action}) yetkiniz bulunmamaktadır.`, status: 403 };
+    }
+  }
+  return { authorized: true };
+}
+

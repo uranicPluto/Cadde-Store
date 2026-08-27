@@ -2,7 +2,11 @@ import React from "react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { ShieldCheck, Truck, Lock, Headset } from "lucide-react";
 
-export const CustomerTrustBadges: React.FC = () => {
+export interface CustomerTrustBadgesProps {
+  config?: any;
+}
+
+export const CustomerTrustBadges: React.FC<CustomerTrustBadgesProps> = ({ config }) => {
   const { t } = useLanguage();
 
   return (

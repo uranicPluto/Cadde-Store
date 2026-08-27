@@ -4,7 +4,17 @@ import { getMockStores } from "@/lib/mock-data";
 import { StoreCard } from "@/components/marketplace/store-card";
 import { Store, ArrowRight } from "lucide-react";
 
-export const StoreHighlightsSection: React.FC = () => {
+export interface StoreHighlightsSectionProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+}
+
+export const StoreHighlightsSection: React.FC<StoreHighlightsSectionProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+}) => {
   const { language, t } = useLanguage();
   const stores = getMockStores(language);
 
@@ -15,10 +25,10 @@ export const StoreHighlightsSection: React.FC = () => {
           <div className="flex flex-col">
             <h2 className="text-xl font-bold text-text-main tracking-tight flex items-center gap-2">
               <Store className="w-5 h-5 text-primary" />
-              <span>{t("homepage.storeHighlightsTitle")}</span>
+              <span>{propTitle || t("homepage.storeHighlightsTitle")}</span>
             </h2>
             <p className="text-xs text-text-subtle">
-              {t("homepage.storeHighlightsSubtitle")}
+              {propSubtitle || t("homepage.storeHighlightsSubtitle")}
             </p>
           </div>
           <a href="#" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">

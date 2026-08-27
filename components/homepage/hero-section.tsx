@@ -5,16 +5,90 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import { ChevronLeft, ChevronRight, ArrowRight, Tag, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export const HeroSection: React.FC = () => {
+export interface HeroSectionProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+  banners?: any[];
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+  banners: propBanners,
+}) => {
   const { language } = useLanguage();
   const isEn = language === "en";
   const defaultBanners = getMockBanners(language);
   const categories = getMockCategories(language);
 
-  const [banners, setBanners] = useState(defaultBanners);
+  const [banners, setBanners] = useState(() => {
+    if (propBanners && propBanners.length > 0) {
+      return propBanners.map((b: any, i: number) => ({
+        id: b.id || `banner-${i}`,
+        title: isEn ? b.titleEN || b.titleTR : b.titleTR || b.titleEN,
+        subtitle: isEn ? b.subtitleEN || b.subtitleTR : b.subtitleTR || b.subtitleEN,
+        ctaText: (isEn ? b.ctaTextEN : b.ctaTextTR) || (isEn ? "Explore Now" : "Fırsatı İncele"),
+        badge: isEn ? b.badgeTextEN || b.badgeTextTR : b.badgeTextTR || b.badgeTextEN,
+        bgGradient: b.bgGradient || (i % 2 === 0 ? "from-orange-500 to-amber-600" : "from-indigo-600 to-purple-700"),
+        imageUrl: b.imageUrlDesktop || b.imageUrl || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+        targetUrl: b.targetValue || b.targetUrl || "/category/kadin",
+      }));
+    }
+    if (propConfig || propTitle) {
+      const cfg = propConfig || {};
+      return [
+        {
+          id: "prop-hero",
+          title: propTitle || (isEn ? cfg.titleEN : cfg.titleTR) || (isEn ? "Big Seasonal Sale Has Started!" : "Büyük Sezon İndirimi Başladı!"),
+          subtitle: propSubtitle || (isEn ? cfg.subtitleEN : cfg.subtitleTR) || (isEn ? "Up to 50% discount on thousands of curated items." : "Binlerce üründe %50'ye varan dev indirim fırsatlarını kaçırmayın."),
+          ctaText: (isEn ? cfg.primaryCtaTextEN : cfg.primaryCtaTextTR) || (isEn ? "Explore Now" : "Fırsatı İncele"),
+          badge: (isEn ? cfg.badgeEN : cfg.badgeTR) || (isEn ? "NEW SEASON" : "YENİ SEZON"),
+          bgGradient: cfg.bgGradient || "from-orange-500 to-amber-600",
+          imageUrl: cfg.heroBannerUrl || cfg.backgroundImage || cfg.imageUrlDesktop || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+          targetUrl: cfg.primaryCtaLink || "/category/kadin",
+        },
+      ];
+    }
+    return defaultBanners;
+  });
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
+    // If props are passed, update state directly
+    if (propBanners && propBanners.length > 0) {
+      setBanners(
+        propBanners.map((b: any, i: number) => ({
+          id: b.id || `banner-${i}`,
+          title: isEn ? b.titleEN || b.titleTR : b.titleTR || b.titleEN,
+          subtitle: isEn ? b.subtitleEN || b.subtitleTR : b.subtitleTR || b.subtitleEN,
+          ctaText: (isEn ? b.ctaTextEN : b.ctaTextTR) || (isEn ? "Explore Now" : "Fırsatı İncele"),
+          badge: isEn ? b.badgeTextEN || b.badgeTextTR : b.badgeTextTR || b.badgeTextEN,
+          bgGradient: b.bgGradient || (i % 2 === 0 ? "from-orange-500 to-amber-600" : "from-indigo-600 to-purple-700"),
+          imageUrl: b.imageUrlDesktop || b.imageUrl || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+          targetUrl: b.targetValue || b.targetUrl || "/category/kadin",
+        }))
+      );
+      return;
+    }
+    if (propConfig || propTitle) {
+      const cfg = propConfig || {};
+      setBanners([
+        {
+          id: "prop-hero",
+          title: propTitle || (isEn ? cfg.titleEN : cfg.titleTR) || (isEn ? "Big Seasonal Sale Has Started!" : "Büyük Sezon İndirimi Başladı!"),
+          subtitle: propSubtitle || (isEn ? cfg.subtitleEN : cfg.subtitleTR) || (isEn ? "Up to 50% discount on thousands of curated items." : "Binlerce üründe %50'ye varan dev indirim fırsatlarını kaçırmayın."),
+          ctaText: (isEn ? cfg.primaryCtaTextEN : cfg.primaryCtaTextTR) || (isEn ? "Explore Now" : "Fırsatı İncele"),
+          badge: (isEn ? cfg.badgeEN : cfg.badgeTR) || (isEn ? "NEW SEASON" : "YENİ SEZON"),
+          bgGradient: cfg.bgGradient || "from-orange-500 to-amber-600",
+          imageUrl: cfg.heroBannerUrl || cfg.backgroundImage || cfg.imageUrlDesktop || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+          targetUrl: cfg.primaryCtaLink || "/category/kadin",
+        },
+      ]);
+      return;
+    }
+
     async function loadCmsBanners() {
       try {
         const res = await fetch("/api/cms/sections");
@@ -34,6 +108,20 @@ export const HeroSection: React.FC = () => {
                 targetUrl: b.targetValue || "/category/women",
               }))
             );
+          } else if (hero && hero.configJson) {
+            const cfg = typeof hero.configJson === "string" ? JSON.parse(hero.configJson) : hero.configJson;
+            setBanners([
+              {
+                id: hero.id,
+                title: (isEn ? hero.titleEN : hero.titleTR) || (isEn ? cfg.titleEN : cfg.titleTR) || "Büyük Sezon İndirimi Başladı!",
+                subtitle: (isEn ? cfg.subtitleEN : cfg.subtitleTR) || "Binlerce üründe %50'ye varan dev indirim fırsatlarını kaçırmayın.",
+                ctaText: (isEn ? cfg.primaryCtaTextEN : cfg.primaryCtaTextTR) || "Fırsatı İncele",
+                badge: (isEn ? cfg.badgeEN : cfg.badgeTR) || "YENİ SEZON",
+                bgGradient: cfg.bgGradient || "from-orange-500 to-amber-600",
+                imageUrl: cfg.heroBannerUrl || cfg.backgroundImage || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+                targetUrl: cfg.primaryCtaLink || "/category/kadin",
+              }
+            ]);
           } else {
             setBanners(getMockBanners(language));
           }
@@ -45,7 +133,7 @@ export const HeroSection: React.FC = () => {
       }
     }
     loadCmsBanners();
-  }, [language, isEn]);
+  }, [language, isEn, propBanners, propConfig, propTitle, propSubtitle]);
 
   useEffect(() => {
     if (banners.length === 0) return;

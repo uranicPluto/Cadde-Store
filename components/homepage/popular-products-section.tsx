@@ -7,7 +7,19 @@ import { useCart } from "@/lib/cart/cart-context";
 import { formatCurrency } from "@/lib/utils";
 import { Heart, Star, ShoppingBag, Tag, ChevronRight, ChevronLeft } from "lucide-react";
 
-export const PopularProductsSection: React.FC = () => {
+export interface PopularProductsSectionProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+  products?: any[];
+}
+
+export const PopularProductsSection: React.FC<PopularProductsSectionProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+  products: propProducts,
+}) => {
   const { language, currency } = useLanguage();
   const { addToCart } = useCart();
   const isEn = language === "en";
@@ -131,7 +143,7 @@ export const PopularProductsSection: React.FC = () => {
           {/* Header Title: Bestsellers */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-              {isEn ? "Bestsellers" : "En Çok Satanlar"}
+              {propTitle || (isEn ? "Bestsellers" : "En Çok Satanlar")}
             </h2>
 
             {/* Right Carousel Arrow Buttons */}

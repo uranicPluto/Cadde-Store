@@ -4,13 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { AdminStatCard } from "@/components/admin/admin-stat-card";
-import { Footer } from "@/components/layout/footer";
 import { getSavedOrders } from "@/lib/orders/order-utils";
 import { OrderRecord } from "@/lib/orders/order-types";
-import { MOCK_SELLERS } from "@/lib/sellers/seller-repository";
-import { MOCK_ADMIN_CUSTOMERS } from "@/lib/admin/admin-repository";
-import { getFullCatalog } from "@/lib/catalog/product-repository";
 import { formatCurrency } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
 import {
@@ -28,10 +23,20 @@ import {
   Ticket,
   Sliders,
   CheckCircle2,
+  Sparkles,
+  ArrowUpRight,
+  Layers,
+  Award,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  Eye,
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const { language, currency, t } = useLanguage();
+  const { language, currency } = useLanguage();
+  const isEn = language === "en";
+
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [overviewMetrics, setOverviewMetrics] = useState({
     totalRevenue: 184500,
@@ -60,203 +65,298 @@ export default function AdminDashboardPage() {
     loadOverview();
   }, []);
 
-  const isEn = language === "en";
   const totalRevenue = overviewMetrics.totalRevenue;
-  const fullCatalog = getFullCatalog(language);
-
-  // Monthly revenue trends for chart visualizer
-  const monthlyTrends = [
-    { month: isEn ? "Jan" : "Oca", val: 42 },
-    { month: isEn ? "Feb" : "Şub", val: 58 },
-    { month: isEn ? "Mar" : "Mar", val: 65 },
-    { month: isEn ? "Apr" : "Nis", val: 80 },
-    { month: isEn ? "May" : "May", val: 95 },
-    { month: isEn ? "Jun" : "Haz", val: 110 },
-    { month: isEn ? "Jul" : "Tem", val: 145 },
-    { month: isEn ? "Aug" : "Ağu", val: 184 },
-  ];
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
-      <AdminHeader />
+    <div className="flex h-screen bg-[#0b0f19] text-slate-100 overflow-hidden font-sans">
+      {/* Grouped Hierarchical Sidebar */}
+      <AdminSidebar className="w-64 shrink-0 hidden md:flex" />
 
-      <main className="max-w-wide mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6 flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-3 sticky top-20">
-            <AdminSidebar />
-          </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50 text-slate-900">
+        <AdminHeader />
 
-          <div className="lg:col-span-9 flex flex-col gap-6">
-            {/* Executive Command Center Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-              <div className="flex flex-col gap-2 relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/20 px-2.5 py-0.5 rounded border border-indigo-500/30">
-                    {isEn ? "Executive Control Center" : "Yönetici Kontrol Merkezi"}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{isEn ? "All Systems Operational" : "Tüm Sistemler Aktif"}</span>
-                  </span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{t("admin.dashboard.title")}</h1>
-                <p className="text-xs text-slate-300 max-w-xl font-medium leading-relaxed">
-                  {isEn
-                    ? "Monitor live platform GMV sales, merchant approvals, active orders, and system health in real-time."
-                    : "Platform genelindeki canlı satış verilerini, mağaza onaylarını, aktif siparişleri ve sistem sağlığını buradan yönetin."}
-                </p>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex items-center gap-2 relative z-10 shrink-0">
-                <Link
-                  href="/admin/sellers"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl shadow-md transition-colors flex items-center gap-1.5"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>{isEn ? "Approve Stores" : "Mağaza Onayla"}</span>
-                </Link>
-
-                <Link
-                  href="/admin/coupons"
-                  className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-black rounded-xl border border-white/20 transition-colors flex items-center gap-1.5"
-                >
-                  <Ticket className="w-4 h-4 text-amber-300" />
-                  <span>{isEn ? "Create Coupon" : "Kupon Oluştur"}</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Stat Cards Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <AdminStatCard
-                title={t("admin.dashboard.totalRevenue")}
-                value={formatCurrency(totalRevenue, currency)}
-                change="+18.4%"
-                isPositive={true}
-                icon={DollarSign}
-                iconBgColor="bg-emerald-100 text-emerald-600"
-              />
-              <AdminStatCard
-                title={t("admin.dashboard.totalOrders")}
-                value={overviewMetrics.totalOrders}
-                change="+12.5%"
-                isPositive={true}
-                icon={ShoppingCart}
-                iconBgColor="bg-indigo-100 text-indigo-600"
-              />
-              <AdminStatCard
-                title={t("admin.dashboard.activeSellers")}
-                value={overviewMetrics.activeSellers}
-                change={isEn ? `+${overviewMetrics.pendingSellers} Pending` : `+${overviewMetrics.pendingSellers} Bekleyen`}
-                isPositive={true}
-                icon={Store}
-                iconBgColor="bg-amber-100 text-amber-600"
-              />
-              <AdminStatCard
-                title={t("admin.dashboard.totalCustomers")}
-                value={overviewMetrics.totalCustomers}
-                change="+24.8%"
-                isPositive={true}
-                icon={Users}
-                iconBgColor="bg-purple-100 text-purple-600"
-              />
-            </div>
-
-            {/* Platform Revenue Chart & System Performance */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex flex-col">
-                  <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-indigo-600" />
-                    <span>{isEn ? "Monthly Platform GMV Revenue (2026)" : "Aylık Platform Ciro Trendi (2026)"}</span>
-                  </h2>
-                  <span className="text-xs text-slate-500 font-semibold">
-                    {isEn ? "Total transaction volume and sales growth" : "Toplam İşlem Hacmi ve Satış Büyümesi"}
-                  </span>
-                </div>
-                <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  {isEn ? "+34% Record Growth" : "+34% Rekor Büyüme"}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+          {/* Executive Control Header Banner */}
+          <div className="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="flex flex-col gap-2 relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/20 px-2.5 py-0.5 rounded border border-indigo-500/30">
+                  {isEn ? "Executive Marketplace Room" : "Pazaryeri Yönetici Odası"}
+                </span>
+                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{isEn ? "All 15 Modules Connected" : "15 Modülün Tümü Bağlı & Aktif"}</span>
                 </span>
               </div>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                {isEn ? "Cadde Store Marketplace Overview" : "Cadde Store Türkiye Yönetim Özeti"}
+              </h1>
+              <p className="text-xs text-slate-400 max-w-xl">
+                {isEn
+                  ? "Real-time commerce activity, live storefront CMS sync, catalog inventory, and merchant operations."
+                  : "Gerçek zamanlı ticaret verileri, canlı vitrin CMS senkronizasyonu, katalog envanteri ve satıcı operasyonları."}
+              </p>
+            </div>
 
-              {/* Custom CSS Bar Chart Visualizer */}
-              <div className="flex items-end justify-between gap-3 h-44 pt-6 px-4 bg-slate-50 border border-slate-200/80 rounded-xl">
-                {monthlyTrends.map((t, idx) => (
-                  <div key={idx} className="flex flex-col items-center gap-2 flex-1 group">
-                    <div className="text-[10px] font-black text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {currency === "USD" ? `$${t.val}k` : `₺${t.val}k`}
-                    </div>
-                    <div
-                      style={{ height: `${(t.val / 184) * 100}%` }}
-                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg group-hover:from-indigo-700 group-hover:to-indigo-500 transition-all shadow-xs"
-                    />
-                    <span className="text-[11px] font-extrabold text-slate-600">{t.month}</span>
+            <div className="flex items-center gap-3 relative z-10 shrink-0">
+              <Link
+                href="/admin/cms"
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+              >
+                <Sliders className="w-4 h-4" />
+                <span>{isEn ? "Homepage Studio" : "Vitrin Stüdyosu"}</span>
+              </Link>
+              <Link
+                href="/admin/pages"
+                className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 border border-slate-700 transition-colors"
+              >
+                <Layers className="w-4 h-4 text-indigo-400" />
+                <span>{isEn ? "Pages & CMS" : "Sayfa Yönetimi"}</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* KPI Stat Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Revenue */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between gap-3 hover:border-indigo-300 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {isEn ? "Gross Revenue" : "Toplam Ciro"}
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-black text-slate-900">
+                  {formatCurrency(totalRevenue, currency)}
+                </span>
+                <span className="text-[11px] font-black text-emerald-600 flex items-center gap-0.5">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  +18.4%
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-medium">Son 30 günlük satış geliri</span>
+            </div>
+
+            {/* Total Orders */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between gap-3 hover:border-indigo-300 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {isEn ? "Total Orders" : "Toplam Sipariş"}
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                  <ShoppingCart className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-black text-slate-900">
+                  {overviewMetrics.totalOrders}
+                </span>
+                <span className="text-[11px] font-black text-indigo-600 flex items-center gap-0.5">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  +12.1%
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-medium">Teslim edilen ve kargoda siparişler</span>
+            </div>
+
+            {/* Active Sellers */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between gap-3 hover:border-indigo-300 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {isEn ? "Active Sellers" : "Aktif Satıcılar"}
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                  <Store className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-black text-slate-900">
+                  {overviewMetrics.activeSellers}
+                </span>
+                {overviewMetrics.pendingSellers > 0 && (
+                  <span className="text-[10px] font-black bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
+                    {overviewMetrics.pendingSellers} bekleyen onay
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] text-slate-400 font-medium">Doğrulanmış pazar satıcıları</span>
+            </div>
+
+            {/* Total Customers */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between gap-3 hover:border-indigo-300 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {isEn ? "Registered Customers" : "Kayıtlı Müşteriler"}
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                  <Users className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-black text-slate-900">
+                  {overviewMetrics.totalCustomers}
+                </span>
+                <span className="text-[11px] font-black text-purple-600 flex items-center gap-0.5">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  +9.5%
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-medium">Bireysel ve kurumsal alıcılar</span>
+            </div>
+          </div>
+
+          {/* Middle 2-Column: Recent Orders Activity & Storefront Merchandising Hub */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Recent Orders Table (7 Cols) */}
+            <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 flex flex-col justify-between gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <ShoppingCart className="w-4 h-4" />
                   </div>
-                ))}
+                  <div className="flex flex-col">
+                    <h3 className="font-extrabold text-sm text-slate-900">
+                      {isEn ? "Live Recent Orders" : "Son Canlı Siparişler"}
+                    </h3>
+                    <span className="text-[11px] text-slate-400">Pazaryerinde gerçekleşen son alımlar</span>
+                  </div>
+                </div>
+
+                <Link
+                  href="/admin/orders"
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                >
+                  <span>{isEn ? "View All" : "Tümünü Gör"}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              {/* Orders Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase text-[10px]">
+                      <th className="pb-2.5">{isEn ? "Order No" : "Sipariş No"}</th>
+                      <th className="pb-2.5">{isEn ? "Customer" : "Müşteri"}</th>
+                      <th className="pb-2.5">{isEn ? "Amount" : "Tutar"}</th>
+                      <th className="pb-2.5 text-right">{isEn ? "Status" : "Durum"}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {orders.slice(0, 5).map((ord) => (
+                      <tr key={ord.orderId} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3 font-mono font-bold text-slate-900">#{ord.orderNumber}</td>
+                        <td className="py-3 font-medium text-slate-700">
+                          {ord.shippingAddress
+                            ? `${ord.shippingAddress.firstName} ${ord.shippingAddress.lastName}`
+                            : ord.customerInfo
+                            ? `${ord.customerInfo.firstName} ${ord.customerInfo.lastName}`
+                            : "Müşteri"}
+                        </td>
+                        <td className="py-3 font-bold text-slate-900">
+                          {formatCurrency(ord.calculation?.grandTotal || 0, currency)}
+                        </td>
+                        <td className="py-3 text-right">
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {ord.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {orders.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-8 text-center text-slate-400">
+                          Henüz sipariş kaydı bulunmuyor.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            {/* System Alerts & Recent Orders */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Recent Orders Overview */}
-              <div className="md:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                    <ShoppingCart className="w-4 h-4 text-indigo-600" />
-                    <span>{t("admin.dashboard.recentOrdersTitle")}</span>
-                  </h2>
-                  <Link href="/admin/orders" className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
-                    <span>{t("admin.dashboard.seeAll")}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+            {/* Storefront Merchandising & Quick Actions Hub (5 Cols) */}
+            <div className="lg:col-span-5 flex flex-col gap-4">
+              {/* Homepage Studio Shortcut Card */}
+              <div className="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-950 text-white rounded-2xl p-5 shadow-sm border border-indigo-800/80 flex flex-col justify-between gap-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md">
+                      <Sliders className="w-5 h-5" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-extrabold text-sm text-white">Homepage Studio</span>
+                      <span className="text-[11px] text-indigo-300">Shopify-style visual editor</span>
+                    </div>
+                  </div>
+                  <span className="text-[9px] font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">
+                    Config-Driven
+                  </span>
                 </div>
 
-                <div className="divide-y divide-slate-100 text-xs flex flex-col gap-2">
-                  {orders.slice(0, 4).map((ord) => (
-                    <div key={ord.orderId} className="flex items-center justify-between pt-2">
-                      <div className="flex flex-col">
-                        <span className="font-extrabold text-slate-900">{ord.orderNumber}</span>
-                        <span className="text-[11px] text-slate-500">{ord.customerInfo.firstName} {ord.customerInfo.lastName}</span>
-                      </div>
-                      <span className="font-extrabold text-slate-900">{formatCurrency(ord.calculation.grandTotal, currency)}</span>
-                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
-                        {ord.status}
-                      </span>
-                    </div>
-                  ))}
+                <p className="text-xs text-indigo-200/80 leading-relaxed">
+                  {isEn
+                    ? "Visually manage hero banners, flash sales, bestsellers, and custom blocks with live storefront sync."
+                    : "Hero afişlerini, flaş indirimleri, çok satanları ve sponsorlu blokları canlı mağaza ile görsel olarak yönetin."}
+                </p>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-indigo-800/60">
+                  <Link
+                    href="/admin/cms"
+                    className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs text-center transition-colors shadow-sm"
+                  >
+                    {isEn ? "Open Homepage Studio" : "Stüdyoyu Aç"}
+                  </Link>
+                  <Link
+                    href="/admin/appearance"
+                    className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs text-center border border-slate-700 transition-colors"
+                  >
+                    {isEn ? "Appearance" : "Görünüm"}
+                  </Link>
                 </div>
               </div>
 
-              {/* Critical System Notifications */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
-                <h2 className="text-sm font-black text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  <span>{t("admin.dashboard.criticalAlertsTitle")}</span>
-                </h2>
-
-                <div className="flex flex-col gap-3 text-xs">
-                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex flex-col gap-1">
-                    <span className="font-bold text-amber-900">{t("admin.dashboard.alertPendingSellerMsg").replace("{count}", "2")}</span>
-                    <Link href="/admin/sellers" className="text-[11px] font-black text-indigo-600 underline mt-1">
-                      {t("admin.sellers.title")} &rarr;
-                    </Link>
+              {/* Quick Health Status Card */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-600" />
+                    <span className="font-extrabold text-xs text-slate-900 uppercase">
+                      {isEn ? "System Health Center" : "Sistem Sağlık Merkezi"}
+                    </span>
                   </div>
+                  <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    99.9% Uptime
+                  </span>
+                </div>
 
-                  <div className="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl flex flex-col gap-1">
-                    <span className="font-bold text-indigo-900">{t("admin.dashboard.alertPendingProductMsg").replace("{count}", "4")}</span>
-                    <Link href="/admin/products" className="text-[11px] font-black text-indigo-600 underline mt-1">
-                      {t("admin.products.title")} &rarr;
-                    </Link>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col">
+                    <span className="text-[10px] text-slate-500 font-bold">Veritabanı Durumu</span>
+                    <span className="font-extrabold text-slate-900 text-xs mt-0.5 text-emerald-600">Bağlı & Hızlı</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col">
+                    <span className="text-[10px] text-slate-500 font-bold">Katalog Ürünleri</span>
+                    <span className="font-extrabold text-slate-900 text-xs mt-0.5">{overviewMetrics.totalProducts} Aktif</span>
                   </div>
                 </div>
+
+                <Link
+                  href="/admin/health"
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-between pt-2 border-t border-slate-100"
+                >
+                  <span>{isEn ? "Run System Diagnostics" : "Sistem Tanılamalarını Görüntüle"}</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </div>
           </div>
-        </div>
-      </main>
-
-      <Footer />
+        </main>
+      </div>
     </div>
   );
 }

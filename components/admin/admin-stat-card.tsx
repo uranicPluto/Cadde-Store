@@ -1,47 +1,77 @@
 import React from "react";
-import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 export interface AdminStatCardProps {
   title: string;
   value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
   change?: string;
   isPositive?: boolean;
-  icon: LucideIcon;
-  iconBgColor?: string;
+  subtitle?: string;
+  badge?: string;
+  className?: string;
 }
 
 export const AdminStatCard: React.FC<AdminStatCardProps> = ({
   title,
   value,
+  icon: Icon,
   change,
   isPositive = true,
-  icon: Icon,
-  iconBgColor = "bg-indigo-100 text-indigo-600",
+  subtitle,
+  badge,
+  className,
 }) => {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between gap-3">
+    <div
+      className={cn(
+        "bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between gap-3 hover:border-indigo-300 transition-all group",
+        className
+      )}
+    >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-text-subtle uppercase tracking-wider">{title}</span>
-        <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 shadow-2xs", iconBgColor)}>
-          <Icon className="w-5 h-5" />
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          {title}
+        </span>
+        <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 flex items-center justify-center font-bold group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+          <Icon className="w-4 h-4" />
         </div>
       </div>
 
-      <div className="flex items-baseline justify-between gap-2 mt-1">
-        <span className="text-2xl font-black text-text-main tracking-tight">{value}</span>
-
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-2xl font-black text-slate-900 tracking-tight">
+          {value}
+        </span>
         {change && (
           <span
-            className={`text-xs font-bold flex items-center gap-0.5 px-2 py-0.5 rounded ${
-              isPositive ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-rose-700 bg-rose-50 border border-rose-200"
-            }`}
+            className={cn(
+              "text-[11px] font-black flex items-center gap-0.5 px-1.5 py-0.5 rounded-md",
+              isPositive
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-rose-50 text-rose-700"
+            )}
           >
-            {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+            {isPositive ? (
+              <TrendingUp className="w-3 h-3" />
+            ) : (
+              <TrendingDown className="w-3 h-3" />
+            )}
             {change}
           </span>
         )}
       </div>
+
+      {(subtitle || badge) && (
+        <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium pt-1 border-t border-slate-50">
+          {subtitle && <span>{subtitle}</span>}
+          {badge && (
+            <span className="font-extrabold text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded">
+              {badge}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 };

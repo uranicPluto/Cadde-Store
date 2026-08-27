@@ -7,7 +7,17 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import { getMockCategories } from "@/lib/mock-data";
 import { Shirt, User, Footprints, Smartphone, Home, Sparkles, Activity, ShoppingBag, ArrowRight } from "lucide-react";
 
-export const CategoryGridStrips: React.FC = () => {
+export interface CategoryGridStripsProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+}
+
+export const CategoryGridStrips: React.FC<CategoryGridStripsProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+}) => {
   const { language, t } = useLanguage();
   const router = useRouter();
   const categories = getMockCategories(language);
@@ -43,7 +53,7 @@ export const CategoryGridStrips: React.FC = () => {
       <div className="max-w-wide mx-auto px-4 sm:px-6 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            {t("homepage.categoryStripsTitle")}
+            {propTitle || t("homepage.categoryStripsTitle")}
           </h2>
           <Link
             href="/category/kadin"

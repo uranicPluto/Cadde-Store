@@ -6,7 +6,17 @@ import { fetchDbProducts, DetailedProductMock } from "@/lib/catalog/product-repo
 import { ProductCard } from "@/components/marketplace/product-card";
 import { Flame, Clock } from "lucide-react";
 
-export const FlashSalesSection: React.FC = () => {
+export interface FlashSalesSectionProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+}
+
+export const FlashSalesSection: React.FC<FlashSalesSectionProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+}) => {
   const { language, t } = useLanguage();
   const [products, setProducts] = useState<DetailedProductMock[]>([]);
 
@@ -42,10 +52,10 @@ export const FlashSalesSection: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <span>{t("homepage.flashSalesTitle")}</span>
+                <span>{propTitle || t("homepage.flashSalesTitle")}</span>
               </h2>
               <p className="text-xs text-text-subtle">
-                {t("homepage.flashSalesSubtitle")}
+                {propSubtitle || t("homepage.flashSalesSubtitle")}
               </p>
             </div>
           </div>

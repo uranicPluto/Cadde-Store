@@ -243,3 +243,26 @@ export function getLastOrder(): OrderRecord | null {
   const orders = getSavedOrders();
   return orders.length > 0 ? orders[0] : null;
 }
+
+export function getOrderById(orderId: string): OrderRecord | null {
+  const orders = getSavedOrders();
+  return orders.find((o) => o.orderId === orderId || o.orderNumber === orderId) || null;
+}
+
+export function updateOrderStatus(orderId: string, newStatus: OrderStatusType): OrderRecord | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const orders = getSavedOrders();
+    const target = orders.find((o) => o.orderId === orderId || o.orderNumber === orderId);
+    if (!target) return null;
+
+    target.status = newStatus;
+    target.statusHistory = buildMockStatusHistory(newStatus, target.createdAt);
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    return target;
+  } catch (e) {
+    console.error("Failed to update order status", e);
+    return null;
+  }
+}
+

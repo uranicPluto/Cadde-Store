@@ -59,26 +59,37 @@ function isSectionActiveAndScheduled(s: CmsSectionItem): boolean {
 
 function renderCmsSection(section: CmsSectionItem) {
   const normalizedType = (section.type || "").toUpperCase().trim();
+  const config = typeof section.configJson === "string" ? (() => {
+    try { return JSON.parse(section.configJson); } catch { return {}; }
+  })() : (section.configJson || {});
 
   switch (normalizedType) {
     case "HERO":
-      return <HeroSection key={section.id} />;
+      return (
+        <HeroSection
+          key={section.id}
+          title={section.titleTR}
+          subtitle={config.subtitleTR}
+          config={config}
+          banners={section.banners}
+        />
+      );
     case "BRAND_STRIP":
-      return <BrandQuickStrip key={section.id} />;
+      return <BrandQuickStrip key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "PRODUCT_CAROUSEL":
     case "POPULAR_PRODUCTS":
     case "NEW_ARRIVALS":
     case "TRENDING_PRODUCTS":
     case "RECOMMENDED_PRODUCTS":
     case "DEALS_OF_THE_DAY":
-      return <PopularProductsSection key={section.id} />;
+      return <PopularProductsSection key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "CATEGORY_GRID":
     case "POPULAR_CATEGORIES":
     case "CATEGORY_CAROUSEL":
-      return <CategoryGridStrips key={section.id} />;
+      return <CategoryGridStrips key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "FLASH_DEALS":
     case "FLASH_SALES":
-      return <FlashSalesSection key={section.id} />;
+      return <FlashSalesSection key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "BANNER_STRIP":
     case "CAMPAIGN_STRIP":
     case "CAMPAIGN_CARDS":
@@ -86,22 +97,23 @@ function renderCmsSection(section: CmsSectionItem) {
     case "SEASONAL_CAMPAIGN":
     case "PROMOTIONAL_BANNER":
     case "IMAGE_TEXT_BANNER":
-      return <CampaignBannerStrips key={section.id} />;
+      return <CampaignBannerStrips key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} banners={section.banners} />;
     case "FEATURED_BRANDS":
     case "BRAND_CAROUSEL":
     case "BRAND_DEALS":
-      return <FeaturedBrandsSection key={section.id} />;
+    case "SPONSOR_CAROUSEL":
+      return <FeaturedBrandsSection key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "STORE_HIGHLIGHTS":
     case "VERIFIED_SELLERS":
     case "FEATURED_STORES":
     case "SELLER_CAROUSEL":
-      return <StoreHighlightsSection key={section.id} />;
+      return <StoreHighlightsSection key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "BESTSELLER_GRID":
     case "BESTSELLERS":
-      return <BestsellerGridSection key={section.id} />;
+      return <BestsellerGridSection key={section.id} title={section.titleTR} subtitle={config.subtitleTR} config={config} />;
     case "TRUST_BADGES":
     case "CUSTOMER_TRUST":
-      return <CustomerTrustBadges key={section.id} />;
+      return <CustomerTrustBadges key={section.id} config={config} />;
     default:
       return null;
   }

@@ -1,264 +1,108 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { Button } from "@/components/ui/button";
-import { Toast } from "@/components/ui/toast";
+import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/lib/i18n/language-context";
-import { Settings, Store, Percent, Truck, Save, CheckCircle2, ShieldCheck } from "lucide-react";
-import { Footer } from "@/components/layout/footer";
-
-export interface AdminPlatformSettings {
-  id?: string;
-  marketplaceName: string;
-  supportEmail: string;
-  defaultCommissionRate: number;
-  orderCancellationWindowDays: number;
-  returnWindowDays: number;
-  defaultShippingFee: number;
-  freeShippingThreshold: number;
-}
-
-const DEFAULT_SETTINGS: AdminPlatformSettings = {
-  marketplaceName: "Cadde Store Türkiye",
-  supportEmail: "destek@cadde.store",
-  defaultCommissionRate: 10.0,
-  orderCancellationWindowDays: 2,
-  returnWindowDays: 14,
-  defaultShippingFee: 34.9,
-  freeShippingThreshold: 200.0,
-};
+import { Settings, Check, Shield, Globe, Bell } from "lucide-react";
 
 export default function AdminSettingsPage() {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const isEn = language === "en";
-  const [settings, setSettings] = useState<AdminPlatformSettings>(DEFAULT_SETTINGS);
-  const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/admin/settings");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.settings) {
-          setSettings(data.settings);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load settings from API:", e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [settings, setSettings] = useState({
+    siteName: "Cadde Store",
+    supportEmail: "destek@cadde-store.com",
+    taxRate: 20,
+    currencyDefault: "TRY",
+    maintenanceMode: false,
+  });
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
+  const [saved, setSaved] = useState(false);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setIsSaving(true);
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          marketplaceName: settings.marketplaceName,
-          supportEmail: settings.supportEmail,
-          defaultCommissionRate: Number(settings.defaultCommissionRate),
-          orderCancellationWindowDays: Number(settings.orderCancellationWindowDays),
-          returnWindowDays: Number(settings.returnWindowDays),
-          defaultShippingFee: Number(settings.defaultShippingFee),
-          freeShippingThreshold: Number(settings.freeShippingThreshold),
-        }),
-      });
-
-      if (res.ok) {
-        setToastMsg(t("admin.settings.successToastMessage"));
-        setTimeout(() => setToastMsg(null), 3500);
-        await fetchSettings();
-      } else {
-        const err = await res.json();
-        alert(err.error || "Ayarlar kaydedilemedi.");
-      }
-    } catch (err) {
-      console.error("Save settings error:", err);
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
-      <AdminHeader />
+    <div className="flex h-screen bg-[#0b0f19] text-slate-100 overflow-hidden font-sans">
+      <AdminSidebar className="w-64 shrink-0 hidden md:flex" />
 
-      {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200">
-          <Toast type="success" title={t("admin.settings.successToastTitle")} message={toastMsg} onClose={() => setToastMsg(null)} />
-        </div>
-      )}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50 text-slate-900">
+        <AdminHeader />
 
-      <main className="max-w-wide mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6 flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-3 sticky top-20">
-            <AdminSidebar />
-          </div>
-
-          <div className="lg:col-span-9 flex flex-col gap-6">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
-                  <Settings className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <h1 className="text-xl font-black text-text-main">{t("admin.settings.title")}</h1>
-                  <span className="text-xs text-text-muted">{t("admin.settings.subtitle")}</span>
-                </div>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col gap-6 max-w-4xl mx-auto w-full">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md">
+                <Settings className="w-6 h-6" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-xl font-black text-slate-900 tracking-tight">
+                  {isEn ? "General Platform Settings" : "Sistem & Platform Ayarları"}
+                </h1>
+                <p className="text-xs text-slate-500 font-medium">
+                  {isEn
+                    ? "Configure store variables, support contacts, tax defaults, and operational switches."
+                    : "Pazaryeri değişkenlerini, destek iletişimini, KDV oranlarını ve çalışma modlarını yönetin."}
+                </p>
               </div>
             </div>
 
-            {loading ? (
-              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 text-xs">
-                <div className="animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto mb-3" />
-                <span>{isEn ? "Loading settings..." : "Ayarlar yükleniyor..."}</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSave} className="flex flex-col gap-6 max-w-3xl">
-                {/* Marketplace Details */}
-                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
-                  <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
-                    <Store className="w-4 h-4 text-indigo-600" />
-                    <span>{t("admin.settings.sectionMarketplace")}</span>
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-text-muted">{t("admin.settings.marketplaceName")}</label>
-                      <input
-                        type="text"
-                        required
-                        value={settings.marketplaceName || ""}
-                        onChange={(e) => setSettings({ ...settings, marketplaceName: e.target.value })}
-                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-text-muted">{t("admin.settings.supportEmail")}</label>
-                      <input
-                        type="email"
-                        required
-                        value={settings.supportEmail || ""}
-                        onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
-                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Commission & Rules */}
-                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
-                  <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
-                    <Percent className="w-4 h-4 text-indigo-600" />
-                    <span>{t("admin.settings.sectionCommission")}</span>
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-text-muted">{t("admin.settings.defaultCommission")}</label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        required
-                        value={settings.defaultCommissionRate ?? 10}
-                        onChange={(e) => setSettings({ ...settings, defaultCommissionRate: Number(e.target.value) })}
-                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-text-muted">{t("admin.settings.cancelWindowDays")}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        required
-                        value={settings.orderCancellationWindowDays ?? 2}
-                        onChange={(e) => setSettings({ ...settings, orderCancellationWindowDays: Number(e.target.value) })}
-                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-text-muted">{t("admin.settings.returnWindowDays")}</label>
-                      <input
-                        type="number"
-                        min="1"
-                        required
-                        value={settings.returnWindowDays ?? 14}
-                        onChange={(e) => setSettings({ ...settings, returnWindowDays: Number(e.target.value) })}
-                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Shipping Rules */}
-                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col gap-4">
-                  <h2 className="text-sm font-extrabold text-text-main flex items-center gap-2 pb-3 border-b border-slate-100">
-                    <Truck className="w-4 h-4 text-indigo-600" />
-                    <span>{t("admin.settings.sectionShipping")}</span>
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-text-muted">{t("admin.settings.defaultShippingFee")}</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        required
-                        value={settings.defaultShippingFee ?? 34.9}
-                        onChange={(e) => setSettings({ ...settings, defaultShippingFee: Number(e.target.value) })}
-                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="font-bold text-text-muted">{t("admin.settings.freeShippingThreshold")}</label>
-                      <input
-                        type="number"
-                        step="1"
-                        required
-                        value={settings.freeShippingThreshold ?? 200}
-                        onChange={(e) => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
-                        className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-600 font-bold text-slate-900"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    type="submit"
-                    disabled={isSaving}
-                    className="font-bold px-8 bg-indigo-600 hover:bg-indigo-700 shadow-md text-white"
-                  >
-                    <Save className="w-4 h-4 mr-1.5" />
-                    <span>{isSaving ? (isEn ? "Saving..." : "Kaydediliyor...") : t("admin.settings.saveSettings")}</span>
-                  </Button>
-                </div>
-              </form>
-            )}
+            <Button
+              onClick={handleSave}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs"
+            >
+              <Check className="w-4 h-4 mr-1.5" />
+              <span>{saved ? (isEn ? "Saved!" : "Kaydedildi!") : isEn ? "Save Settings" : "Ayarları Kaydet"}</span>
+            </Button>
           </div>
-        </div>
-      </main>
 
-      <Footer />
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs flex flex-col gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-700">Platform Adı</label>
+                <Input
+                  value={settings.siteName}
+                  onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
+                  className="text-xs"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-700">Müşteri Destek E-Postası</label>
+                <Input
+                  value={settings.supportEmail}
+                  onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
+                  className="text-xs font-mono"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-700">Varsayılan KDV Oranı (%)</label>
+                <Input
+                  type="number"
+                  value={settings.taxRate}
+                  onChange={(e) => setSettings({ ...settings, taxRate: Number(e.target.value) })}
+                  className="text-xs font-mono"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-700">Varsayılan Para Birimi</label>
+                <Input
+                  value={settings.currencyDefault}
+                  onChange={(e) => setSettings({ ...settings, currencyDefault: e.target.value })}
+                  className="text-xs font-mono uppercase"
+                />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

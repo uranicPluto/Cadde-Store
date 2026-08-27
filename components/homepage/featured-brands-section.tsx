@@ -5,7 +5,17 @@ import { getMockBrands, BrandMock } from "@/lib/mock-data";
 import { BrandCard } from "@/components/marketplace/brand-card";
 import { ArrowRight, Tag } from "lucide-react";
 
-export const FeaturedBrandsSection: React.FC = () => {
+export interface FeaturedBrandsSectionProps {
+  title?: string;
+  subtitle?: string;
+  config?: any;
+}
+
+export const FeaturedBrandsSection: React.FC<FeaturedBrandsSectionProps> = ({
+  title: propTitle,
+  subtitle: propSubtitle,
+  config: propConfig,
+}) => {
   const { language, t } = useLanguage();
   const defaultBrands = getMockBrands(language);
   const [brands, setBrands] = useState<BrandMock[]>(defaultBrands);
@@ -43,10 +53,10 @@ export const FeaturedBrandsSection: React.FC = () => {
           <div className="flex flex-col">
             <h2 className="text-xl font-bold text-text-main tracking-tight flex items-center gap-2">
               <Tag className="w-5 h-5 text-amber-600" />
-              <span>{t("homepage.featuredBrandsTitle")}</span>
+              <span>{propTitle || t("homepage.featuredBrandsTitle")}</span>
             </h2>
             <p className="text-xs text-text-subtle">
-              {t("homepage.featuredBrandsSubtitle")}
+              {propSubtitle || t("homepage.featuredBrandsSubtitle")}
             </p>
           </div>
           <Link href="/brands" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">

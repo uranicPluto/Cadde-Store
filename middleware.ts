@@ -6,11 +6,6 @@ import { getAuthSecret } from "@/lib/auth/config";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow login page without checks
-  if (pathname === "/admin/login") {
-    return NextResponse.next();
-  }
-
   const token = request.cookies.get("cadde_store_session")?.value;
   let user: { role: string; sellerSlug?: string } | null = null;
 
@@ -24,9 +19,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  const adminRoles = [
+    "ADMIN",
+    "SUPER_ADMIN",
+    "CONTENT_MANAGER",
+    "MERCHANDISING_MANAGER",
+    "OPERATIONS_MANAGER",
+    "MARKETING_MANAGER",
+  ];
+
+  // Allow login page without checks, or redirect to /admin if already authenticated
+  if (pathname === "/admin/login") {
+    if (user && adminRoles.includes(user.role)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
   // Protect Admin Routes (/admin/*)
   if (pathname.startsWith("/admin")) {
-    if (!user || user.role !== "ADMIN") {
+    if (!user || !adminRoles.includes(user.role)) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/admin/login";
       loginUrl.searchParams.set("callbackUrl", pathname);
