@@ -1,57 +1,53 @@
 import { PrismaClient } from "@prisma/client";
-import path from "path";
-import fs from "fs";
 
 function ensureTmpDatabase(): string {
-  const tmpDbPath = "/tmp/dev.db";
+  if (typeof window !== "undefined") return "file:/tmp/dev.db";
 
-  let tmpValid = false;
   try {
-    if (fs.existsSync(tmpDbPath) && fs.statSync(tmpDbPath).size > 1000) {
-      tmpValid = true;
+    const fs = require("fs");
+    const path = require("path");
+    const tmpDbPath = "/tmp/dev.db";
+
+    let tmpValid = false;
+    try {
+      if (fs.existsSync(tmpDbPath) && fs.statSync(tmpDbPath).size > 1000) {
+        tmpValid = true;
+      }
+    } catch (e) {}
+
+    if (!tmpValid) {
+      const candidates = [
+        path.join(process.cwd(), "public", "dev.db"),
+        path.join(process.cwd(), "prisma", "dev.db"),
+        path.join(process.cwd(), "dev.db"),
+        path.resolve("./public/dev.db"),
+        path.resolve("./prisma/dev.db"),
+        path.resolve("./dev.db"),
+        "/var/task/public/dev.db",
+        "/var/task/prisma/dev.db",
+      ];
+
+      for (const c of candidates) {
+        try {
+          if (fs.existsSync(c) && fs.statSync(c).size > 1000) {
+            fs.copyFileSync(c, tmpDbPath);
+            try {
+              fs.chmodSync(tmpDbPath, 0o666);
+            } catch (e) {}
+            console.log(`[Prisma] Successfully initialized /tmp/dev.db from ${c}`);
+            break;
+          }
+        } catch (e) {}
+      }
     }
   } catch (e) {}
-
-  if (!tmpValid) {
-    const candidates = [
-      path.join(process.cwd(), "public", "dev.db"),
-      path.join(process.cwd(), "prisma", "dev.db"),
-      path.join(process.cwd(), "dev.db"),
-      path.resolve("./public/dev.db"),
-      path.resolve("./prisma/dev.db"),
-      path.resolve("./dev.db"),
-      "/var/task/public/dev.db",
-      "/var/task/prisma/dev.db",
-    ];
-
-    let copied = false;
-    for (const c of candidates) {
-      try {
-        if (fs.existsSync(c) && fs.statSync(c).size > 1000) {
-          fs.copyFileSync(c, tmpDbPath);
-          try {
-            fs.chmodSync(tmpDbPath, 0o666);
-          } catch (e) {}
-          copied = true;
-          console.log(`[Prisma] Successfully initialized /tmp/dev.db from ${c}`);
-          break;
-        }
-      } catch (e) {}
-    }
-
-    if (!copied) {
-      try {
-        if (!fs.existsSync(tmpDbPath)) {
-          fs.writeFileSync(tmpDbPath, "");
-        }
-      } catch (e) {}
-    }
-  }
 
   return "file:/tmp/dev.db";
 }
 
 function getDatabaseUrl(): string {
+  if (typeof window !== "undefined") return "file:./prisma/dev.db";
+
   if (
     process.env.DATABASE_URL &&
     !process.env.DATABASE_URL.includes("dev.db") &&
@@ -65,15 +61,20 @@ function getDatabaseUrl(): string {
     return ensureTmpDatabase();
   }
 
-  const localDb = path.join(process.cwd(), "prisma", "dev.db");
-  if (fs.existsSync(localDb)) {
-    return `file:${localDb}`;
-  }
+  try {
+    const fs = require("fs");
+    const path = require("path");
+    const localDb = path.join(process.cwd(), "prisma", "dev.db");
+    if (fs.existsSync(localDb)) {
+      return `file:${localDb}`;
+    }
+  } catch (e) {}
+
   return "file:./prisma/dev.db";
 }
 
 const dbUrl = getDatabaseUrl();
-if (!process.env.DATABASE_URL) {
+if (typeof window === "undefined" && !process.env.DATABASE_URL) {
   process.env.DATABASE_URL = dbUrl;
 }
 
@@ -95,4 +96,5 @@ export const prisma =
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;
+
 

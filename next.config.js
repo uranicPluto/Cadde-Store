@@ -9,9 +9,19 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+      };
+    }
+    return config;
+  },
   experimental: {
     outputFileTracingIncludes: {
-      '/**': ['./prisma/dev.db', './prisma/schema.prisma', './prisma/**/*'],
+      '/**': ['./prisma/dev.db', './public/dev.db', './prisma/**/*'],
     },
   },
 };
