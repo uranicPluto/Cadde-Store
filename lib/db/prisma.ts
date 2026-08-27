@@ -2,56 +2,70 @@ import { PrismaClient } from "@prisma/client";
 import path from "path";
 import fs from "fs";
 
-function findSourceDb(): string | null {
-  const candidates = [
-    path.join(process.cwd(), "prisma", "dev.db"),
-    path.join(process.cwd(), "dev.db"),
-    path.join(__dirname, "..", "..", "..", "prisma", "dev.db"),
-    path.join(__dirname, "..", "..", "prisma", "dev.db"),
-    path.join(__dirname, "..", "prisma", "dev.db"),
-    path.join(__dirname, "prisma", "dev.db"),
-    path.resolve("./prisma/dev.db"),
-    path.resolve("./dev.db"),
-    path.join(process.cwd(), ".next", "server", "prisma", "dev.db"),
-  ];
+function ensureTmpDatabase(): string {
+  const tmpDbPath = path.join("/tmp", "dev.db");
 
-  for (const c of candidates) {
-    try {
-      if (fs.existsSync(c) && fs.statSync(c).size > 0) {
-        return c;
-      }
-    } catch (e) {}
+  let tmpValid = false;
+  try {
+    if (fs.existsSync(tmpDbPath) && fs.statSync(tmpDbPath).size > 0) {
+      tmpValid = true;
+    }
+  } catch (e) {}
+
+  if (!tmpValid) {
+    const candidates = [
+      path.join(process.cwd(), "prisma", "dev.db"),
+      path.join(process.cwd(), "dev.db"),
+      path.join(__dirname, "..", "..", "..", "prisma", "dev.db"),
+      path.join(__dirname, "..", "..", "prisma", "dev.db"),
+      path.join(__dirname, "..", "prisma", "dev.db"),
+      path.join(__dirname, "prisma", "dev.db"),
+      path.resolve("./prisma/dev.db"),
+      path.resolve("./dev.db"),
+      path.join(process.cwd(), ".next", "server", "prisma", "dev.db"),
+    ];
+
+    let copied = false;
+    for (const c of candidates) {
+      try {
+        if (fs.existsSync(c) && fs.statSync(c).size > 0) {
+          fs.copyFileSync(c, tmpDbPath);
+          copied = true;
+          console.log(`[Prisma] Successfully initialized /tmp/dev.db from ${c}`);
+          break;
+        }
+      } catch (e) {}
+    }
+
+    if (!copied) {
+      try {
+        if (!fs.existsSync(tmpDbPath)) {
+          fs.writeFileSync(tmpDbPath, "");
+        }
+      } catch (e) {}
+    }
   }
-  return null;
+
+  return `file:${tmpDbPath}`;
 }
 
 function getDatabaseUrl(): string {
-  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dev.db") && !process.env.DATABASE_URL.startsWith("file:")) {
+  if (
+    process.env.DATABASE_URL &&
+    !process.env.DATABASE_URL.includes("dev.db") &&
+    !process.env.DATABASE_URL.startsWith("file:")
+  ) {
     return process.env.DATABASE_URL;
   }
 
-  // Handle serverless read-write SQLite on Vercel / AWS Lambda
   const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
   if (isServerless) {
-    const tmpDbPath = path.join("/tmp", "dev.db");
-    if (!fs.existsSync(tmpDbPath) || fs.statSync(tmpDbPath).size === 0) {
-      const sourceDb = findSourceDb();
-      if (sourceDb) {
-        try {
-          fs.copyFileSync(sourceDb, tmpDbPath);
-        } catch (e) {
-          console.error("Failed to copy SQLite database to /tmp:", e);
-        }
-      }
-    }
-    if (fs.existsSync(tmpDbPath) && fs.statSync(tmpDbPath).size > 0) {
-      return `file:${tmpDbPath}`;
-    }
+    return ensureTmpDatabase();
   }
 
-  const source = findSourceDb();
-  if (source) {
-    return `file:${source}`;
+  const localDb = path.join(process.cwd(), "prisma", "dev.db");
+  if (fs.existsSync(localDb)) {
+    return `file:${localDb}`;
   }
   return "file:./prisma/dev.db";
 }
