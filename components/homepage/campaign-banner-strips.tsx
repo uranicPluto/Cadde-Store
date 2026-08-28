@@ -84,50 +84,7 @@ export const CampaignBannerStrips: React.FC = () => {
   const [campaigns, setCampaigns] = useState<CampaignItem[]>(defaultCampaigns);
 
   useEffect(() => {
-    async function fetchCampaignSections() {
-      try {
-        const res = await fetch("/api/cms/sections");
-        const data = await res.json();
-        if (data.sections && data.sections.length > 0) {
-          const stripSection = data.sections.find(
-            (s: any) => s.type === "BANNER_STRIP" || s.type === "CAMPAIGN_STRIP"
-          );
-          if (stripSection && stripSection.banners && stripSection.banners.length > 0) {
-            const gradients = [
-              "bg-gradient-to-r from-amber-500 to-orange-600",
-              "bg-gradient-to-r from-amber-600 to-yellow-600",
-              "bg-gradient-to-r from-indigo-600 to-blue-700",
-              "bg-gradient-to-r from-rose-500 to-pink-600",
-              "bg-gradient-to-r from-rose-600 to-red-700",
-              "bg-gradient-to-r from-cyan-600 to-teal-700",
-            ];
-
-            const dynamicCampaigns: CampaignItem[] = stripSection.banners.map(
-              (b: any, idx: number) => ({
-                id: b.id,
-                dateRange: isEn
-                  ? b.badgeTextEN || b.badgeTextTR || "Limited Time"
-                  : b.badgeTextTR || b.badgeTextEN || "Sınırlı Süre",
-                title: isEn ? b.titleEN || b.titleTR || "Special Offer" : b.titleTR || b.titleEN || "Özel Fırsat",
-                subtitle: isEn ? b.subtitleEN || b.subtitleTR || "" : b.subtitleTR || b.subtitleEN || "",
-                link: b.targetValue || "/category/women",
-                bgGradient: gradients[idx % gradients.length],
-                img1: b.imageUrlDesktop,
-                img2: b.imageUrlMobile || b.imageUrlDesktop,
-              })
-            );
-
-            setCampaigns(dynamicCampaigns);
-            return;
-          }
-        }
-        setCampaigns(defaultCampaigns);
-      } catch (err) {
-        setCampaigns(defaultCampaigns);
-      }
-    }
-
-    fetchCampaignSections();
+    setCampaigns(defaultCampaigns);
   }, [language, isEn]);
 
   return (

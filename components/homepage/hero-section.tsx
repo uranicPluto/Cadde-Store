@@ -15,37 +15,8 @@ export const HeroSection: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    async function loadCmsBanners() {
-      try {
-        const res = await fetch("/api/cms/sections");
-        const data = await res.json();
-        if (data.sections && data.sections.length > 0) {
-          const hero = data.sections.find((s: any) => s.type === "HERO") || data.sections[0];
-          if (hero && hero.banners && hero.banners.length > 0) {
-            setBanners(
-              hero.banners.map((b: any, i: number) => ({
-                id: b.id,
-                title: isEn ? b.titleEN || b.titleTR : b.titleTR || b.titleEN,
-                subtitle: isEn ? b.subtitleEN || b.subtitleTR : b.subtitleTR || b.subtitleEN,
-                ctaText: isEn ? "Explore Now" : "Fırsatı İncele",
-                badge: isEn ? b.badgeTextEN || b.badgeTextTR : b.badgeTextTR || b.badgeTextEN,
-                bgGradient: i % 2 === 0 ? "from-orange-500 to-amber-600" : "from-indigo-600 to-purple-700",
-                imageUrl: b.imageUrlDesktop,
-                targetUrl: b.targetValue || "/category/women",
-              }))
-            );
-          } else {
-            setBanners(getMockBanners(language));
-          }
-        } else {
-          setBanners(getMockBanners(language));
-        }
-      } catch (e) {
-        setBanners(getMockBanners(language));
-      }
-    }
-    loadCmsBanners();
-  }, [language, isEn]);
+    setBanners(getMockBanners(language));
+  }, [language]);
 
   useEffect(() => {
     if (banners.length === 0) return;
