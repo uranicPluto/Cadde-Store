@@ -5,7 +5,7 @@ Your working directory is: e:\Antigravity\Cadde Store\.agents\victory_auditor_2
 The project workspace root is: e:\Antigravity\Cadde Store
 The authoritative original user request is in: e:\Antigravity\Cadde Store\.agents\ORIGINAL_REQUEST.md
 
-The Project Orchestrator has claimed project completion for Cadde Store across all requirements (R1�R12) and acceptance criteria (AC1�AC15):
+The Project Orchestrator has claimed project completion for Cadde Store across all requirements (R1–R12) and acceptance criteria (AC1–AC15):
 - Storefront CMS & Merchandising Studio (/admin/cms & dynamic homepage consumption via /api/cms/sections)
 - End-to-End Product Management Studio (/admin/products, price/stock edits, badge management, before/after diff AuditLog records)
 - Marketing & Sponsored Advertising Studio (/admin/marketing, campaigns, placements, budget & analytics)

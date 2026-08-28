@@ -12,7 +12,7 @@
    - Dual Database Script (`scripts/prepare-db.js`): Successfully validates and configures SQLite/PostgreSQL provider dynamically.
 3. **Automated E2E Test Suite (`node tests/e2e/runner.js`)**:
    - Tier 1 (Feature Coverage): `75/75 passed (0 failed)` — 100% pass rate across 15 core features.
-   - Tier 2 (Boundary & Corner Cases): `75/75 passed (0 failed)` �t 100% pass rate on boundary conditions, SQL injection safety, edge strings, empty arrays, and extreme quantities.
+   - Tier 2 (Boundary & Corner Cases): `75/75 passed (0 failed)` — 100% pass rate on boundary conditions, SQL injection safety, edge strings, empty arrays, and extreme quantities.
    - Tier 3 (Pairwise Cross-Flow Combinations): `15/16 passed` (T3.1 through T3.15 passed cleanly).
    - Tier 4 (Workload Scenarios): During high-concurrency dev-server compilation on Windows, Webpack on-demand chunking for `jose` triggered `MODULE_NOT_FOUND: ./vendor-chunks/jose.js` under burst traffic.
 

@@ -101,7 +101,7 @@ function SortableSectionItem({
           type="button"
           {...attributes}
           {...listeners}
-          title="S�r�kleyip Yeniden Sirala"
+          title="Sürükleyip Yeniden Sırala"
           className="cursor-grab active:cursor-grabbing p-1 text-slate-500 hover:text-slate-200 rounded hover:bg-slate-800"
           onClick={(e) => e.stopPropagation()}
         >
@@ -339,7 +339,7 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
     if (restoredSections[0]) {
       setSelectedSectionId(restoredSections[0].id);
     }
-    setStatusMessage(isEn ? `Restored v${versionNumber} to canvas!` : `v${versionNumber} s�r�m� st�dyoya y�klendi!`);
+    setStatusMessage(isEn ? `Restored v${versionNumber} to canvas!` : `v${versionNumber} sürümü stüdyoya yüklendi!`);
     setTimeout(() => setStatusMessage(null), 4000);
   };
 
@@ -414,11 +414,11 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
           <button
             type="button"
             onClick={() => setIsHistoryOpen(true)}
-            title="S�r�m Ge�misi & Snapshotlar"
+            title="Sürüm Geçmişi & Snapshotlar"
             className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg transition-colors"
           >
             <History className="w-3.5 h-3.5 text-indigo-400" />
-            <span>{isEn ? "History" : "Tarih�e"}</span>
+            <span>{isEn ? "History" : "Tarihçe"}</span>
           </button>
         </div>
 
@@ -456,7 +456,7 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
             className="text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30"
           >
             <Rocket className="w-3.5 h-3.5 mr-1.5" />
-            <span>{publishing ? (isEn ? "Publishing..." : "Yayinlaniyor...") : isEn ? "Publish Live" : "Canliya Yayinla"}</span>
+            <span>{publishing ? (isEn ? "Publishing..." : "Yayınlanıyor...") : isEn ? "Publish Live" : "Canlıya Yayınla"}</span>
           </Button>
         </div>
       </div>
@@ -467,7 +467,7 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
         <div className="w-72 bg-slate-950 border-r border-slate-800/80 flex flex-col shrink-0">
           <div className="p-3 border-b border-slate-800 flex items-center justify-between">
             <span className="text-xs font-black text-slate-300 uppercase tracking-wider">
-              {isEn ? "Sections Outline" : "Sayfa B�l�mleri"}
+              {isEn ? "Sections Outline" : "Sayfa Bölümleri"}
             </span>
             <Button
               size="sm"

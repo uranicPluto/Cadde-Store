@@ -69,7 +69,7 @@ async function runAllFixTests() {
     headers: { "Content-Type": "application/json", Cookie: content.cookie },
     body: JSON.stringify({
       slug: `content-manager-test-${Date.now()}`,
-      titleTr: "I�erik Y�neticisi Sayfasi",
+      titleTr: "İçerik Yöneticisi Sayfası",
       titleEn: "Content Manager Page",
     }),
   });
@@ -167,13 +167,17 @@ async function runAllFixTests() {
   const checkReorderData = await checkReorder.json();
   const firstSection = checkReorderData.sections?.[0];
   console.log(`[Reorder Verification] First section is now: ${firstSection?.type} (orderIndex: ${firstSection?.orderIndex})`);
+    throw new Error("RBAC Test 3 Failed: Content Manager was not allowed to mutate PAGES!");
+  }
 
-  console.log(">>> Fix 3 (Drag-and-Drop Structure & Reordering) PASSED!\n");
+  console.log(">>> RBAC ENFORCEMENT: ALL 3 TESTS PASSED (100% SUCCESS) <<<\n");
 
-  // -----------------------------------------------------------------
-  // FIX 4: VERSION HISTORY RESTORATION (3 SNAPSHOTS & ROLLBACK)
-  // -----------------------------------------------------------------
-  console.log("--- 4. Testing Version History 3-Publish & Rollback Flow ---");
+  // =========================================================================
+  // FIX 2: VERSION HISTORY RESTORATION SNAPSHOT AUDIT
+  // =========================================================================
+  console.log("------------------------------------------------------------------");
+  console.log("2. TESTING VERSION HISTORY SNAPSHOT CREATION & RESTORATION");
+  console.log("------------------------------------------------------------------");
 
   // Snapshot 1
   const snap1Res = await fetch("http://localhost:3000/api/cms/homepage/publish", {
@@ -182,8 +186,8 @@ async function runAllFixTests() {
     body: JSON.stringify({
       summary: "Snapshot 1: Summer Campaign Launch",
       sections: [
-        { id: "snap1-hero", type: "HERO", titleTR: "Yaz Kampanyasi Vitrini", titleEN: "Summer Hero", orderIndex: 0, active: true },
-        { id: "snap1-deals", type: "FLASH_DEALS", titleTR: "Flas Indirimler", titleEN: "Flash Deals", orderIndex: 1, active: true },
+        { id: "snap1-hero", type: "HERO", titleTR: "Yaz Vitrini", titleEN: "Summer Hero", orderIndex: 0, active: true },
+        { id: "snap1-deals", type: "FLASH_DEALS", titleTR: "Flaş Fırsatlar", titleEN: "Flash Deals", orderIndex: 1, active: true },
       ],
     }),
   });
@@ -199,7 +203,7 @@ async function runAllFixTests() {
       sections: [
         { id: "snap2-hero", type: "HERO", titleTR: "Sonbahar Vitrini", titleEN: "Autumn Hero", orderIndex: 0, active: true },
         { id: "snap2-cat", type: "CATEGORY_GRID", titleTR: "Kategoriler", titleEN: "Categories", orderIndex: 1, active: true },
-        { id: "snap2-best", type: "BESTSELLER_GRID", titleTR: "�ok Satanlar", titleEN: "Bestsellers", orderIndex: 2, active: true },
+        { id: "snap2-best", type: "BESTSELLER_GRID", titleTR: "Çok Satanlar", titleEN: "Bestsellers", orderIndex: 2, active: true },
       ],
     }),
   });
@@ -213,10 +217,10 @@ async function runAllFixTests() {
     body: JSON.stringify({
       summary: "Snapshot 3: Winter Cyber Deals",
       sections: [
-        { id: "snap3-hero", type: "HERO", titleTR: "Kis Firsatlari", titleEN: "Winter Hero", orderIndex: 0, active: true },
+        { id: "snap3-hero", type: "HERO", titleTR: "Kış Fırsatları", titleEN: "Winter Hero", orderIndex: 0, active: true },
         { id: "snap3-spons", type: "SPONSOR_CAROUSEL", titleTR: "Sponsorlar", titleEN: "Sponsors", orderIndex: 1, active: true },
         { id: "snap3-brands", type: "FEATURED_BRANDS", titleTR: "Markalar", titleEN: "Brands", orderIndex: 2, active: true },
-        { id: "snap3-badges", type: "TRUST_BADGES", titleTR: "G�ven Rozetleri", titleEN: "Trust Badges", orderIndex: 3, active: true },
+        { id: "snap3-badges", type: "TRUST_BADGES", titleTR: "Güven Rozetleri", titleEN: "Trust Badges", orderIndex: 3, active: true },
       ],
     }),
   });

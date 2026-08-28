@@ -1,4 +1,4 @@
-# Progress Log � victory_auditor_2
+# Progress Log — victory_auditor_2
 Last visited: 2026-08-23T15:01:00Z
 
 - [x] Initialized workspace and DISPATCH.md / BRIEFING.md

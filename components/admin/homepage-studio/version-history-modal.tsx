@@ -50,7 +50,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
     setError(null);
     try {
       const res = await fetch("/api/cms/homepage/versions");
-      if (!res.ok) throw new Error("S�r�m ge�misi alinamadi.");
+      if (!res.ok) throw new Error("Sürüm geçmişi alınamadı.");
       const data = await res.json();
       if (data.versions && Array.isArray(data.versions)) {
         setVersions(data.versions);
@@ -59,7 +59,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
         }
       }
     } catch (e: any) {
-      setError(e.message || "S�r�m ge�misi y�klenirken hata olustu.");
+      setError(e.message || "Sürüm geçmişi yüklenirken hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -107,12 +107,12 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-white">
-                {isEn ? "Homepage Version History & Snapshots" : "Ana Sayfa S�r�m Ge�misi & Snapshotlar"}
+                {isEn ? "Homepage Version History & Snapshots" : "Ana Sayfa Sürüm Geçmişi & Snapshotlar"}
               </h2>
               <p className="text-xs text-slate-400">
                 {isEn
                   ? "Browse past published versions and restore any historical snapshot."
-                  : "Daha �nce yayinlanan s�r�mleri inceleyin ve istediginiz ana sayfa snapshotini geri y�kleyin."}
+                  : "Daha önce yayınlanan sürümleri inceleyin ve istediğiniz ana sayfa snapshotını geri yükleyin."}
               </p>
             </div>
           </div>
@@ -131,7 +131,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
           <div className="md:col-span-5 border-r border-slate-800 overflow-y-auto p-3 space-y-2 bg-slate-950/30">
             {loading ? (
               <div className="py-16 text-center text-xs text-slate-400">
-                {isEn ? "Loading versions..." : "S�r�mler y�kleniyor..."}
+                {isEn ? "Loading versions..." : "Sürümler yükleniyor..."}
               </div>
             ) : error ? (
               <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs">
@@ -139,7 +139,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
               </div>
             ) : versions.length === 0 ? (
               <div className="py-16 text-center text-xs text-slate-500">
-                {isEn ? "No published versions found." : "Hen�z yayinlanmis s�r�m kaydi bulunmuyor."}
+                {isEn ? "No published versions found." : "Henüz yayınlanmış sürüm kaydı bulunmuyor."}
               </div>
             ) : (
               versions.map((ver, idx) => {
@@ -185,7 +185,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                     </div>
 
                     <div className="text-xs font-bold text-slate-200 truncate">
-                      {ver.changeSummary || (isEn ? "Storefront publish update" : "Vitrin yayin g�ncellemesi")}
+                      {ver.changeSummary || (isEn ? "Storefront publish update" : "Vitrin yayın güncellemesi")}
                     </div>
 
                     <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/50">
@@ -195,7 +195,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                       </span>
                       <span className="flex items-center gap-1 font-semibold text-slate-400">
                         <Layers className="w-3 h-3 text-slate-500" />
-                        {secCount} {isEn ? "sections" : "b�l�m"}
+                        {secCount} {isEn ? "sections" : "bölüm"}
                       </span>
                     </div>
                   </div>
@@ -213,32 +213,32 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-black text-white">
-                        S�r�m #{selectedVersion.versionNumber}
+                        Sürüm #{selectedVersion.versionNumber}
                       </span>
                       <span className="text-xs text-slate-400">
                         ({new Date(selectedVersion.publishedAt).toLocaleString("tr-TR")})
                       </span>
                     </div>
                     <span className="text-xs text-indigo-400 font-bold">
-                      {parsedSections.length} {isEn ? "Sections" : "B�l�m"}
+                      {parsedSections.length} {isEn ? "Sections" : "Bölüm"}
                     </span>
                   </div>
 
                   <p className="text-xs text-slate-300">
-                    <strong>{isEn ? "Summary: " : "A�iklama: "}</strong>
-                    {selectedVersion.changeSummary || (isEn ? "Homepage visual update" : "Ana sayfa vitrin g�ncellemesi")}
+                    <strong>{isEn ? "Summary: " : "Açıklama: "}</strong>
+                    {selectedVersion.changeSummary || (isEn ? "Homepage visual update" : "Ana sayfa vitrin güncellemesi")}
                   </p>
 
                   <div className="text-[11px] text-slate-400 flex items-center gap-2">
-                    <span>{isEn ? "Published by:" : "Yayinlayan:"}</span>
-                    <strong className="text-slate-200">{selectedVersion.authorEmail || "Y�netici"}</strong>
+                    <span>{isEn ? "Published by:" : "Yayınlayan:"}</span>
+                    <strong className="text-slate-200">{selectedVersion.authorEmail || "Yönetici"}</strong>
                   </div>
                 </div>
 
                 {/* Section Composition in this snapshot */}
                 <div className="flex flex-col gap-2">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    {isEn ? "Section Composition in this Snapshot" : "Bu S�r�mdeki B�l�m Yapisi"}
+                    {isEn ? "Section Composition in this Snapshot" : "Bu Sürümdeki Bölüm Yapısı"}
                   </span>
                   <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
                     {parsedSections.map((sec, idx) => (
@@ -281,17 +281,17 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                     <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
                     <span>
                       {restoring
-                        ? isEn ? "Restoring..." : "Geri Y�kleniyor..."
+                        ? isEn ? "Restoring..." : "Geri Yükleniyor..."
                         : isEn
                         ? `Restore v${selectedVersion.versionNumber} to Canvas`
-                        : `v${selectedVersion.versionNumber} S�r�m�n� St�dyoya Geri Y�kle`}
+                        : `v${selectedVersion.versionNumber} Sürümünü Stüdyoya Geri Yükle`}
                     </span>
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="py-24 text-center text-xs text-slate-500">
-                {isEn ? "Select a version to inspect details." : "Detaylari g�rmek i�in sol listeden bir s�r�m se�in."}
+                {isEn ? "Select a version to inspect details." : "Detayları görmek için sol listeden bir sürüm seçin."}
               </div>
             )}
           </div>
