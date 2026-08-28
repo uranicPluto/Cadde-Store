@@ -21,20 +21,26 @@ export function isCategorySlugMatch(prodCatSlug: string, targetSlug: string): bo
     erkek: ["erkek", "men"],
     kids: ["cocuk", "kids"],
     cocuk: ["cocuk", "kids"],
-    electronics: ["elektronik", "electronics"],
-    elektronik: ["elektronik", "electronics"],
-    "home-living": ["ev-yasam", "home-living"],
-    "ev-yasam": ["ev-yasam", "home-living"],
-    supermarket: ["supermarket"],
-    "beauty-care": ["kozmetik", "beauty-care"],
-    kozmetik: ["kozmetik", "beauty-care"],
-    "shoes-bags": ["ayakkabi-canta", "shoes-bags"],
-    "ayakkabi-canta": ["ayakkabi-canta", "shoes-bags"],
-    spor: ["spor", "sports-outdoor"],
-    "sports-outdoor": ["spor", "sports-outdoor"],
-    "kitap-kirtasiye": ["kitap-kirtasiye", "books-hobbies"],
-    "books-hobbies": ["kitap-kirtasiye", "books-hobbies"],
-    "pet-shop": ["pet-shop"],
+    electronics: ["elektronik", "electronics", "electronic"],
+    elektronik: ["elektronik", "electronics", "electronic"],
+    "home-living": ["ev-yasam", "home-living", "home", "living"],
+    "ev-yasam": ["ev-yasam", "home-living", "home", "living"],
+    home: ["ev-yasam", "home-living", "home"],
+    supermarket: ["supermarket", "grocery"],
+    "beauty-care": ["kozmetik", "beauty-care", "beauty", "cosmetics"],
+    beauty: ["kozmetik", "beauty-care", "beauty", "cosmetics"],
+    cosmetics: ["kozmetik", "beauty-care", "beauty", "cosmetics"],
+    kozmetik: ["kozmetik", "beauty-care", "beauty", "cosmetics"],
+    "shoes-bags": ["ayakkabi-canta", "shoes-bags", "shoes", "bags"],
+    shoes: ["ayakkabi-canta", "shoes-bags", "shoes"],
+    "ayakkabi-canta": ["ayakkabi-canta", "shoes-bags", "shoes", "bags"],
+    spor: ["spor", "sports-outdoor", "sports", "sport"],
+    sports: ["spor", "sports-outdoor", "sports", "sport"],
+    "sports-outdoor": ["spor", "sports-outdoor", "sports", "sport"],
+    "kitap-kirtasiye": ["kitap-kirtasiye", "books-hobbies", "books"],
+    "books-hobbies": ["kitap-kirtasiye", "books-hobbies", "books"],
+    books: ["kitap-kirtasiye", "books-hobbies", "books"],
+    "pet-shop": ["pet-shop", "pets"],
     otomotiv: ["otomotiv", "automotive"],
     automotive: ["otomotiv", "automotive"],
   };
@@ -146,7 +152,7 @@ export function getCategoryBySlug(slug: string, lang: Language = "tr"): Category
     };
   }
 
-  if (s === "beauty-care" || s === "kozmetik") {
+  if (s === "beauty-care" || s === "kozmetik" || s === "beauty" || s === "cosmetics") {
     return {
       slug: "kozmetik",
       name: isEn ? "Beauty & Personal Care" : "Kozmetik & Kişisel Bakım",
@@ -162,7 +168,7 @@ export function getCategoryBySlug(slug: string, lang: Language = "tr"): Category
     };
   }
 
-  if (s === "shoes-bags" || s === "ayakkabi-canta") {
+  if (s === "shoes-bags" || s === "ayakkabi-canta" || s === "shoes" || s === "bags") {
     return {
       slug: "ayakkabi-canta",
       name: isEn ? "Shoes & Bags" : "Ayakkabı & Çanta",
@@ -174,6 +180,22 @@ export function getCategoryBySlug(slug: string, lang: Language = "tr"): Category
         { slug: "sneakers", name: isEn ? "Sneakers" : "Spor Ayakkabılar" },
         { slug: "bags", name: isEn ? "Handbags" : "Omuz Çantaları" },
         { slug: "boots", name: isEn ? "Boots" : "Botlar" },
+      ],
+    };
+  }
+
+  if (s === "spor" || s === "sports" || s === "sports-outdoor" || s === "sport") {
+    return {
+      slug: "spor",
+      name: isEn ? "Sports & Outdoor" : "Spor & Outdoor",
+      description: isEn
+        ? "Activewear, athletic shoes, workout equipment, and outdoor gear."
+        : "Spor giyim, antrenman ekipmanları ve outdoor malzemeleri.",
+      bannerImage: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1200&q=80",
+      subcategories: [
+        { slug: "fitness", name: isEn ? "Fitness" : "Fitness & Kondisyon" },
+        { slug: "running", name: isEn ? "Running" : "Koşu & Yürüyüş" },
+        { slug: "outdoor", name: isEn ? "Outdoor" : "Outdoor & Kamp" },
       ],
     };
   }

@@ -19,7 +19,7 @@ export const CategoryGridStrips: React.FC<CategoryGridStripsProps> = ({
   config: propConfig,
 }) => {
   const { language, t } = useLanguage();
-  const router = useRouter();
+  const isEn = language === "en";
   const categories = getMockCategories(language);
 
   const categoryIcons: Record<string, React.ReactNode> = {
@@ -34,18 +34,14 @@ export const CategoryGridStrips: React.FC<CategoryGridStripsProps> = ({
   };
 
   const categorySlugs: Record<string, string> = {
-    c1: "kadin",
-    c2: "erkek",
-    c3: "ayakkabi-canta",
-    c4: "elektronik",
-    c5: "ev-yasam",
-    c6: "kozmetik",
-    c7: "spor",
+    c1: "women",
+    c2: "men",
+    c3: "shoes-bags",
+    c4: "electronics",
+    c5: "home-living",
+    c6: "beauty",
+    c7: "sports",
     c8: "supermarket",
-  };
-
-  const handleCategoryClick = (targetSlug: string) => {
-    router.push(`/category/${targetSlug}`);
   };
 
   return (
@@ -53,10 +49,10 @@ export const CategoryGridStrips: React.FC<CategoryGridStripsProps> = ({
       <div className="max-w-wide mx-auto px-4 sm:px-6 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            {propTitle || t("homepage.categoryStripsTitle")}
+            {propTitle || (isEn ? "Explore Popular Categories" : "Popüler Kategorileri Keşfedin")}
           </h2>
           <Link
-            href="/category/kadin"
+            href="/category/women"
             className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
           >
             <span>{t("homepage.viewAll")}</span>
@@ -66,26 +62,22 @@ export const CategoryGridStrips: React.FC<CategoryGridStripsProps> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
           {categories.map((c) => {
-            const targetSlug = categorySlugs[c.id] || "kadin";
+            const targetSlug = categorySlugs[c.id] || "women";
             const targetUrl = `/category/${targetSlug}`;
 
             return (
-              <a
+              <Link
                 key={c.id}
                 href={targetUrl}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleCategoryClick(targetSlug);
-                }}
-                className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200/80 rounded-xl hover:border-primary hover:bg-orange-50/40 transition-all text-center gap-2 group shadow-2xs cursor-pointer active:scale-95"
+                className="flex flex-col items-center justify-center p-4 bg-slate-50/70 border border-slate-200/80 rounded-2xl hover:border-primary hover:bg-orange-50/40 hover:shadow-xs transition-all text-center gap-2 group cursor-pointer active:scale-95"
               >
-                <div className="w-12 h-12 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-white border border-slate-200 shadow-2xs flex items-center justify-center group-hover:scale-110 transition-transform">
                   {categoryIcons[c.icon] || <Shirt className="w-5 h-5 text-primary" />}
                 </div>
-                <span className="text-xs font-extrabold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">
+                <span className="text-xs font-bold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">
                   {c.name}
                 </span>
-              </a>
+              </Link>
             );
           })}
         </div>

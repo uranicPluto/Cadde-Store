@@ -228,21 +228,31 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Quick Category Icons Strip Underneath */}
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
           {categories.slice(0, 8).map((cat) => {
-            const href = (cat as any).slug
-              ? `/category/${(cat as any).slug}`
-              : `/search?q=${encodeURIComponent(cat.name)}`;
+            const slugMap: Record<string, string> = {
+              c1: "women",
+              c2: "men",
+              c3: "shoes-bags",
+              c4: "electronics",
+              c5: "home-living",
+              c6: "beauty",
+              c7: "sports",
+              c8: "supermarket",
+            };
+            const targetSlug = slugMap[cat.id] || (cat as any).slug || "women";
+            const href = `/category/${targetSlug}`;
+
             return (
               <Link
                 key={cat.id}
                 href={href}
-                className="flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-xs group transition-all text-center gap-1.5"
+                className="flex items-center sm:flex-col justify-center p-3 sm:py-3.5 sm:px-2 bg-white border border-slate-200/80 rounded-xl hover:border-primary hover:shadow-xs group transition-all text-center gap-2"
               >
-                <div className="w-9 h-9 rounded-full bg-primary-light text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-orange-50 text-primary border border-orange-200/60 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
                   <Tag className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-bold text-text-main group-hover:text-primary transition-colors line-clamp-1">
+                <span className="text-xs font-bold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">
                   {cat.name}
                 </span>
               </Link>
