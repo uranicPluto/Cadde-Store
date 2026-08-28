@@ -244,11 +244,25 @@ export function getDefaultBaselineSections(): SectionItem[] {
       banners: [],
     },
     {
+      id: "sec-sponsors",
+      titleTR: "Resmi Sponsorlarımız & İş Ortaklarımız",
+      titleEN: "Official Sponsors & Strategic Partners",
+      type: "SPONSOR_CAROUSEL",
+      orderIndex: 8,
+      active: true,
+      configJson: {
+        subtitleTR: "Türkiye'nin ve dünyanın önde gelen e-ticaret markaları",
+        subtitleEN: "Leading Turkish and global e-commerce brand partners",
+        visibility: { desktop: true, tablet: true, mobile: true },
+      },
+      banners: [],
+    },
+    {
       id: "sec-bestseller-grid",
       titleTR: "Haftanın En Çok Satan Ürünleri",
       titleEN: "Weekly Top Bestsellers",
       type: "BESTSELLER_GRID",
-      orderIndex: 8,
+      orderIndex: 9,
       active: true,
       configJson: {
         subtitleTR: "Tüm kategorilerde en yüksek sipariş hacmine ulaşanlar",
@@ -268,7 +282,7 @@ export function getDefaultBaselineSections(): SectionItem[] {
       titleTR: "Cadde Store Güvencesi",
       titleEN: "Cadde Store Customer Trust",
       type: "TRUST_BADGES",
-      orderIndex: 9,
+      orderIndex: 10,
       active: true,
       configJson: {
         subtitleTR: "Güvenli ödeme, kolay iade ve hızlı teslimat",
