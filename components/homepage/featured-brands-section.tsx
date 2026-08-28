@@ -66,7 +66,7 @@ export const FeaturedBrandsSection: React.FC<FeaturedBrandsSectionProps> = ({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-          {brands.slice(0, 12).map((b) => (
+          {brands.slice(0, 6).map((b) => (
             <BrandCard key={b.id} brand={b} />
           ))}
         </div>
