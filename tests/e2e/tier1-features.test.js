@@ -2284,6 +2284,7 @@ async function runTier1Tests() {
           },
         ],
         changeSummary: "E2E Automated Publish Test",
+        sellerApproved: true,
       };
 
       const res = await request("/api/cms/homepage/publish", {

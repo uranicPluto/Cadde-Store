@@ -313,10 +313,34 @@ model Banner {
 }
 
 model HomepageDraft {
-  id         String   @id @default("current_draft")
-  draftJson  String   @default("[]") // JSON string of SectionItem[]
-  updatedBy  String?
-  updatedAt  DateTime @updatedAt
+  id              String    @id @default("current_draft")
+  draftJson       String    @default("[]") // JSON string of SectionItem[]
+  approvalStatus  String    @default("DRAFT") // DRAFT | PENDING_SELLER_APPROVAL | SELLER_APPROVED | SELLER_REJECTED
+  approvalSellerId String?
+  approvedBy      String?   // Seller email who approved
+  approvedAt      DateTime?
+  requestedBy     String?   // Admin email who requested
+  requestedAt     DateTime?
+  rejectionReason String?
+  sellerNotes     String?
+  updatedBy       String?
+  updatedAt       DateTime  @updatedAt
+}
+
+model HomepageApprovalRequest {
+  id              String    @id @default(uuid())
+  draftJson       String    // Snapshot of draft when approval was requested
+  status          String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  requestedBy     String    // Admin email
+  requestedAt     DateTime  @default(now())
+  sellerId        String?   // Target seller ID or null for any verified seller
+  sellerEmail     String?   // Approving/rejecting seller email
+  sellerStoreName String?   // Approving/rejecting seller store name
+  sellerNotes     String?
+  rejectionReason String?
+  approvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model HomepageVersion {

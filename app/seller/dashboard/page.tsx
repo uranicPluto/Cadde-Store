@@ -23,6 +23,7 @@ import {
   MessageSquare,
   CheckCircle2,
   Sparkles,
+  Clock,
 } from "lucide-react";
 
 export default function SellerDashboardOverviewPage() {
@@ -88,6 +89,33 @@ export default function SellerDashboardOverviewPage() {
                   <span>{t("seller.dashboard.addProductCta")}</span>
                 </Link>
               </div>
+            </div>
+
+            {/* Pending Homepage Approval Alert Card */}
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
+                  <Clock className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-amber-950">
+                    {isEn ? "Homepage Layout Changes Awaiting Your Review" : "Onayınızı Bekleyen Ana Sayfa Vitrin Değişiklikleri Var"}
+                  </h4>
+                  <p className="text-[11px] text-amber-800">
+                    {isEn
+                      ? "Administrators cannot publish homepage changes until a verified merchant confirms the draft."
+                      : "Satıcı onayı verilmeden ana sayfa vitrin değişiklikleri canlıya alınamaz."}
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href="/seller/dashboard/approvals"
+                className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shrink-0 transition-colors shadow-xs"
+              >
+                <span>{isEn ? "Review & Confirm" : "İncele & Teyit Et"}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
 
             {/* Metric Summary Stat Cards */}

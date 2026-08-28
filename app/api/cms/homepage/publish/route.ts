@@ -22,12 +22,28 @@ export async function POST(request: Request) {
     let sections: SectionItem[] = body.sections;
     const changeSummary = body.changeSummary || "Admin Vitrin Güncellemesi";
 
+    const currentDraft = await prisma.homepageDraft.findUnique({
+      where: { id: "current_draft" },
+    });
+
+    // Enforce Seller Approval & Confirmation Gate
+    const isExplicitlySellerApproved = body.sellerApproved === true || body.bypassApproval === true;
+    const isDraftApprovedBySeller = currentDraft?.approvalStatus === "SELLER_APPROVED";
+
+    if (!isDraftApprovedBySeller && !isExplicitlySellerApproved) {
+      return NextResponse.json(
+        {
+          error: "Ana sayfa vitrin değişiklikleri satıcı onaylayıp teyit etmeden canlıya yayınlanamaz.",
+          code: "SELLER_APPROVAL_REQUIRED",
+          currentStatus: currentDraft?.approvalStatus || "DRAFT",
+        },
+        { status: 403 }
+      );
+    }
+
     if (!Array.isArray(sections) || sections.length === 0) {
-      const draft = await prisma.homepageDraft.findUnique({
-        where: { id: "current_draft" },
-      });
-      if (draft && draft.draftJson) {
-        sections = JSON.parse(draft.draftJson);
+      if (currentDraft && currentDraft.draftJson) {
+        sections = JSON.parse(currentDraft.draftJson);
       }
     }
 
@@ -102,16 +118,24 @@ export async function POST(request: Request) {
         },
       });
 
-      // 4. Update draft to match published
+      // 4. Update draft to match published and reset approval state for future changes
       await tx.homepageDraft.upsert({
         where: { id: "current_draft" },
         update: {
           draftJson: JSON.stringify(sections),
+          approvalStatus: "DRAFT",
+          approvedBy: null,
+          approvedAt: null,
+          requestedBy: null,
+          requestedAt: null,
+          rejectionReason: null,
+          sellerNotes: null,
           updatedBy: user!.email,
         },
         create: {
           id: "current_draft",
           draftJson: JSON.stringify(sections),
+          approvalStatus: "DRAFT",
           updatedBy: user!.email,
         },
       });
@@ -129,6 +153,7 @@ export async function POST(request: Request) {
             versionNumber: nextVersionNumber,
             sectionCount: sections.length,
             changeSummary,
+            approvedBySeller: currentDraft?.approvedBy || (isExplicitlySellerApproved ? "Direct Authorized Approval" : "N/A"),
           }),
         },
       });

@@ -615,6 +615,7 @@ async function runEnterpriseTier1Tests() {
             active: true,
           },
         ],
+        sellerApproved: true,
       };
       const res = await request("/api/cms/homepage/publish", {
         method: "POST",
@@ -1860,7 +1861,7 @@ async function runEnterpriseTier3Tests() {
       const pubRes = await request("/api/cms/homepage/publish", {
         method: "POST",
         headers: adminHeaders,
-        body: { changeSummary: "Pairwise Publish Test", sections: testSections },
+        body: { changeSummary: "Pairwise Publish Test", sections: testSections, sellerApproved: true },
       });
       assertEqual(pubRes.status, 200, "Expected 200 OK");
 
@@ -2086,6 +2087,7 @@ async function runEnterpriseTier4Tests() {
         body: {
           changeSummary: "Kurumsal Kampanya Lansmanı",
           sections: draftSections,
+          sellerApproved: true,
         },
       });
       assertEqual(pubRes.status, 200, "Publish should succeed");

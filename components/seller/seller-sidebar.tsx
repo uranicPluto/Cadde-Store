@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, Star, Settings, Store, PlusCircle, ArrowLeft, RotateCcw } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Star, Settings, Store, PlusCircle, ArrowLeft, RotateCcw, ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ export const SellerSidebar: React.FC<{ className?: string }> = ({ className }) =
     { href: "/seller/dashboard/products", icon: Package, label: t("seller.navigation.products") },
     { href: "/seller/dashboard/orders", icon: ShoppingCart, label: t("seller.navigation.orders") },
     { href: "/seller/dashboard/returns", icon: RotateCcw, label: isEn ? "Returns & Claims" : "İade & Talepler" },
+    { href: "/seller/dashboard/approvals", icon: ShieldCheck, label: isEn ? "Homepage Approvals" : "Vitrin Onayları" },
     { href: "/seller/dashboard/reviews", icon: Star, label: t("seller.navigation.reviews") },
     { href: "/seller/dashboard/settings", icon: Settings, label: t("seller.navigation.settings") },
   ];

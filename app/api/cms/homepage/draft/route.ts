@@ -21,6 +21,13 @@ export async function GET() {
             sections: parsed,
             updatedAt: draft.updatedAt,
             updatedBy: draft.updatedBy,
+            approvalStatus: draft.approvalStatus || "DRAFT",
+            approvedBy: draft.approvedBy || null,
+            approvedAt: draft.approvedAt || null,
+            requestedBy: draft.requestedBy || null,
+            requestedAt: draft.requestedAt || null,
+            rejectionReason: draft.rejectionReason || null,
+            sellerNotes: draft.sellerNotes || null,
             source: "draft_database",
           });
         }
@@ -38,6 +45,7 @@ export async function GET() {
     if (liveSections && liveSections.length > 0) {
       return NextResponse.json({
         sections: liveSections,
+        approvalStatus: draft?.approvalStatus || "DRAFT",
         source: "live_database",
       });
     }
@@ -46,12 +54,14 @@ export async function GET() {
     const defaults = getDefaultBaselineSections();
     return NextResponse.json({
       sections: defaults,
+      approvalStatus: "DRAFT",
       source: "baseline_defaults",
     });
   } catch (error) {
     console.error("[API Draft GET Error]:", error);
     return NextResponse.json({
       sections: getDefaultBaselineSections(),
+      approvalStatus: "DRAFT",
       source: "fallback_error",
     });
   }
@@ -84,11 +94,16 @@ async function saveDraftHandler(request: Request) {
       create: {
         id: "current_draft",
         draftJson: JSON.stringify(sections),
+        approvalStatus: "DRAFT",
         updatedBy: user!.email,
       },
     });
 
-    return NextResponse.json({ success: true, draft });
+    return NextResponse.json({
+      success: true,
+      draft,
+      approvalStatus: draft.approvalStatus || "DRAFT",
+    });
   } catch (error) {
     console.error("[API Draft Save Error]:", error);
     return NextResponse.json({ error: "Taslak kaydedilemedi." }, { status: 500 });

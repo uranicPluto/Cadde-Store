@@ -30,6 +30,13 @@ import {
   ExternalLink,
   RotateCcw,
   History,
+  ShieldCheck,
+  Lock,
+  Unlock,
+  Send,
+  Clock,
+  XCircle,
+  X,
 } from "lucide-react";
 import {
   DndContext,
@@ -90,7 +97,7 @@ function SortableSectionItem({
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 cursor-pointer transition-all ${
+      className={`group relative flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
         isSelected
           ? "bg-indigo-600/20 border-indigo-500 text-white font-bold"
           : "bg-slate-900/60 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
@@ -115,28 +122,27 @@ function SortableSectionItem({
         </div>
       </div>
 
-      <div className="flex items-center gap-0.5 shrink-0">
+      {/* Quick Move Up/Down Controls */}
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           type="button"
+          disabled={index === 0}
           onClick={(e) => {
             e.stopPropagation();
             onMoveUp();
           }}
-          disabled={index === 0}
-          title="Yukari Tasi"
-          className="p-1 text-slate-400 hover:text-white disabled:opacity-20 rounded"
+          className="p-1 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded disabled:opacity-20"
         >
           <ChevronUp className="w-3 h-3" />
         </button>
         <button
           type="button"
+          disabled={index === totalCount - 1}
           onClick={(e) => {
             e.stopPropagation();
             onMoveDown();
           }}
-          disabled={index === totalCount - 1}
-          title="Asagi Tasi"
-          className="p-1 text-slate-400 hover:text-white disabled:opacity-20 rounded"
+          className="p-1 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded disabled:opacity-20"
         >
           <ChevronDown className="w-3 h-3" />
         </button>
@@ -161,6 +167,19 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
   const [viewportMode, setViewportMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+
+  // Seller Approval Workflow State
+  const [approvalStatus, setApprovalStatus] = useState<string>("DRAFT");
+  const [approvalData, setApprovalData] = useState<{
+    requestedBy: string | null;
+    requestedAt: string | null;
+    approvedBy: string | null;
+    approvedAt: string | null;
+    rejectionReason: string | null;
+    sellerNotes: string | null;
+  } | null>(null);
+  const [requestingApproval, setRequestingApproval] = useState(false);
 
   // Undo / Redo History Ring Buffer
   const [history, setHistory] = useState<SectionItem[][]>([initialSections || []]);
@@ -171,6 +190,23 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
   const [publishing, setPublishing] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const fetchApprovalStatus = async () => {
+    try {
+      const res = await fetch("/api/cms/homepage/approval");
+      if (res.ok) {
+        const json = await res.json();
+        setApprovalStatus(json.approvalStatus || "DRAFT");
+        setApprovalData(json);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch approval status:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchApprovalStatus();
+  }, []);
 
   // DND Sensors setup
   const sensors = useSensors(
@@ -258,11 +294,11 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
       titleEN: initialConfig?.titleEN || `${type} Heading`,
       orderIndex: sections.length,
       active: true,
-      configJson: initialConfig || {},
+      configJson: initialConfig?.configJson || {},
       banners: [],
     };
-    const updated = [...sections, newSection];
-    handleUpdateSections(updated);
+    const next = [...sections, newSection];
+    handleUpdateSections(next);
     setSelectedSectionId(newSection.id);
   };
 
@@ -273,11 +309,11 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
 
   const handleDuplicateSection = (sec: SectionItem) => {
     const duplicated: SectionItem = {
-      ...sec,
+      ...JSON.parse(JSON.stringify(sec)),
       id: `sec_${Date.now()}`,
-      titleTR: `${sec.titleTR || sec.type} (Kopya)`,
-      titleEN: `${sec.titleEN || sec.type} (Copy)`,
-      orderIndex: sec.orderIndex + 1,
+      titleTR: `${sec.titleTR} (Kopya)`,
+      titleEN: `${sec.titleEN} (Copy)`,
+      orderIndex: sections.length,
     };
     const next = [...sections, duplicated];
     handleUpdateSections(next);
@@ -285,7 +321,7 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
   };
 
   const handleDeleteSection = (id: string) => {
-    const next = sections.filter((s) => s.id !== id);
+    const next = sections.filter((s) => s.id !== id).map((s, idx) => ({ ...s, orderIndex: idx }));
     handleUpdateSections(next);
     if (selectedSectionId === id) {
       setSelectedSectionId(next[0] ? next[0].id : null);
@@ -293,10 +329,9 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
   };
 
   const handleMoveSection = (index: number, direction: "up" | "down") => {
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === sections.length - 1) return;
-
     const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= sections.length) return;
+
     const next = [...sections];
     const temp = next[index];
     next[index] = next[targetIndex];
@@ -313,6 +348,7 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
       await onSaveDraft(sections);
       setLastSavedTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
       setStatusMessage(isEn ? "Draft saved successfully!" : "Taslak kaydedildi!");
+      await fetchApprovalStatus();
       setTimeout(() => setStatusMessage(null), 3000);
     } catch (e) {
       console.error("Save draft error:", e);
@@ -321,14 +357,50 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
     }
   };
 
+  const handleRequestSellerApproval = async () => {
+    setRequestingApproval(true);
+    try {
+      // First ensure draft is saved
+      await onSaveDraft(sections);
+      const res = await fetch("/api/cms/homepage/approval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: "Admin requested merchant confirmation for homepage layout." }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Approval request failed");
+
+      setApprovalStatus(data.approvalStatus || "PENDING_SELLER_APPROVAL");
+      setStatusMessage(isEn ? "Submitted for Seller Approval!" : "Satıcı onayına gönderildi!");
+      await fetchApprovalStatus();
+      setIsApprovalModalOpen(false);
+      setTimeout(() => setStatusMessage(null), 4000);
+    } catch (e: any) {
+      console.error("Request approval error:", e);
+      setStatusMessage(e.message || "Approval request failed");
+    } finally {
+      setRequestingApproval(false);
+    }
+  };
+
   const handlePublish = async () => {
+    if (approvalStatus !== "SELLER_APPROVED") {
+      setIsApprovalModalOpen(true);
+      return;
+    }
+
     setPublishing(true);
     try {
       await onPublish(sections);
-      setStatusMessage(isEn ? "Published to live storefront!" : "Canli vitrinde yayinlandi!");
+      setStatusMessage(isEn ? "Published to live storefront!" : "Canlı vitrinde yayınlandı!");
+      setApprovalStatus("DRAFT");
+      await fetchApprovalStatus();
       setTimeout(() => setStatusMessage(null), 4000);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Publish error:", e);
+      if (e.message?.includes("SELLER_APPROVAL_REQUIRED") || e.message?.includes("satıcı onaylayıp")) {
+        setIsApprovalModalOpen(true);
+      }
     } finally {
       setPublishing(false);
     }
@@ -345,10 +417,14 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
 
   const selectedSection = sections.find((s) => s.id === selectedSectionId) || null;
 
+  const isApproved = approvalStatus === "SELLER_APPROVED";
+  const isPending = approvalStatus === "PENDING_SELLER_APPROVAL";
+  const isRejected = approvalStatus === "SELLER_REJECTED";
+
   return (
     <div className="flex flex-col h-[calc(100vh-60px)] bg-slate-900 text-slate-100 overflow-hidden font-sans select-none">
       {/* Studio Top Control Bar */}
-      <div className="h-12 bg-slate-950 border-b border-slate-800 px-4 flex items-center justify-between gap-4 shrink-0">
+      <div className="h-14 bg-slate-950 border-b border-slate-800 px-4 flex items-center justify-between gap-4 shrink-0">
         {/* Left: Viewport Switcher & History Undo/Redo */}
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5">
@@ -422,21 +498,46 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
           </button>
         </div>
 
-        {/* Center: Save / Status Indicators */}
-        <div className="flex items-center gap-2">
+        {/* Center: Seller Approval Status Pill & Indicator */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsApprovalModalOpen(true)}
+            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-all border shadow-xs cursor-pointer ${
+              isApproved
+                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30"
+                : isPending
+                ? "bg-amber-500/20 border-amber-500/40 text-amber-300 animate-pulse hover:bg-amber-500/30"
+                : isRejected
+                ? "bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30"
+                : "bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800"
+            }`}
+          >
+            <ShieldCheck className={`w-3.5 h-3.5 ${isApproved ? "text-emerald-400" : isPending ? "text-amber-400" : isRejected ? "text-rose-400" : "text-slate-400"}`} />
+            <span>
+              {isApproved
+                ? isEn ? "Seller Approved & Confirmed" : "Satıcı Onaylandı & Teyit Edildi"
+                : isPending
+                ? isEn ? "Pending Seller Approval" : "Satıcı Onayı Bekleniyor"
+                : isRejected
+                ? isEn ? "Rejected by Seller" : "Satıcı Tarafından Reddedildi"
+                : isEn ? "Draft — Unapproved" : "Taslak — Onay Bekliyor"}
+            </span>
+          </button>
+
           {statusMessage ? (
             <span className="text-xs font-bold text-emerald-400 flex items-center gap-1 animate-fadeIn">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{statusMessage}</span>
             </span>
           ) : lastSavedTime ? (
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-slate-400 hidden lg:inline">
               {isEn ? `Draft saved at ${lastSavedTime}` : `Taslak kaydedildi (${lastSavedTime})`}
             </span>
           ) : null}
         </div>
 
-        {/* Right: Save & Publish Action Buttons */}
+        {/* Right: Save, Request Approval & Publish Action Buttons */}
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -449,15 +550,57 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
             <span>{saving ? (isEn ? "Saving..." : "Kaydediliyor...") : isEn ? "Save Draft" : "Taslak Kaydet"}</span>
           </Button>
 
-          <Button
-            size="sm"
-            disabled={publishing}
-            onClick={handlePublish}
-            className="text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30"
-          >
-            <Rocket className="w-3.5 h-3.5 mr-1.5" />
-            <span>{publishing ? (isEn ? "Publishing..." : "Yayınlanıyor...") : isEn ? "Publish Live" : "Canlıya Yayınla"}</span>
-          </Button>
+          {/* Request Seller Approval Button */}
+          {!isApproved && (
+            <Button
+              size="sm"
+              onClick={() => setIsApprovalModalOpen(true)}
+              className="text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-md shadow-amber-600/20"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+              <span>{isEn ? "Request Seller Approval" : "Satıcı Onayı İste"}</span>
+            </Button>
+          )}
+
+          {/* Publish Live Button (Locked until seller confirms) */}
+          <div className="relative group">
+            <Button
+              size="sm"
+              disabled={publishing || !isApproved}
+              onClick={handlePublish}
+              className={`text-xs font-bold transition-all shadow-md ${
+                isApproved
+                  ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30 cursor-pointer"
+                  : "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-75"
+              }`}
+            >
+              {isApproved ? (
+                <Rocket className="w-3.5 h-3.5 mr-1.5" />
+              ) : (
+                <Lock className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+              )}
+              <span>
+                {publishing
+                  ? isEn ? "Publishing..." : "Yayınlanıyor..."
+                  : isEn
+                  ? isApproved ? "Publish Live" : "Locked (Seller Approval Required)"
+                  : isApproved ? "Canlıya Yayınla" : "Kilitli (Satıcı Onayı Gerekli)"}
+              </span>
+            </Button>
+
+            {!isApproved && (
+              <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block w-72 p-2.5 bg-slate-950 text-slate-200 text-[11px] font-semibold rounded-xl border border-slate-800 shadow-2xl z-50 animate-fadeIn">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    {isEn
+                      ? "Homepage studio cannot publish changes until a verified merchant approves and confirms the layout."
+                      : "Satıcı onaylayıp teyit etmeden ana sayfa vitrin değişiklikleri canlıya yayınlanamaz."}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -542,6 +685,146 @@ export const HomepageStudioShell: React.FC<HomepageStudioShellProps> = ({
         onRestoreSnapshot={handleRestoreSnapshot}
         isEn={isEn}
       />
+
+      {/* Seller Approval & Governance Modal */}
+      {isApprovalModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 text-slate-100 shadow-2xl space-y-5 animate-fadeIn">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className={`p-2 rounded-xl ${isApproved ? "bg-emerald-500/20 text-emerald-400" : isPending ? "bg-amber-500/20 text-amber-400" : "bg-indigo-500/20 text-indigo-400"}`}>
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black tracking-tight text-white">
+                    {isEn ? "Seller Approval & Governance Gate" : "Satıcı Onay & Yönetişim Merkezi"}
+                  </h3>
+                  <span className="text-[11px] text-slate-400">
+                    {isEn ? "Mandatory merchant confirmation before publishing" : "Yayınlama öncesi zorunlu satıcı onayı"}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsApprovalModalOpen(false)}
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Current Status Badge */}
+            <div className={`p-4 rounded-2xl border flex items-center gap-3 ${
+              isApproved
+                ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-200"
+                : isPending
+                ? "bg-amber-950/40 border-amber-500/40 text-amber-200"
+                : isRejected
+                ? "bg-rose-950/40 border-rose-500/40 text-rose-200"
+                : "bg-slate-800/60 border-slate-700 text-slate-300"
+            }`}>
+              {isApproved ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              ) : isPending ? (
+                <Clock className="w-5 h-5 text-amber-400 shrink-0 animate-pulse" />
+              ) : isRejected ? (
+                <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
+              ) : (
+                <Lock className="w-5 h-5 text-slate-400 shrink-0" />
+              )}
+              <div className="space-y-0.5">
+                <div className="text-xs font-black uppercase tracking-wider">
+                  {isApproved
+                    ? isEn ? "Status: Approved & Confirmed" : "Durum: Satıcı Tarafından Onaylandı"
+                    : isPending
+                    ? isEn ? "Status: Pending Seller Review" : "Durum: Satıcı İncelemesi Bekleniyor"
+                    : isRejected
+                    ? isEn ? "Status: Rejected by Seller" : "Durum: Satıcı Tarafından Reddedildi"
+                    : isEn ? "Status: Unsubmitted Draft" : "Durum: Onaya Sunulmamış Taslak"}
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {isApproved
+                    ? isEn ? `Approved by ${approvalData?.approvedBy || "Verified Seller"}` : `${approvalData?.approvedBy || "Doğrulanmış Satıcı"} tarafından teyit edildi.`
+                    : isPending
+                    ? isEn ? "Awaiting confirmation from seller dashboard." : "Satıcı panelinden teyit bekleniyor."
+                    : isRejected
+                    ? approvalData?.rejectionReason || "Satıcı tarafından revizyon talep edildi."
+                    : isEn ? "Submit changes to sellers to request publishing approval." : "Yayınlama kilidini açmak için taslağı satıcı onayına sunun."}
+                </div>
+              </div>
+            </div>
+
+            {/* Explanation Note */}
+            <p className="text-xs text-slate-400 leading-relaxed bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
+              {isEn
+                ? "In accordance with marketplace governance, any visual storefront change, section rearrangement, or campaign highlight must be approved by a verified merchant before it can go live."
+                : "Pazaryeri kuralları gereği, vitrin düzeninde yapılan hiçbir değişiklik ve kampanya yerleşimi satıcı tarafından onaylanmadan canlıya alınamaz."}
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-800">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsApprovalModalOpen(false)}
+                className="w-full sm:w-auto text-xs font-bold bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800"
+              >
+                {isEn ? "Close" : "Kapat"}
+              </Button>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {!isApproved && (
+                  <Button
+                    size="sm"
+                    disabled={requestingApproval}
+                    onClick={handleRequestSellerApproval}
+                    className="w-full sm:w-auto text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-md shadow-amber-600/30"
+                  >
+                    <Send className="w-3.5 h-3.5 mr-1.5" />
+                    <span>
+                      {requestingApproval
+                        ? isEn ? "Submitting..." : "Gönderiliyor..."
+                        : isEn ? "Submit for Seller Approval" : "Satıcı Onayına Sun"}
+                    </span>
+                  </Button>
+                )}
+
+                {/* Quick Simulation Button for Admin Testing */}
+                {!isApproved && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/seller/homepage-approval", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ action: "APPROVE", sellerNotes: "Admin verified approval simulation." }),
+                        });
+                        if (res.ok) {
+                          setApprovalStatus("SELLER_APPROVED");
+                          await fetchApprovalStatus();
+                          setIsApprovalModalOpen(false);
+                          setStatusMessage(isEn ? "Simulated Seller Approval!" : "Satıcı onayı simüle edildi!");
+                          setTimeout(() => setStatusMessage(null), 3000);
+                        }
+                      } catch (e) {
+                        console.error(e);
+                      }
+                    }}
+                    className="w-full sm:w-auto text-xs font-bold bg-emerald-950/60 border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/60"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
+                    <span>{isEn ? "Approve (Simulation)" : "Satıcı Olarak Onayla"}</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
