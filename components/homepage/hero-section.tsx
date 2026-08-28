@@ -111,21 +111,29 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Quick Category Icons Strip Underneath */}
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5 sm:gap-3">
           {categories.slice(0, 8).map((cat) => {
-            const href = (cat as any).slug
-              ? `/category/${(cat as any).slug}`
-              : `/search?q=${encodeURIComponent(cat.name)}`;
+            const slugMap: Record<string, string> = {
+              c1: "kadin",
+              c2: "erkek",
+              c3: "ayakkabi-canta",
+              c4: "elektronik",
+              c5: "ev-yasam",
+              c6: "kozmetik",
+              c7: "spor",
+              c8: "supermarket",
+            };
+            const href = `/category/${slugMap[cat.id] || "kadin"}`;
             return (
               <Link
                 key={cat.id}
                 href={href}
-                className="flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-xs group transition-all text-center gap-1.5"
+                className="flex flex-col items-center justify-center p-3 sm:p-3.5 bg-white border border-slate-200/90 rounded-2xl hover:border-primary hover:shadow-xs group transition-all text-center gap-2 shadow-2xs"
               >
-                <div className="w-9 h-9 rounded-full bg-primary-light text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                  <Tag className="w-4 h-4" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-orange-50 text-primary border border-orange-100 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                  <Tag className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 </div>
-                <span className="text-[11px] font-bold text-text-main group-hover:text-primary transition-colors line-clamp-1">
+                <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">
                   {cat.name}
                 </span>
               </Link>
