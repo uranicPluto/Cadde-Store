@@ -38,7 +38,8 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/seller/dashboard")) {
     if (!user || (user.role !== "SELLER" && user.role !== "ADMIN")) {
       const url = request.nextUrl.clone();
-      url.pathname = "/seller";
+      url.pathname = "/seller/login";
+      url.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(url);
     }
   }
@@ -47,7 +48,8 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/account")) {
     if (!user) {
       const url = request.nextUrl.clone();
-      url.pathname = "/";
+      url.pathname = "/login";
+      url.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(url);
     }
   }

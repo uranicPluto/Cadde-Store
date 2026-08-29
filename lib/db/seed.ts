@@ -12,7 +12,7 @@ async function main() {
   // 1. Admin User
   const admin = await prisma.user.upsert({
     where: { email: "admin@cadde-store.com" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "admin@cadde-store.com",
       passwordHash,
@@ -25,7 +25,7 @@ async function main() {
   // 2. Seller User 1 & Profile
   const sellerUser1 = await prisma.user.upsert({
     where: { email: "seller@cadde-store.com" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "seller@cadde-store.com",
       passwordHash,
@@ -56,7 +56,7 @@ async function main() {
   // Seller User 2 & Profile
   const sellerUser2 = await prisma.user.upsert({
     where: { email: "tech@cadde-store.com" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "tech@cadde-store.com",
       passwordHash,
@@ -87,7 +87,7 @@ async function main() {
   // 3. Customer User
   const customer = await prisma.user.upsert({
     where: { email: "customer@cadde-store.com" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "customer@cadde-store.com",
       passwordHash,

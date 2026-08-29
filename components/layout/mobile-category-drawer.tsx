@@ -90,6 +90,31 @@ export const MobileCategoryDrawer: React.FC<MobileCategoryDrawerProps> = ({
     setExpandedSubGroup(expandedSubGroup === id ? null : id);
   };
 
+  const [user, setUser] = useState<{ firstName: string; lastName: string; email: string; role: string } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch("/api/auth/me")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.authenticated) {
+            setUser(data.user);
+          } else {
+            setUser(null);
+          }
+        })
+        .catch(() => setUser(null));
+    }
+  }, [isOpen]);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    if (onLoginToggleMock) onLoginToggleMock();
+    onClose();
+    window.location.reload();
+  };
+
   const hasCustomTree = customMobileTree.length > 0;
 
   return (
@@ -120,27 +145,39 @@ export const MobileCategoryDrawer: React.FC<MobileCategoryDrawerProps> = ({
       <div className="flex flex-col gap-4 text-sm pb-6">
         {/* User Status Bar */}
         <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-primary-light border border-primary/30 flex items-center justify-center text-primary font-bold">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-primary-light border border-primary/30 flex items-center justify-center text-primary font-bold shrink-0">
               <User className="w-5 h-5 text-primary" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-xs text-text-main">
-                {isLoggedInMock ? "Ahmet Yılmaz" : t("header.welcomeUser")}
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-xs text-text-main truncate">
+                {user ? `${user.firstName} ${user.lastName}` : (isLoggedInMock ? "Ahmet Yılmaz" : t("header.welcomeUser"))}
               </span>
-              <span className="text-[10px] text-text-muted">
-                {isLoggedInMock ? "Elite" : t("header.userSubtitle")}
+              <span className="text-[10px] text-text-muted truncate">
+                {user ? user.email : (isLoggedInMock ? "Elite" : t("header.userSubtitle"))}
               </span>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onLoginToggleMock}
-            className="text-xs px-2.5 py-1"
-          >
-            {isLoggedInMock ? t("header.signOut") : t("common.signIn")}
-          </Button>
+          {user || isLoggedInMock ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="text-xs px-2.5 py-1 shrink-0"
+            >
+              {t("header.signOut")}
+            </Button>
+          ) : (
+            <Link href="/login" onClick={onClose}>
+              <Button
+                variant="primary"
+                size="sm"
+                className="text-xs px-3 py-1 bg-primary font-bold shrink-0"
+              >
+                {t("common.signIn")}
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Language Switcher Section */}
