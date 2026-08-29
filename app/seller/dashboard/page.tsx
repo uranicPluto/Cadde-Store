@@ -53,7 +53,13 @@ export default function SellerDashboardOverviewPage() {
       });
 
     // 2. Fetch products for active products count & low stock alerts
-    fetch("/api/products")
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((meData) => {
+        const sellerId = meData?.user?.sellerId;
+        const url = sellerId ? `/api/products?sellerId=${encodeURIComponent(sellerId)}` : "/api/products";
+        return fetch(url);
+      })
       .then((res) => (res.ok ? res.json() : { products: [] }))
       .then((data) => {
         if (data.products && Array.isArray(data.products)) {

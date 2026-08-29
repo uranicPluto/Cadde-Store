@@ -17,10 +17,20 @@ export default function SellerProductsPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/products");
+      // 1. Get seller's own ID from session
+      let sellerId: string | null = null;
+      const meRes = await fetch("/api/auth/me");
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        sellerId = meData?.user?.sellerId || null;
+      }
+
+      // 2. Fetch scoped products
+      const url = sellerId ? `/api/products?sellerId=${encodeURIComponent(sellerId)}` : "/api/products";
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        if (data.products && Array.isArray(data.products) && data.products.length > 0) {
+        if (data.products && Array.isArray(data.products)) {
           const mapped = data.products.map((p: any) => mapDbProductToMock(p, language));
           setProducts(mapped);
           setLoading(false);
