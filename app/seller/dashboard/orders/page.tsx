@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { SellerHeader } from "@/components/seller/seller-header";
 import { SellerSidebar } from "@/components/seller/seller-sidebar";
-import { getSavedOrders } from "@/lib/orders/order-utils";
+import { getSavedOrders, mapSellerOrderGroupsToRecords } from "@/lib/orders/order-utils";
 import { OrderRecord, OrderStatusType } from "@/lib/orders/order-types";
 import { formatCurrency } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
@@ -18,72 +18,16 @@ export default function SellerOrdersPage() {
 
   useEffect(() => {
     fetch("/api/orders/seller")
-      .then((res) => (res.ok ? res.json() : { orderGroups: [] }))
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch seller orders");
+        return res.json();
+      })
       .then((data) => {
-        if (data.orderGroups && Array.isArray(data.orderGroups) && data.orderGroups.length > 0) {
-          const mapped: OrderRecord[] = data.orderGroups.map((g: any) => ({
-            orderId: g.id,
-            orderNumber: g.order?.orderNumber || `OG-${g.id.slice(-6)}`,
-            createdAt: g.createdAt,
-            customerInfo: {
-              firstName: g.order?.customer?.firstName || "Müşteri",
-              lastName: g.order?.customer?.lastName || "",
-              email: g.order?.customer?.email || "",
-              phone: g.order?.customer?.phone || "",
-            },
-            shippingAddress: JSON.parse(g.order?.shippingAddressSnapshot || "{}"),
-            shippingMethod: { id: "std", name: "Standart Kargo", price: 34.9, estimatedDelivery: "2-3 Gün" },
-            sellerGroups: [
-              {
-                sellerId: g.sellerId,
-                storeName: g.seller?.storeName || "Mağaza",
-                items: Array.isArray(g.items)
-                  ? g.items.map((i: any) => ({
-                      id: i.id,
-                      product: {
-                        id: i.product?.id || i.productId,
-                        slug: i.product?.slug || i.productId,
-                        name: i.product?.name || "Ürün",
-                        brand: i.product?.brand || "Cadde Store",
-                        categorySlug: "general",
-                        categoryName: "Genel",
-                        storeName: g.seller?.storeName || "Mağaza",
-                        price: i.price,
-                        rating: 4.8,
-                        reviewCount: 5,
-                        imageUrl: i.product?.imageUrl || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
-                        galleryImages: [],
-                        description: "",
-                        specifications: {},
-                        stock: 10,
-                        reviews: [],
-                      },
-                      quantity: i.quantity,
-                      selectedColor: i.selectedColor,
-                      selectedSize: i.selectedSize,
-                    }))
-                  : [],
-                subtotal: g.subtotal,
-                shippingFee: 0,
-                status: g.status.toLowerCase(),
-              },
-            ],
-            appliedCoupon: null,
-            paymentMethod: "credit_card",
-            calculation: {
-              subtotal: g.subtotal,
-              productDiscount: 0,
-              couponDiscount: 0,
-              shippingFee: 0,
-              grandTotal: g.subtotal,
-              currency: "TRY",
-              sellerGroups: [],
-            },
-            status: g.status.toLowerCase() as any,
-          }));
+        if (data.orderGroups && Array.isArray(data.orderGroups)) {
+          const mapped = mapSellerOrderGroupsToRecords(data.orderGroups);
           setOrders(mapped);
         } else {
-          setOrders(getSavedOrders());
+          setOrders([]);
         }
       })
       .catch(() => setOrders(getSavedOrders()));

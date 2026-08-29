@@ -5,7 +5,7 @@ import { MarketplaceHeader } from "@/components/layout/marketplace-header";
 import { Footer } from "@/components/layout/footer";
 import { AccountSidebar } from "@/components/account/account-sidebar";
 import { OrderCard } from "@/components/account/order-card";
-import { getSavedOrders } from "@/lib/orders/order-utils";
+import { getSavedOrders, mapCustomerOrdersToRecords } from "@/lib/orders/order-utils";
 import { OrderRecord } from "@/lib/orders/order-types";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -24,75 +24,16 @@ export default function OrderHistoryPage() {
 
   useEffect(() => {
     fetch("/api/orders")
-      .then((res) => (res.ok ? res.json() : { orders: [] }))
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch customer orders");
+        return res.json();
+      })
       .then((data) => {
-        if (data.orders && Array.isArray(data.orders) && data.orders.length > 0) {
-          const dbMapped: OrderRecord[] = data.orders.map((o: any) => ({
-            orderId: o.id,
-            orderNumber: o.orderNumber,
-            createdAt: o.createdAt,
-            customerInfo: {
-              firstName: o.customer?.firstName || "Müşteri",
-              lastName: o.customer?.lastName || "",
-              email: o.customer?.email || "",
-              phone: o.customer?.phone || "",
-            },
-            shippingAddress: JSON.parse(o.shippingAddressSnapshot || "{}"),
-            shippingMethod: { id: "std", name: { tr: "Standart Kargo", en: "Standard Shipping" }, deliveryDays: { tr: "2-3 Gün", en: "2-3 Days" }, price: o.shippingFee },
-            sellerGroups: Array.isArray(o.orderGroups)
-              ? o.orderGroups.map((g: any) => ({
-                  sellerId: g.sellerId,
-                  storeName: g.seller?.storeName || "Cadde Store Mağazası",
-                  items: Array.isArray(o.orderItems)
-                    ? o.orderItems
-                        .filter((item: any) => item.orderGroupId === g.id || !item.orderGroupId)
-                        .map((item: any) => ({
-                          id: item.id,
-                          product: {
-                            id: item.product?.id || item.productId,
-                            slug: item.product?.slug || item.productId,
-                            name: item.product?.name || "Ürün",
-                            brand: item.product?.brand || "Cadde Store",
-                            categorySlug: "general",
-                            categoryName: "Genel",
-                            storeName: g.seller?.storeName || "Mağaza",
-                            price: item.price,
-                            rating: 4.8,
-                            reviewCount: 10,
-                            imageUrl: item.product?.imageUrl || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
-                            galleryImages: [],
-                            description: "",
-                            specifications: {},
-                            stock: 10,
-                            reviews: [],
-                          },
-                          quantity: item.quantity,
-                          selectedColor: item.selectedColor,
-                          selectedSize: item.selectedSize,
-                        }))
-                    : [],
-                  subtotal: g.subtotal,
-                  freeShippingThreshold: 500,
-                  shippingFee: 0,
-                  isFreeShipping: true,
-                  status: g.status.toLowerCase(),
-                }))
-              : [],
-            appliedCoupon: null,
-            paymentMethod: o.paymentMethod || "credit_card",
-            calculation: {
-              subtotal: o.subtotal,
-              productDiscount: o.productDiscount,
-              couponDiscount: o.couponDiscount,
-              totalShipping: o.shippingFee,
-              grandTotal: o.grandTotal,
-              sellerGroups: [],
-            },
-            status: o.status.toLowerCase() as any,
-          }));
+        if (data.orders && Array.isArray(data.orders)) {
+          const dbMapped = mapCustomerOrdersToRecords(data.orders);
           setOrders(dbMapped);
         } else {
-          setOrders(getSavedOrders());
+          setOrders([]);
         }
       })
       .catch(() => setOrders(getSavedOrders()));

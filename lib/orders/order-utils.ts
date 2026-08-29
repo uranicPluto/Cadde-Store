@@ -243,3 +243,153 @@ export function getLastOrder(): OrderRecord | null {
   const orders = getSavedOrders();
   return orders.length > 0 ? orders[0] : null;
 }
+
+export function mapSellerOrderGroupsToRecords(orderGroups: any[]): OrderRecord[] {
+  if (!Array.isArray(orderGroups)) return [];
+  return orderGroups.map((g: any) => {
+    let shippingAddr: any = {};
+    try {
+      shippingAddr = typeof g.order?.shippingAddressSnapshot === "string"
+        ? JSON.parse(g.order.shippingAddressSnapshot)
+        : (g.order?.shippingAddressSnapshot || {});
+    } catch {
+      shippingAddr = {};
+    }
+
+    return {
+      orderId: g.id,
+      orderNumber: g.order?.orderNumber || `OG-${g.id.slice(-6)}`,
+      createdAt: g.createdAt,
+      customerInfo: {
+        firstName: g.order?.customer?.firstName || "Müşteri",
+        lastName: g.order?.customer?.lastName || "",
+        email: g.order?.customer?.email || "",
+        phone: g.order?.customer?.phone || "",
+      },
+      shippingAddress: shippingAddr,
+      shippingMethod: { id: "std", name: { tr: "Standart Kargo", en: "Standard Shipping" }, deliveryDays: { tr: "2-3 Gün", en: "2-3 Days" }, price: 34.9 },
+      sellerGroups: [
+        {
+          storeName: g.seller?.storeName || "Mağaza",
+          items: Array.isArray(g.items)
+            ? g.items.map((i: any) => ({
+                id: i.id,
+                product: {
+                  id: i.product?.id || i.productId,
+                  slug: i.product?.slug || i.productId,
+                  name: i.product?.name || "Ürün",
+                  brand: i.product?.brand || "Cadde Store",
+                  categorySlug: "general",
+                  categoryName: "Genel",
+                  storeName: g.seller?.storeName || "Mağaza",
+                  price: i.price,
+                  rating: 4.8,
+                  reviewCount: 5,
+                  imageUrl: i.product?.imageUrl || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
+                  galleryImages: [],
+                  description: "",
+                  specifications: {},
+                  stock: 10,
+                  reviews: [],
+                },
+                quantity: i.quantity,
+                selectedColor: i.selectedColor,
+                selectedSize: i.selectedSize,
+              }))
+            : [],
+          subtotal: g.subtotal,
+          freeShippingThreshold: 500,
+          shippingFee: 0,
+          isFreeShipping: true,
+        },
+      ],
+      appliedCoupon: null,
+      paymentMethod: "credit_card",
+      calculation: {
+        subtotal: g.subtotal,
+        productDiscount: 0,
+        couponDiscount: 0,
+        totalShipping: 0,
+        grandTotal: g.subtotal,
+        sellerGroups: [],
+      },
+      status: (g.status || "confirmed").toLowerCase() as OrderStatusType,
+    };
+  });
+}
+
+export function mapCustomerOrdersToRecords(orders: any[]): OrderRecord[] {
+  if (!Array.isArray(orders)) return [];
+  return orders.map((o: any) => {
+    let shippingAddr: any = {};
+    try {
+      shippingAddr = typeof o.shippingAddressSnapshot === "string"
+        ? JSON.parse(o.shippingAddressSnapshot)
+        : (o.shippingAddressSnapshot || {});
+    } catch {
+      shippingAddr = {};
+    }
+
+    return {
+      orderId: o.id,
+      orderNumber: o.orderNumber,
+      createdAt: o.createdAt,
+      customerInfo: {
+        firstName: o.customer?.firstName || "Müşteri",
+        lastName: o.customer?.lastName || "",
+        email: o.customer?.email || "",
+        phone: o.customer?.phone || "",
+      },
+      shippingAddress: shippingAddr,
+      shippingMethod: { id: "std", name: { tr: "Standart Kargo", en: "Standard Shipping" }, deliveryDays: { tr: "2-3 Gün", en: "2-3 Days" }, price: o.shippingFee || 0 },
+      sellerGroups: Array.isArray(o.orderGroups)
+        ? o.orderGroups.map((g: any) => ({
+            storeName: g.seller?.storeName || "Cadde Store Mağazası",
+            items: Array.isArray(o.orderItems)
+              ? o.orderItems
+                  .filter((item: any) => item.orderGroupId === g.id || !item.orderGroupId)
+                  .map((item: any) => ({
+                    id: item.id,
+                    product: {
+                      id: item.product?.id || item.productId,
+                      slug: item.product?.slug || item.productId,
+                      name: item.product?.name || "Ürün",
+                      brand: item.product?.brand || "Cadde Store",
+                      categorySlug: "general",
+                      categoryName: "Genel",
+                      storeName: g.seller?.storeName || "Mağaza",
+                      price: item.price,
+                      rating: 4.8,
+                      reviewCount: 10,
+                      imageUrl: item.product?.imageUrl || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
+                      galleryImages: [],
+                      description: "",
+                      specifications: {},
+                      stock: 10,
+                      reviews: [],
+                    },
+                    quantity: item.quantity,
+                    selectedColor: item.selectedColor,
+                    selectedSize: item.selectedSize,
+                  }))
+              : [],
+            subtotal: g.subtotal,
+            freeShippingThreshold: 500,
+            shippingFee: 0,
+            isFreeShipping: true,
+          }))
+        : [],
+      appliedCoupon: null,
+      paymentMethod: o.paymentMethod || "credit_card",
+      calculation: {
+        subtotal: o.subtotal || 0,
+        productDiscount: o.productDiscount || 0,
+        couponDiscount: o.couponDiscount || 0,
+        totalShipping: o.shippingFee || 0,
+        grandTotal: o.grandTotal || 0,
+        sellerGroups: [],
+      },
+      status: (o.status || "confirmed").toLowerCase() as OrderStatusType,
+    };
+  });
+}

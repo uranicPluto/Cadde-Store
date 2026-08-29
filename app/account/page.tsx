@@ -7,23 +7,58 @@ import { Footer } from "@/components/layout/footer";
 import { AccountSidebar } from "@/components/account/account-sidebar";
 import { AccountSummaryCard } from "@/components/account/account-summary-card";
 import { OrderCard } from "@/components/account/order-card";
-import { getSavedOrders } from "@/lib/orders/order-utils";
+import { getSavedOrders, mapCustomerOrdersToRecords } from "@/lib/orders/order-utils";
 import { getSavedAddresses } from "@/lib/checkout/address-utils";
 import { useFavorites } from "@/lib/favorites/favorites-context";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { OrderRecord } from "@/lib/orders/order-types";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { Package, MapPin, Tag, Heart, ArrowRight, User } from "lucide-react";
+import { Package, MapPin, Tag, Heart, ArrowRight } from "lucide-react";
 import { MOCK_COUPONS } from "@/lib/cart/coupon-utils";
 
 export default function AccountDashboardPage() {
   const { language, t } = useLanguage();
   const { favoriteCount } = useFavorites();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
-  const [addressCount, setAddressCount] = useState(2);
+  const [addressCount, setAddressCount] = useState(0);
+  const [userName, setUserName] = useState("Ahmet Yılmaz");
+  const [userInitials, setUserInitials] = useState("AY");
 
   useEffect(() => {
-    setOrders(getSavedOrders());
+    // 1. Fetch real customer orders
+    fetch("/api/orders")
+      .then((res) => {
+        if (!res.ok) throw new Error("Customer orders fetch failed");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.orders && Array.isArray(data.orders)) {
+          const mapped = mapCustomerOrdersToRecords(data.orders);
+          setOrders(mapped);
+        } else {
+          setOrders([]);
+        }
+      })
+      .catch(() => {
+        setOrders(getSavedOrders());
+      });
+
+    // 2. Fetch user profile from session if authenticated
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.authenticated && data.user) {
+          const first = data.user.firstName || "";
+          const last = data.user.lastName || "";
+          const full = `${first} ${last}`.trim() || data.user.email || "Ahmet Yılmaz";
+          setUserName(full);
+          const initials = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase() || "AY";
+          setUserInitials(initials);
+        }
+      })
+      .catch(() => {});
+
+    // 3. Load addresses count
     setAddressCount(getSavedAddresses().length);
   }, []);
 
@@ -53,14 +88,14 @@ export default function AccountDashboardPage() {
             <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">
-                  AY
+                  {userInitials}
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
                     {language === "en" ? "VIP Marketplace Customer" : "VIP Pazaryeri Müşterisi"}
                   </span>
                   <h1 className="text-2xl font-black tracking-tight">
-                    {language === "en" ? "Welcome back, Ahmet Yılmaz" : "Hoş Geldiniz, Ahmet Yılmaz"}
+                    {language === "en" ? `Welcome back, ${userName}` : `Hoş Geldiniz, ${userName}`}
                   </h1>
                   <span className="text-xs text-slate-300">
                     {language === "en"
@@ -144,3 +179,4 @@ export default function AccountDashboardPage() {
     </div>
   );
 }
+

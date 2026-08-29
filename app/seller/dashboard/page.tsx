@@ -6,7 +6,7 @@ import { SellerHeader } from "@/components/seller/seller-header";
 import { SellerSidebar } from "@/components/seller/seller-sidebar";
 import { SellerStatCard } from "@/components/seller/seller-stat-card";
 import { Footer } from "@/components/layout/footer";
-import { getSavedOrders } from "@/lib/orders/order-utils";
+import { getSavedOrders, mapSellerOrderGroupsToRecords } from "@/lib/orders/order-utils";
 import { OrderRecord } from "@/lib/orders/order-types";
 import { formatCurrency } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
@@ -19,33 +19,88 @@ import {
   Star,
   TrendingUp,
   PlusCircle,
-  Truck,
-  MessageSquare,
   CheckCircle2,
-  Sparkles,
 } from "lucide-react";
 
 export default function SellerDashboardOverviewPage() {
   const { language, currency, t } = useLanguage();
   const isEn = language === "en";
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [activeProductsCount, setActiveProductsCount] = useState<number>(0);
+  const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
+  const [storeName, setStoreName] = useState<string>("Trend Fashion Mağazası");
 
   useEffect(() => {
-    setOrders(getSavedOrders());
+    // 1. Fetch real seller orders
+    fetch("/api/orders/seller")
+      .then((res) => {
+        if (!res.ok) throw new Error("Orders fetch failed");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.orderGroups && Array.isArray(data.orderGroups)) {
+          const mapped = mapSellerOrderGroupsToRecords(data.orderGroups);
+          setOrders(mapped);
+          if (data.orderGroups.length > 0 && data.orderGroups[0].seller?.storeName) {
+            setStoreName(data.orderGroups[0].seller.storeName);
+          }
+        } else {
+          setOrders([]);
+        }
+      })
+      .catch(() => {
+        setOrders(getSavedOrders());
+      });
+
+    // 2. Fetch products for active products count & low stock alerts
+    fetch("/api/products")
+      .then((res) => (res.ok ? res.json() : { products: [] }))
+      .then((data) => {
+        if (data.products && Array.isArray(data.products)) {
+          setActiveProductsCount(data.products.length);
+          const lowStock = data.products.filter((p: any) => Number(p.stock) < 5);
+          setLowStockProducts(lowStock);
+        }
+      })
+      .catch(() => {
+        setActiveProductsCount(0);
+      });
   }, []);
 
-  const totalSales = orders.reduce((sum, o) => sum + o.calculation.grandTotal, 48450);
+  const totalSales = orders.reduce((sum, o) => sum + (o.calculation?.grandTotal || 0), 0);
 
-  // Mock daily sales performance trends
-  const dailySalesTrends = [
-    { day: isEn ? "Mon" : "Pzt", val: 34 },
-    { day: isEn ? "Tue" : "Sal", val: 52 },
-    { day: isEn ? "Wed" : "Çar", val: 48 },
-    { day: isEn ? "Thu" : "Per", val: 78 },
-    { day: isEn ? "Fri" : "Cum", val: 92 },
-    { day: isEn ? "Sat" : "Cmt", val: 115 },
-    { day: isEn ? "Sun" : "Paz", val: 84 },
-  ];
+  // Compute past 7 days daily sales trends dynamically from real orders
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d;
+  });
+
+  const dayNamesEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dayNamesTr = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+
+  const dailySalesTrends = last7Days.map((dateObj) => {
+    const dayOfWeek = dateObj.getDay();
+    const dayLabel = isEn ? dayNamesEn[dayOfWeek] : dayNamesTr[dayOfWeek];
+    const dateStr = dateObj.toISOString().slice(0, 10);
+
+    const dayOrders = orders.filter((o) => {
+      if (!o.createdAt) return false;
+      const orderDateStr = new Date(o.createdAt).toISOString().slice(0, 10);
+      return orderDateStr === dateStr;
+    });
+
+    const dayTotal = dayOrders.reduce((sum, o) => sum + (o.calculation?.grandTotal || 0), 0);
+
+    return {
+      day: dayLabel,
+      date: dateStr,
+      val: dayTotal,
+      orderCount: dayOrders.length,
+    };
+  });
+
+  const maxVal = Math.max(...dailySalesTrends.map((d) => d.val), 1);
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
@@ -70,7 +125,7 @@ export default function SellerDashboardOverviewPage() {
                     <span>{isEn ? "Verified Super Store" : "Süper Mağaza Onaylı"}</span>
                   </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Trend Fashion Mağazası</h1>
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{storeName}</h1>
                 <p className="text-xs text-slate-300 max-w-xl font-medium leading-relaxed">
                   {isEn
                     ? "Manage your weekly sales performance, critical inventory alerts, and customer fulfillment here."
@@ -102,7 +157,7 @@ export default function SellerDashboardOverviewPage() {
               />
               <SellerStatCard
                 title={t("seller.dashboard.statOrders")}
-                value={orders.length + 140}
+                value={orders.length}
                 change="+12.2%"
                 isPositive={true}
                 icon={ShoppingCart}
@@ -110,7 +165,7 @@ export default function SellerDashboardOverviewPage() {
               />
               <SellerStatCard
                 title={t("seller.dashboard.statActiveProducts")}
-                value={32}
+                value={activeProductsCount}
                 change={isEn ? "+4 New" : "+4 Yeni"}
                 isPositive={true}
                 icon={Package}
@@ -145,18 +200,21 @@ export default function SellerDashboardOverviewPage() {
 
               {/* Custom CSS Bar Chart Visualizer */}
               <div className="flex items-end justify-between gap-4 h-40 pt-6 px-4 bg-slate-50 border border-slate-200/80 rounded-xl">
-                {dailySalesTrends.map((d, idx) => (
-                  <div key={idx} className="flex flex-col items-center gap-2 flex-1 group">
-                    <div className="text-[10px] font-black text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      {currency === "USD" ? `$${d.val}k` : `₺${d.val}k`}
+                {dailySalesTrends.map((d, idx) => {
+                  const heightPercent = maxVal > 0 && d.val > 0 ? Math.max(6, (d.val / maxVal) * 100) : 4;
+                  return (
+                    <div key={idx} className="flex flex-col items-center gap-2 flex-1 group">
+                      <div className="text-[10px] font-black text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                        {formatCurrency(d.val, currency)}
+                      </div>
+                      <div
+                        style={{ height: `${heightPercent}%` }}
+                        className="w-full bg-gradient-to-t from-primary to-orange-400 rounded-t-lg group-hover:from-primary/90 group-hover:to-orange-500 transition-all shadow-xs"
+                      />
+                      <span className="text-[11px] font-extrabold text-slate-600">{d.day}</span>
                     </div>
-                    <div
-                      style={{ height: `${(d.val / 115) * 100}%` }}
-                      className="w-full bg-gradient-to-t from-primary to-orange-400 rounded-t-lg group-hover:from-primary/90 group-hover:to-orange-500 transition-all shadow-xs"
-                    />
-                    <span className="text-[11px] font-extrabold text-slate-600">{d.day}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -174,20 +232,26 @@ export default function SellerDashboardOverviewPage() {
                   </Link>
                 </div>
 
-                <div className="divide-y divide-slate-100 text-xs flex flex-col gap-2">
-                  {orders.slice(0, 3).map((ord) => (
-                    <div key={ord.orderId} className="flex items-center justify-between pt-2">
-                      <div className="flex flex-col">
-                        <span className="font-extrabold text-slate-900">{ord.orderNumber}</span>
-                        <span className="text-[11px] text-slate-500">{ord.customerInfo.firstName} {ord.customerInfo.lastName}</span>
+                {orders.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-slate-500 font-medium">
+                    {isEn ? "No orders found yet." : "Henüz sipariş bulunmuyor."}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 text-xs flex flex-col gap-2">
+                    {orders.slice(0, 3).map((ord) => (
+                      <div key={ord.orderId} className="flex items-center justify-between pt-2">
+                        <div className="flex flex-col">
+                          <span className="font-extrabold text-slate-900">{ord.orderNumber}</span>
+                          <span className="text-[11px] text-slate-500">{ord.customerInfo.firstName} {ord.customerInfo.lastName}</span>
+                        </div>
+                        <span className="font-extrabold text-primary">{formatCurrency(ord.calculation.grandTotal, currency)}</span>
+                        <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
+                          {ord.status}
+                        </span>
                       </div>
-                      <span className="font-extrabold text-primary">{formatCurrency(ord.calculation.grandTotal, currency)}</span>
-                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
-                        {ord.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Low Stock Widget */}
@@ -198,15 +262,28 @@ export default function SellerDashboardOverviewPage() {
                 </h2>
 
                 <div className="flex flex-col gap-3 text-xs">
-                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-amber-900">{isEn ? "Black Oversize T-Shirt" : "Siyah Oversize Tişört"}</span>
-                      <span className="text-[10px] text-amber-700">{t("seller.dashboard.lastItemsLeft")}</span>
+                  {lowStockProducts.length === 0 ? (
+                    <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-emerald-800">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="font-bold">
+                        {isEn ? "All product inventory levels are healthy." : "Tüm ürünlerin stok durumu iyi."}
+                      </span>
                     </div>
-                    <Link href="/seller/dashboard/products" className="text-[11px] font-black text-primary underline">
-                      {t("seller.dashboard.addStock")}
-                    </Link>
-                  </div>
+                  ) : (
+                    lowStockProducts.slice(0, 2).map((p) => (
+                      <div key={p.id} className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-amber-900">{p.name}</span>
+                          <span className="text-[10px] text-amber-700">
+                            {isEn ? `Only ${p.stock} items left in stock` : `Son ${p.stock} ürün kaldı`}
+                          </span>
+                        </div>
+                        <Link href={`/seller/dashboard/products/${p.id}/edit`} className="text-[11px] font-black text-primary underline">
+                          {t("seller.dashboard.addStock")}
+                        </Link>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -218,3 +295,4 @@ export default function SellerDashboardOverviewPage() {
     </div>
   );
 }
+
