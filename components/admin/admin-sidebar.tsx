@@ -37,25 +37,12 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
   const { t, language } = useLanguage();
   const isEn = language === "en";
 
-  const navItems = [
-    { href: "/admin", icon: LayoutDashboard, label: t("admin.navigation.overview") },
-    { href: "/admin/sellers", icon: Store, label: t("admin.navigation.sellers") },
-    { href: "/admin/products", icon: Package, label: t("admin.navigation.products") },
-    { href: "/admin/orders", icon: ShoppingCart, label: t("admin.navigation.orders") },
-    { href: "/admin/returns", icon: RotateCcw, label: isEn ? "Returns & Refunds" : "İade & Geri Ödeme" },
-    { href: "/admin/customers", icon: Users, label: t("admin.navigation.customers") },
-    { href: "/admin/categories", icon: Grid, label: t("admin.navigation.categories") },
-    { href: "/admin/brands", icon: Award, label: t("admin.navigation.brands") },
-    { href: "/admin/marketing", icon: Megaphone, label: isEn ? "Marketing & Ads" : "Pazarlama & Reklam" },
-    { href: "/admin/media", icon: ImageIcon, label: isEn ? "Media Assets" : "Görsel Kütüphanesi" },
-    { href: "/admin/research", icon: TrendingUp, label: isEn ? "Market Research" : "Pazar Araştırması" },
-    { href: "/admin/roles", icon: ShieldCheck, label: isEn ? "Roles & Permissions" : "Roller & Yetkiler" },
-    { href: "/admin/seo", icon: Globe, label: isEn ? "SEO Studio" : "SEO Kontrolü" },
-    { href: "/admin/health", icon: Activity, label: isEn ? "Website Health" : "Site Sağlığı" },
-    { href: "/admin/coupons", icon: Tag, label: t("admin.navigation.coupons") },
-    { href: "/admin/reviews", icon: Star, label: t("admin.navigation.reviews") },
-    { href: "/admin/audit", icon: FileText, label: t("admin.navigation.audit") },
-    { href: "/admin/settings", icon: Settings, label: t("admin.navigation.settings") },
+  const groups = [
+    { label: isEn ? "Command center" : "Kontrol merkezi", items: [{ href: "/admin", icon: LayoutDashboard, label: t("admin.navigation.overview") }] },
+    { label: isEn ? "Commerce" : "Ticaret", items: [{ href: "/admin/orders", icon: ShoppingCart, label: t("admin.navigation.orders") }, { href: "/admin/returns", icon: RotateCcw, label: isEn ? "Returns & refunds" : "İade & geri ödeme" }, { href: "/admin/sellers", icon: Store, label: t("admin.navigation.sellers") }, { href: "/admin/customers", icon: Users, label: t("admin.navigation.customers") }] },
+    { label: isEn ? "Catalog" : "Katalog", items: [{ href: "/admin/products", icon: Package, label: t("admin.navigation.products") }, { href: "/admin/categories", icon: Grid, label: t("admin.navigation.categories") }, { href: "/admin/brands", icon: Award, label: t("admin.navigation.brands") }, { href: "/admin/reviews", icon: Star, label: t("admin.navigation.reviews") }] },
+    { label: isEn ? "Content & growth" : "İçerik ve büyüme", items: [{ href: "/admin/cms", icon: Sparkles, label: isEn ? "Homepage studio" : "Vitrin stüdyosu" }, { href: "/admin/marketing", icon: Megaphone, label: isEn ? "Marketing & ads" : "Pazarlama & reklam" }, { href: "/admin/media", icon: ImageIcon, label: isEn ? "Media assets" : "Görsel kütüphanesi" }, { href: "/admin/coupons", icon: Tag, label: t("admin.navigation.coupons") }, { href: "/admin/seo", icon: Globe, label: isEn ? "SEO studio" : "SEO kontrolü" }] },
+    { label: isEn ? "Governance" : "Yönetişim", items: [{ href: "/admin/roles", icon: ShieldCheck, label: isEn ? "Roles & permissions" : "Roller & yetkiler" }, { href: "/admin/audit", icon: FileText, label: t("admin.navigation.audit") }, { href: "/admin/health", icon: Activity, label: isEn ? "Website health" : "Site sağlığı" }, { href: "/admin/settings", icon: Settings, label: t("admin.navigation.settings") }] },
   ];
 
   return (
@@ -72,27 +59,17 @@ export const AdminSidebar: React.FC<{ className?: string }> = ({ className }) =>
       </div>
 
       {/* Navigation Links List */}
-      <nav className="flex flex-col gap-0.5">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all",
-                isActive
-                  ? "bg-slate-800 text-indigo-400 border-l-3 border-indigo-500 pl-2 shadow-xs"
-                  : "text-slate-400 hover:bg-slate-900 hover:text-white"
-              )}
-            >
-              <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-indigo-400" : "text-slate-500")} />
-              <span className="truncate">{item.label}</span>
-            </Link>
-          );
-        })}
+      <nav className="flex flex-col gap-5">
+        {groups.map((group) => (
+          <div key={group.label} className="flex flex-col gap-1">
+            <p className="px-3 text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">{group.label}</p>
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+              return <Link key={item.href} href={item.href} className={cn("flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-bold transition-all", isActive ? "bg-slate-800 text-indigo-400 shadow-xs" : "text-slate-400 hover:bg-slate-900 hover:text-white")}><Icon className={cn("size-4 shrink-0", isActive ? "text-indigo-400" : "text-slate-500")} /><span className="truncate">{item.label}</span></Link>;
+            })}
+          </div>
+        ))}
 
         {/* Back to Public Marketplace Link */}
         <div className="pt-2 border-t border-slate-900 mt-2">

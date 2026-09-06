@@ -1,262 +1,107 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
-import { Footer } from "@/components/layout/footer";
-import { getSavedOrders } from "@/lib/orders/order-utils";
-import { OrderRecord } from "@/lib/orders/order-types";
-import { MOCK_SELLERS } from "@/lib/sellers/seller-repository";
-import { MOCK_ADMIN_CUSTOMERS } from "@/lib/admin/admin-repository";
-import { getFullCatalog } from "@/lib/catalog/product-repository";
-import { formatCurrency } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { formatCurrency } from "@/lib/utils";
+import { getSavedOrders } from "@/lib/orders/order-utils";
+import type { OrderRecord } from "@/lib/orders/order-types";
 import {
-  DollarSign,
+  Activity,
+  AlertTriangle,
+  ArrowUpRight,
+  BarChart3,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  FileEdit,
+  Megaphone,
+  Package,
+  Plus,
   ShoppingCart,
   Store,
   Users,
-  Package,
-  AlertTriangle,
-  ArrowRight,
-  ShieldCheck,
-  TrendingUp,
-  Activity,
-  PlusCircle,
-  Ticket,
-  Sliders,
-  CheckCircle2,
+  Zap,
 } from "lucide-react";
+
+const trend = [42, 58, 65, 80, 95, 110, 145, 184, 168, 196, 212, 238];
 
 export default function AdminDashboardPage() {
   const { language, currency, t } = useLanguage();
+  const isEn = language === "en";
+  const [range, setRange] = useState("30d");
   const [orders, setOrders] = useState<OrderRecord[]>([]);
-  const [overviewMetrics, setOverviewMetrics] = useState({
-    totalRevenue: 184500,
-    totalOrders: 382,
-    activeSellers: 15,
-    pendingSellers: 2,
-    totalCustomers: 1243,
-    totalProducts: 45,
-    outOfStockProducts: 2,
-    publishedPages: 8,
-  });
+  const [metrics, setMetrics] = useState({ totalRevenue: 184500, totalOrders: 382, activeSellers: 15, pendingSellers: 2, totalCustomers: 1243, totalProducts: 45, outOfStockProducts: 2, publishedPages: 8 });
 
   useEffect(() => {
     setOrders(getSavedOrders());
-    async function loadOverview() {
-      try {
-        const res = await fetch("/api/admin/overview");
-        if (res.ok) {
-          const data = await res.json();
-          if (data.metrics) setOverviewMetrics(data.metrics);
-        }
-      } catch (e) {
-        console.error("Failed to load overview metrics:", e);
-      }
-    }
-    loadOverview();
-  }, []);
+    fetch(`/api/admin/overview?range=${range}`).then((res) => res.ok ? res.json() : null).then((data) => data?.metrics && setMetrics((current) => ({ ...current, ...data.metrics }))).catch(() => undefined);
+  }, [range]);
 
-  const isEn = language === "en";
-  const totalRevenue = overviewMetrics.totalRevenue;
-  const fullCatalog = getFullCatalog(language);
-
-  // Monthly revenue trends for chart visualizer
-  const monthlyTrends = [
-    { month: isEn ? "Jan" : "Oca", val: 42 },
-    { month: isEn ? "Feb" : "Şub", val: 58 },
-    { month: isEn ? "Mar" : "Mar", val: 65 },
-    { month: isEn ? "Apr" : "Nis", val: 80 },
-    { month: isEn ? "May" : "May", val: 95 },
-    { month: isEn ? "Jun" : "Haz", val: 110 },
-    { month: isEn ? "Jul" : "Tem", val: 145 },
-    { month: isEn ? "Aug" : "Ağu", val: 184 },
-  ];
+  const labels = useMemo(() => isEn ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] : ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"], [isEn]);
+  const copy = {
+    eyebrow: isEn ? "Command center" : "Kontrol merkezi",
+    intro: isEn ? "A live operating view of your marketplace, storefront content, and growth pipeline." : "Pazar yerinizin, vitrin içeriğinizin ve büyüme hattınızın canlı operasyon görünümü.",
+    viewStore: isEn ? "Preview storefront" : "Mağazayı önizle",
+    quickActions: isEn ? "Quick actions" : "Hızlı işlemler",
+    revenue: isEn ? "Gross merchandise value" : "Brüt işlem hacmi",
+    orders: isEn ? "Orders" : "Siparişler",
+    sellers: isEn ? "Active sellers" : "Aktif mağazalar",
+    customers: isEn ? "Customers" : "Müşteriler",
+    performance: isEn ? "Revenue performance" : "Ciro performansı",
+    period: isEn ? "Compared with previous period" : "Önceki dönemle karşılaştırma",
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-text-main">
+    <div className="min-h-screen bg-slate-100 text-slate-900">
       <AdminHeader />
+      <div className="mx-auto flex w-full max-w-[1680px] gap-6 px-4 py-5 sm:px-6 lg:px-8">
+        <AdminSidebar className="hidden w-64 shrink-0 lg:flex" />
+        <main className="min-w-0 flex-1 space-y-6">
+          <section className="flex flex-col justify-between gap-4 rounded-2xl bg-slate-950 p-6 text-white shadow-xl sm:flex-row sm:items-end">
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em]">
+                <span className="rounded-full bg-indigo-500/15 px-3 py-1 text-indigo-300">{copy.eyebrow}</span>
+                <span className="flex items-center gap-1.5 text-emerald-400"><span className="size-1.5 animate-pulse rounded-full bg-emerald-400" /> {isEn ? "All systems operational" : "Tüm sistemler aktif"}</span>
+              </div>
+              <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{t("admin.dashboard.title")}</h1>
+              <p className="max-w-2xl text-sm leading-6 text-slate-300">{copy.intro}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/admin/cms" className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-4 py-2.5 text-xs font-black text-white transition hover:bg-indigo-400"><FileEdit className="size-4" /> {isEn ? "Edit homepage" : "Vitrini düzenle"}</Link>
+              <Link href="/" className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/15"><ArrowUpRight className="size-4" /> {copy.viewStore}</Link>
+            </div>
+          </section>
 
-      <main className="max-w-wide mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6 flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-3 sticky top-20">
-            <AdminSidebar />
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div><p className="text-sm font-black text-slate-900">{isEn ? "Today at a glance" : "Bugünün özeti"}</p><p className="text-xs text-slate-500">{copy.period}</p></div>
+            <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">{[["today", isEn ? "Today" : "Bugün"], ["7d", isEn ? "7 days" : "7 gün"], ["30d", isEn ? "30 days" : "30 gün"], ["90d", isEn ? "90 days" : "90 gün"]].map(([value, label]) => <button key={value} onClick={() => setRange(value)} className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${range === value ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-slate-100"}`}>{label}</button>)}</div>
           </div>
 
-          <div className="lg:col-span-9 flex flex-col gap-6">
-            {/* Executive Command Center Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-              <div className="flex flex-col gap-2 relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/20 px-2.5 py-0.5 rounded border border-indigo-500/30">
-                    {isEn ? "Executive Control Center" : "Yönetici Kontrol Merkezi"}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{isEn ? "All Systems Operational" : "Tüm Sistemler Aktif"}</span>
-                  </span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{t("admin.dashboard.title")}</h1>
-                <p className="text-xs text-slate-300 max-w-xl font-medium leading-relaxed">
-                  {isEn
-                    ? "Monitor live platform GMV sales, merchant approvals, active orders, and system health in real-time."
-                    : "Platform genelindeki canlı satış verilerini, mağaza onaylarını, aktif siparişleri ve sistem sağlığını buradan yönetin."}
-                </p>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex items-center gap-2 relative z-10 shrink-0">
-                <Link
-                  href="/admin/sellers"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl shadow-md transition-colors flex items-center gap-1.5"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>{isEn ? "Approve Stores" : "Mağaza Onayla"}</span>
-                </Link>
-
-                <Link
-                  href="/admin/coupons"
-                  className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-black rounded-xl border border-white/20 transition-colors flex items-center gap-1.5"
-                >
-                  <Ticket className="w-4 h-4 text-amber-300" />
-                  <span>{isEn ? "Create Coupon" : "Kupon Oluştur"}</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Stat Cards Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <AdminStatCard
-                title={t("admin.dashboard.totalRevenue")}
-                value={formatCurrency(totalRevenue, currency)}
-                change="+18.4%"
-                isPositive={true}
-                icon={DollarSign}
-                iconBgColor="bg-emerald-100 text-emerald-600"
-              />
-              <AdminStatCard
-                title={t("admin.dashboard.totalOrders")}
-                value={overviewMetrics.totalOrders}
-                change="+12.5%"
-                isPositive={true}
-                icon={ShoppingCart}
-                iconBgColor="bg-indigo-100 text-indigo-600"
-              />
-              <AdminStatCard
-                title={t("admin.dashboard.activeSellers")}
-                value={overviewMetrics.activeSellers}
-                change={isEn ? `+${overviewMetrics.pendingSellers} Pending` : `+${overviewMetrics.pendingSellers} Bekleyen`}
-                isPositive={true}
-                icon={Store}
-                iconBgColor="bg-amber-100 text-amber-600"
-              />
-              <AdminStatCard
-                title={t("admin.dashboard.totalCustomers")}
-                value={overviewMetrics.totalCustomers}
-                change="+24.8%"
-                isPositive={true}
-                icon={Users}
-                iconBgColor="bg-purple-100 text-purple-600"
-              />
-            </div>
-
-            {/* Platform Revenue Chart & System Performance */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex flex-col">
-                  <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-indigo-600" />
-                    <span>{isEn ? "Monthly Platform GMV Revenue (2026)" : "Aylık Platform Ciro Trendi (2026)"}</span>
-                  </h2>
-                  <span className="text-xs text-slate-500 font-semibold">
-                    {isEn ? "Total transaction volume and sales growth" : "Toplam İşlem Hacmi ve Satış Büyümesi"}
-                  </span>
-                </div>
-                <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  {isEn ? "+34% Record Growth" : "+34% Rekor Büyüme"}
-                </span>
-              </div>
-
-              {/* Custom CSS Bar Chart Visualizer */}
-              <div className="flex items-end justify-between gap-3 h-44 pt-6 px-4 bg-slate-50 border border-slate-200/80 rounded-xl">
-                {monthlyTrends.map((t, idx) => (
-                  <div key={idx} className="flex flex-col items-center gap-2 flex-1 group">
-                    <div className="text-[10px] font-black text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {currency === "USD" ? `$${t.val}k` : `₺${t.val}k`}
-                    </div>
-                    <div
-                      style={{ height: `${(t.val / 184) * 100}%` }}
-                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg group-hover:from-indigo-700 group-hover:to-indigo-500 transition-all shadow-xs"
-                    />
-                    <span className="text-[11px] font-extrabold text-slate-600">{t.month}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* System Alerts & Recent Orders */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Recent Orders Overview */}
-              <div className="md:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                    <ShoppingCart className="w-4 h-4 text-indigo-600" />
-                    <span>{t("admin.dashboard.recentOrdersTitle")}</span>
-                  </h2>
-                  <Link href="/admin/orders" className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
-                    <span>{t("admin.dashboard.seeAll")}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-
-                <div className="divide-y divide-slate-100 text-xs flex flex-col gap-2">
-                  {orders.slice(0, 4).map((ord) => (
-                    <div key={ord.orderId} className="flex items-center justify-between pt-2">
-                      <div className="flex flex-col">
-                        <span className="font-extrabold text-slate-900">{ord.orderNumber}</span>
-                        <span className="text-[11px] text-slate-500">{ord.customerInfo.firstName} {ord.customerInfo.lastName}</span>
-                      </div>
-                      <span className="font-extrabold text-slate-900">{formatCurrency(ord.calculation.grandTotal, currency)}</span>
-                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase">
-                        {ord.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Critical System Notifications */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
-                <h2 className="text-sm font-black text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  <span>{t("admin.dashboard.criticalAlertsTitle")}</span>
-                </h2>
-
-                <div className="flex flex-col gap-3 text-xs">
-                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex flex-col gap-1">
-                    <span className="font-bold text-amber-900">{t("admin.dashboard.alertPendingSellerMsg").replace("{count}", "2")}</span>
-                    <Link href="/admin/sellers" className="text-[11px] font-black text-indigo-600 underline mt-1">
-                      {t("admin.sellers.title")} &rarr;
-                    </Link>
-                  </div>
-
-                  <div className="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl flex flex-col gap-1">
-                    <span className="font-bold text-indigo-900">{t("admin.dashboard.alertPendingProductMsg").replace("{count}", "4")}</span>
-                    <Link href="/admin/products" className="text-[11px] font-black text-indigo-600 underline mt-1">
-                      {t("admin.products.title")} &rarr;
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            <AdminStatCard title={copy.revenue} value={formatCurrency(metrics.totalRevenue, currency)} change="+18.4%" icon={BarChart3} iconBgColor="bg-emerald-100 text-emerald-600" />
+            <AdminStatCard title={copy.orders} value={metrics.totalOrders} change="+12.5%" icon={ShoppingCart} iconBgColor="bg-indigo-100 text-indigo-600" />
+            <AdminStatCard title={copy.sellers} value={metrics.activeSellers} change={`${metrics.pendingSellers} ${isEn ? "pending" : "bekliyor"}`} icon={Store} iconBgColor="bg-amber-100 text-amber-600" />
+            <AdminStatCard title={copy.customers} value={metrics.totalCustomers} change="+24.8%" icon={Users} iconBgColor="bg-violet-100 text-violet-600" />
           </div>
-        </div>
-      </main>
 
-      <Footer />
+          <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-4"><div><h2 className="flex items-center gap-2 text-sm font-black"><Activity className="size-4 text-indigo-600" /> {copy.performance}</h2><p className="mt-1 text-xs text-slate-500">{isEn ? "Monthly GMV, in thousands" : "Aylık ciro, bin üzerinden"}</p></div><span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">+34.2%</span></div>
+              <div className="mt-8 flex h-52 items-end gap-2 border-b border-slate-100 px-1">{trend.map((value, index) => <div key={value + index} className="group flex flex-1 flex-col items-center gap-2"><div className="text-[10px] font-bold text-indigo-600 opacity-0 transition group-hover:opacity-100">{value}k</div><div className="w-full rounded-t-lg bg-indigo-500 transition group-hover:bg-indigo-700" style={{ height: `${(value / 250) * 100}%` }} /><span className="text-[10px] font-bold text-slate-400">{labels[index]}</span></div>)}</div>
+            </section>
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><h2 className="text-sm font-black">{copy.quickActions}</h2><Zap className="size-4 text-amber-500" /></div><div className="mt-4 grid gap-2">{[["/admin/products", Package, isEn ? "Add product" : "Ürün ekle"], ["/admin/coupons", Plus, isEn ? "Create coupon" : "Kupon oluştur"], ["/admin/marketing", Megaphone, isEn ? "Launch campaign" : "Kampanya başlat"], ["/admin/cms", FileEdit, isEn ? "Manage sponsor banners" : "Sponsor bannerlarını yönet"]].map(([href, Icon, label]) => <Link key={href as string} href={href as string} className="flex items-center justify-between rounded-xl border border-slate-100 px-3 py-3 text-xs font-bold transition hover:border-indigo-200 hover:bg-indigo-50"><span className="flex items-center gap-3"><span className="rounded-lg bg-slate-100 p-2 text-indigo-600"><Icon className="size-4" /></span>{label as string}</span><ChevronRight className="size-4 text-slate-400" /></Link>)}</div></section>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2"><div className="flex items-center justify-between border-b border-slate-100 pb-3"><h2 className="text-sm font-black">{isEn ? "Recent orders" : "Son siparişler"}</h2><Link href="/admin/orders" className="text-xs font-black text-indigo-600">{isEn ? "View all" : "Tümünü gör"}</Link></div><div className="divide-y divide-slate-100">{orders.length ? orders.slice(0, 5).map((order) => <div key={order.orderId} className="flex items-center justify-between gap-3 py-3 text-xs"><div><p className="font-black">{order.orderNumber}</p><p className="text-slate-500">{order.customerInfo.firstName} {order.customerInfo.lastName}</p></div><span className="font-black">{formatCurrency(order.calculation.grandTotal, currency)}</span><span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase text-emerald-700">{order.status}</span></div>) : <p className="py-8 text-center text-xs text-slate-500">{isEn ? "No recent orders yet." : "Henüz son sipariş yok."}</p>}</div></section>
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="flex items-center gap-2 text-sm font-black"><AlertTriangle className="size-4 text-amber-500" /> {isEn ? "Needs attention" : "İlgi bekleyenler"}</h2><div className="mt-4 flex flex-col gap-3"><Link href="/admin/sellers" className="rounded-xl border border-amber-200 bg-amber-50 p-3"><p className="text-xs font-black text-amber-950">{metrics.pendingSellers} {isEn ? "seller applications" : "mağaza başvurusu"}</p><p className="mt-1 text-[11px] font-bold text-amber-700">{isEn ? "Review now" : "Şimdi incele"} →</p></Link><Link href="/admin/products" className="rounded-xl border border-rose-200 bg-rose-50 p-3"><p className="text-xs font-black text-rose-950">{metrics.outOfStockProducts} {isEn ? "products out of stock" : "ürün stokta yok"}</p><p className="mt-1 text-[11px] font-bold text-rose-700">{isEn ? "Open inventory" : "Envanteri aç"} →</p></Link><Link href="/admin/cms" className="rounded-xl border border-indigo-200 bg-indigo-50 p-3"><p className="text-xs font-black text-indigo-950">{isEn ? "Homepage draft is ready" : "Vitrin taslağı hazır"}</p><p className="mt-1 text-[11px] font-bold text-indigo-700">{isEn ? "Publish changes" : "Değişiklikleri yayınla"} →</p></Link></div></section>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

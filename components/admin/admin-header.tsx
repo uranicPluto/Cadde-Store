@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
-import { ShieldCheck, ExternalLink, Activity, Radio } from "lucide-react";
+import { ShieldCheck, ExternalLink, Activity, Radio, Bell, Search, Command } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 
 export const AdminHeader: React.FC = () => {
@@ -28,7 +28,14 @@ export const AdminHeader: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="hidden items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-1.5 md:flex">
+        <Search className="size-4 text-slate-500" />
+        <span className="text-xs font-medium text-slate-500">{t("admin.header.search") || "Search anything"}</span>
+        <span className="ml-4 flex items-center gap-1 text-[10px] font-bold text-slate-600"><Command className="size-3" /> K</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button type="button" aria-label={t("admin.header.notifications") || "Notifications"} className="relative rounded-xl border border-slate-800 bg-slate-900 p-2 text-slate-300 transition hover:bg-slate-800"><Bell className="size-4" /><span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-amber-400" /></button>
         <LanguageSwitcher />
 
         <div className="h-4 w-px bg-slate-800 hidden sm:block" />
