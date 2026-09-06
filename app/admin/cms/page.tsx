@@ -8,6 +8,7 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import { SectionItem, SectionType } from "@/lib/cms/cms-types";
 import { getDefaultBaselineSections } from "@/lib/cms/cms-service";
 import { HomepageNavigatorTree } from "@/components/admin/homepage-studio/homepage-navigator-tree";
+import { BannerManager } from "@/components/admin/homepage-studio/banner-manager";
 import { HomepageCanvas } from "@/components/admin/homepage-studio/homepage-canvas";
 import { SectionSettingsInspector } from "@/components/admin/homepage-studio/section-settings-inspector";
 import { SectionLibraryModal } from "@/components/admin/homepage-studio/section-library-modal";
@@ -524,6 +525,8 @@ export default function AdminHomepageStudioPage() {
             </button>
           </div>
         )}
+
+        <BannerManager isEn={isEn} />
 
         {/* Responsive Studio Visual Layout */}
         <div className="flex-1 grid grid-cols-12 gap-4 p-4 min-h-0 overflow-hidden bg-slate-100">

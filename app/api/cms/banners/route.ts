@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 
+export async function GET() {
+  try {
+    const banners = await prisma.banner.findMany({ orderBy: [{ orderIndex: "asc" }, { createdAt: "desc" }] });
+    return NextResponse.json({ banners });
+  } catch (error) {
+    console.error("[API CMS Banner GET Error]:", error);
+    return NextResponse.json({ error: "Bannerlar alınamadı.", banners: [] }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
